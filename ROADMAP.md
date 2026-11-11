@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** revisione dei layer Yocto (ramo `build/yocto-layers`); poi passo 3
-(configurazione del kernel e firmware). Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** passo 3 della Fase 1, configurazione del kernel e firmware.
+Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -196,4 +196,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
-| 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, sul ramo `build/yocto-layers` (D-024); controllo di lettura con bitbake superato |
+| 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |

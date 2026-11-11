@@ -209,7 +209,7 @@ di approccio, da Debian a sistema costruito da zero.*
   - primo ramo: `project-os/2.54`, da `webkitglib/2.54` (commit `2b614de`, creato il
     2026-11-11; ultimo rilascio ufficiale a quella data: 2.54.2).
 
-### D-024 — Configurazione della build Yocto · `proposta` (in revisione sul ramo `build/yocto-layers`)
+### D-024 — Configurazione della build Yocto · `confermata` (2026-11-11)
 - **Versioni fissate:** Yocto 6.0 «Wrynose» (LTS), OpenEmbedded-Core `2285da0`, bitbake
   2.18 `6e260eb`. Si aggiornano solo con un commit dedicato.
 - **Strumento:** [kas](https://kas.readthedocs.io): file YAML in `kas/` che descrivono
