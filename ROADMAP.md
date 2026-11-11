@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** revisione del kernel e firmware (ramo `build/kernel-hardware`); poi
-passo 4 (schema partizioni A/B). Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** passo 4 della Fase 1, schema partizioni A/B con verifica e dati
+cifrati. Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -199,4 +199,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
-| 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, sul ramo `build/kernel-hardware` (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware |
+| 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |

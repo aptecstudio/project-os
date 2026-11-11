@@ -229,7 +229,7 @@ di approccio, da Debian a sistema costruito da zero.*
   avvisi (controllo di sola lettura, nessuna compilazione). Da verificare alla prima
   build: download, compilazione, schema di partizioni `wic`, sintassi dei file kas.
 
-### D-025 — Kernel e firmware per l'hardware desktop · `proposta` (in revisione sul ramo `build/kernel-hardware`)
+### D-025 — Kernel e firmware per l'hardware desktop · `confermata` (2026-11-11)
 - **Frammenti di configurazione** in
   `layers/meta-project-os-desktop/recipes-kernel/linux/files/`, uno per area: dischi e
   file system, grafica, audio, Bluetooth, Wi‑Fi, rete cablata, input e piattaforma.
