@@ -171,7 +171,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Conseguenza importante:** la **sicurezza degli aggiornamenti** diventa responsabilità
   del progetto. Senza una distribuzione a monte, ogni falla nota (WebKit in particolare,
   che ne ha molte ogni anno) va seguita e corretta da noi. Serve un processo di
-  monitoraggio delle vulnerabilità fin dalla Fase 2. Per WebKitGTK vedi D-019.
+  monitoraggio delle vulnerabilità fin dalla Fase 1. Per WebKitGTK vedi D-019.
 
 ### D-018 — Sistema immutabile con aggiornamenti A/B · `confermata` (2026-11-11)
 - **Cosa:** partizione di sistema in sola lettura, verificata con dm-verity e firmata;
@@ -266,11 +266,21 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Cosa:** si lavora su una fase alla volta, nell'ordine della roadmap.
 - **Perché:** richiesta dell'utente.
 
+### D-022 — Sviluppo dal basso verso l'alto · `confermata` (2026-11-11)
+- **Cosa:** ordine delle fasi: sistema base (Yocto, kernel, avvio) → stack grafico →
+  broker → runtime delle app → shell → app di sistema → mobile → installazione.
+- **Perché:** scelta dell'utente: ogni livello si costruisce e si prova sul sistema reale
+  sotto di esso.
+- **Costo accettato:** il modello applicativo (la parte più nuova) si verifica più tardi;
+  le build Yocto richiedono ore e una macchina di build robusta (DA-11).
+- **Alternativa scartata:** partire dal prototipo del runtime su una distribuzione
+  esistente.
+
 ---
 
 ## 3. Stile grafico
 
-*Da definire nella Fase 4.* Annotare qui: palette, tipografia, spaziature, raggi,
+*Da definire nella Fase 5.* Annotare qui: palette, tipografia, spaziature, raggi,
 ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adattivo
 (desktop ↔ mobile).
 

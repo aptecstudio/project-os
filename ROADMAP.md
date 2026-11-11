@@ -8,21 +8,22 @@ Si lavora solo su fasi `approvata` o `in corso`.
 
 ## Stato globale
 
+Ordine **dal basso verso l'alto** (D-022): prima il sistema, poi ciò che ci gira sopra.
+Le fasi si eseguono **una alla volta**, in ordine (D-021).
+
 | Fase | Titolo | Stato |
 |---|---|---|
 | 0 | Fondamenta e decisioni | `in corso` |
-| 1 | Prototipo del runtime app (su macchina di sviluppo) | `proposta` |
-| 2 | Sistema base da sorgenti, desktop amd64 | `proposta` |
+| 1 | Sistema base: Yocto, kernel, avvio | `proposta` |
+| 2 | Stack grafico: WebKitGTK dal fork e compositore | `proposta` |
 | 3 | Broker, permessi e sandbox | `proposta` |
-| 4 | Shell, stile grafico e modali di sistema | `proposta` |
-| 5 | Applicazioni di sistema | `proposta` |
-| 6 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
-| 7 | Installazione, setup e aggiornamenti | `proposta` |
+| 4 | Runtime delle app (script JS e finestre) | `proposta` |
+| 5 | Shell, stile grafico e modali di sistema | `proposta` |
+| 6 | Applicazioni di sistema | `proposta` |
+| 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
+| 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-Le fasi si eseguono **una alla volta**, in ordine (D-021).
-
-**Prossimo passo:** approvare i primi passi della Fase 1 (sotto) e indicare la macchina di
-sviluppo su cui provarli.
+**Prossimo passo:** approvare i primi passi della Fase 1 e preparare la macchina di build.
 
 ---
 
@@ -33,7 +34,7 @@ in `MEMORY.md` come voce `confermata`.
 
 - [x] **DA-01 — Gestione finestre e compositore Wayland** → compositore proprio (D-007)
 - [x] **DA-02 — Runtime dello script JavaScript principale** → JavaScriptCore (D-008)
-- [ ] **DA-03 — Dispositivi mobili di riferimento** *(blocca Fase 6)*
+- [ ] **DA-03 — Dispositivi mobili di riferimento** *(blocca Fase 7)*
   Primo: il Google Pixel dell'utente (modello esatto da indicare). Poi: i vecchi modelli
   Oppo e Samsung in suo possesso (modelli esatti da indicare). Per ognuno: bootloader
   sbloccabile? recovery custom disponibile?
@@ -48,6 +49,9 @@ in `MEMORY.md` come voce `confermata`.
 - [x] **DA-09 — Modello di aggiornamento del sistema** → immagine immutabile A/B (D-018)
 - [x] **DA-10 — Aggiornare `AGENTS.md`** → autorizzato dall'utente il 2026-11-11, §1
   aggiornato (AGENTS.md v1.1)
+- [ ] **DA-11 — Macchina di build** *(blocca Fase 1)*
+  Yocto deve girare su una macchina dell'utente (VM o fisica): almeno 16 GB di RAM,
+  250 GB di disco, molti core. Sistema host da scegliere tra quelli supportati da Yocto.
 
 ---
 
@@ -62,31 +66,36 @@ in `MEMORY.md` come voce `confermata`.
 - [x] Risolvere DA-08, DA-09, DA-10
 - [x] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
 - [x] Licenza GPL-3.0, file `LICENSE`
+- [x] Roadmap riordinata dal basso verso l'alto (D-022)
 - [ ] Approvazione dei primi passi della Fase 1
+- [ ] Macchina di build pronta (DA-11)
 
-## Fase 1 — Prototipo del runtime app · `proposta`
+## Fase 1 — Sistema base: Yocto, kernel, avvio · `proposta`
 
-Obiettivo: dimostrare il modello applicativo (R-07, R-09) su una macchina di sviluppo
-Linux con WebKitGTK, indipendentemente dall'immagine.
+Obiettivo: un'immagine amd64 costruita da sorgenti che si avvia in QEMU/UEFI e su
+hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 
-- [ ] Progetto Rust (workspace Cargo) con binding a WebKitGTK 6.0 e JavaScriptCore
-- [ ] Host nativo che crea un contesto JavaScriptCore ed esegue lo script principale
-- [ ] Avviare un'app da `package.json`: lettura manifest, esecuzione dello script principale
-- [ ] API `window`: apertura, chiusura e comunicazione con finestre WebKitGTK legate al processo
-- [ ] Canale messaggi script principale ↔ finestre (stile IPC di Electron)
-- [ ] Sottoprocessi dell'app con terminazione a cascata
-- [ ] Specifica v0 del formato `package.json` (`docs/manifest.md`)
-- [ ] App di esempio «hello» con due finestre
+**Primi passi (da approvare):**
+- [ ] 1. Configurare Yocto (ramo LTS più recente) e creare i layer `meta-project-os` e
+      `meta-project-os-desktop`, con la configurazione di build in `build/` (D-012)
+- [ ] 2. Immagine minima: kernel Linux mainline, glibc, systemd; avvio in QEMU/UEFI
+      fino a un terminale testuale (D-015, D-016)
+- [ ] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
+      GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04)
+- [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
+- [ ] 5. Menu di avvio GRUB con tema project-os e logo segnaposto in `branding/`;
+      rilevamento di Windows e altri sistemi (D-009)
 
-## Fase 2 — Sistema base da sorgenti, desktop amd64 · `proposta`
+**Passi successivi:**
+- [ ] Prova del dual boot in QEMU con Windows installato
+- [ ] Servizi di base: rete, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
+- [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
+- [ ] Processo di monitoraggio delle vulnerabilità dei componenti (D-012)
+- [ ] Prova su hardware reale Intel e AMD (audio, Bluetooth, Wi‑Fi, GPU)
+- [ ] Misura dimensione immagine e memoria a riposo; registrarle in `MEMORY.md`
 
-- [ ] Configurare Yocto (ramo LTS corrente) e i layer `meta-project-os` e
-      `meta-project-os-desktop` (D-012)
-- [ ] Toolchain e glibc (D-015)
-- [ ] Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
-- [ ] Kernel Linux mainline con supporto hardware moderno: audio, Bluetooth, Wi‑Fi,
-      GPU (R-04); firmware da linux-firmware
-- [ ] systemd, udev, logind (D-016); rete, audio (PipeWire + WirePlumber), BlueZ
+## Fase 2 — Stack grafico: WebKitGTK dal fork e compositore · `proposta`
+
 - [x] Fork `aptecstudio/WebKit` con ramo di lavoro `project-os/2.54` da
       `webkitglib/2.54` (D-019)
 - [ ] Inventario delle vulnerabilità note sulla versione di partenza e verifica che
@@ -95,28 +104,35 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
       riapplicazione delle nostre patch, nuovo tag del fork
 - [ ] Irrobustimento: funzioni WebKit non necessarie disattivate, opzioni di
       compilazione restrittive
-- [ ] Mesa e GTK 4 da sorgenti; WebKitGTK compilato dal fork
-- [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
-- [ ] Processo di monitoraggio delle vulnerabilità dei componenti (D-012)
-- [ ] Compositore Rust/Smithay minimo che avvia una finestra WebKitGTK
-- [ ] Logo segnaposto generico in `branding/` (SVG + PNG)
-- [ ] Menu di avvio GRUB con tema project-os: voci centrate, logo (D-009)
-- [ ] Dual boot: rilevamento di Windows e altri sistemi, prova in QEMU con Windows
-- [ ] Avvio in QEMU/UEFI fino alla shell
-- [ ] Prova su hardware reale Intel e AMD (audio, Bluetooth, Wi‑Fi, GPU)
-- [ ] Misura dimensione immagine e memoria a riposo; registrarle in `MEMORY.md`
+- [ ] Mesa e GTK 4 nell'immagine; ricetta WebKitGTK che compila dal fork
+- [ ] Compositore Rust/Smithay minimo (D-007, D-013)
+- [ ] Una finestra WebKitGTK a schermo nell'immagine, in QEMU e su hardware reale
 
 ## Fase 3 — Broker, permessi e sandbox · `proposta`
 
 - [ ] Specifica del modello permessi (`docs/permissions.md`)
 - [ ] Demone broker in Rust con IPC autenticato
-- [ ] Sandbox per app (namespace + seccomp), negazione per default
+- [ ] Sandbox per processo (namespace + seccomp), negazione per default
 - [ ] API di base: filesystem, dispositivi, finestre, servizi di sistema (R-12)
 - [ ] Richieste root mediate con conferma e log di audit (R-13)
 - [ ] Formato pacchetto app firmato (DA-05)
-- [ ] Test di sicurezza: un'app non può superare i permessi concessi
+- [ ] Test di sicurezza con client Rust: un processo non supera i permessi concessi
 
-## Fase 4 — Shell, stile grafico e modali di sistema · `proposta`
+## Fase 4 — Runtime delle app · `proposta`
+
+Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
+
+- [ ] Workspace Cargo con binding a WebKitGTK 6.0 e JavaScriptCore
+- [ ] Specifica v0 del formato `package.json` (`docs/manifest.md`)
+- [ ] Host nativo che legge il manifest, crea un contesto JavaScriptCore isolato ed
+      esegue lo script principale
+- [ ] API `window`: apertura, chiusura e comunicazione con finestre WebKitGTK legate al
+      processo; canale messaggi script principale ↔ finestre (stile Electron)
+- [ ] Sottoprocessi dell'app con terminazione a cascata
+- [ ] Collegamento delle API di sistema al broker, secondo i permessi del manifest
+- [ ] App di esempio «hello» con due finestre
+
+## Fase 5 — Shell, stile grafico e modali di sistema · `proposta`
 
 - [ ] Definire lo stile grafico e registrarlo in `MEMORY.md` §3
 - [ ] Shell: pannello, launcher, gestione finestre, notifiche
@@ -124,26 +140,26 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 - [ ] Backend `xdg-desktop-portal` e agente polkit con modali HTML
 - [ ] Layout adattivo desktop ↔ mobile, input touch
 
-## Fase 5 — Applicazioni di sistema · `proposta`
+## Fase 6 — Applicazioni di sistema · `proposta`
 
 - [ ] Impostazioni (rete, Bluetooth, audio, schermo, permessi app)
 - [ ] Gestore file
 - [ ] Terminale
 - [ ] Gestore applicazioni
 
-## Fase 6 — Mobile arm64 su base Android · `proposta`
+## Fase 7 — Mobile arm64 su base Android · `proposta`
 
 - [ ] **Verifica di fattibilità (da anticipare appena possibile):** WebKitGTK con EGL via
       libhybris sul Pixel dell'utente; è il rischio tecnico principale lato mobile (D-014)
 - [ ] Stesso spazio utente compilato per arm64, senza modifiche
-- [ ] Strato `platforms/mobile-arm64`: Halium/libhybris
+- [ ] Layer `meta-project-os-mobile`: Halium/libhybris
 - [ ] Pixel: kernel e firmware del produttore, GPU, touch, audio, Wi‑Fi, Bluetooth
 - [ ] Pixel: modem (chiamate, SMS, dati), sensori, fotocamera
 - [ ] Pacchetto di installazione da recovery per il Pixel (D-011)
 - [ ] Oppo e Samsung: valutazione modelli (bootloader, recovery), poi porting
 - [ ] Gesti touch, tastiera a schermo, rotazione, gestione energetica
 
-## Fase 7 — Installazione, setup e aggiornamenti · `proposta`
+## Fase 8 — Installazione, setup e aggiornamenti · `proposta`
 
 - [ ] Immagine USB di installazione desktop: avvio diretto nel wizard, nessuna modalità
       live (D-010, R-19)
@@ -169,5 +185,6 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 | 2026-11-11 | 0 | Cambio di approccio: da Debian a sistema da sorgenti, spazio utente unico desktop/mobile su base Android, Rust, Pixel come primo dispositivo, setup differenziato (R-20…R-24, D-012…D-017) |
 | 2026-11-11 | 0 | Decisi Yocto e aggiornamenti A/B immutabili (D-012, D-018); `AGENTS.md` §1 aggiornato con autorizzazione |
 | 2026-11-11 | 0 | Deciso il fork di WebKitGTK mantenuto dal progetto (D-019) |
-| 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` |
+| 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` (numerazione attuale: Fase 2) |
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
+| 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
