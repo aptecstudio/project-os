@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** passo 3 della Fase 1, configurazione del kernel e firmware.
-Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** passo 4 della Fase 1, schema partizioni A/B con verifica e dati
+cifrati. Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -85,8 +85,10 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
       fino a un terminale testuale (D-015, D-016)
   - [x] 2a. Ricetta dell'immagine, macchina e schema di partizioni scritti
   - [ ] 2b. Prima build e avvio in QEMU sulla macchina di build (DA-11)
-- [ ] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
-      GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04)
+- [x] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
+      GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04, D-025)
+  - [ ] 3a. Ricetta firmware audio Intel SOF
+  - [ ] 3b. Ricetta microcode Intel, caricamento anticipato del microcode (con il passo 4)
 - [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
 - [ ] 5. Menu di avvio GRUB (D-009):
   - [x] 5a. Logo segnaposto e tema in `branding/`, con anteprima (D-023)
@@ -197,3 +199,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
+| 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |

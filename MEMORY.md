@@ -229,6 +229,32 @@ di approccio, da Debian a sistema costruito da zero.*
   avvisi (controllo di sola lettura, nessuna compilazione). Da verificare alla prima
   build: download, compilazione, schema di partizioni `wic`, sintassi dei file kas.
 
+### D-025 — Kernel e firmware per l'hardware desktop · `confermata` (2026-11-11)
+- **Frammenti di configurazione** in
+  `layers/meta-project-os-desktop/recipes-kernel/linux/files/`, uno per area: dischi e
+  file system, grafica, audio, Bluetooth, Wi‑Fi, rete cablata, input e piattaforma.
+  147 opzioni, tutte verificate contro i Kconfig di Linux 6.18.
+- **Integrati (=y) solo i driver per l'avvio** (NVMe, SATA, ext4, FAT, framebuffer UEFI,
+  tastiera, USB 3): non c'è initramfs, quindi il disco di sistema deve essere leggibile
+  prima di caricare moduli. Tutto il resto è modulo, caricato solo se l'hardware c'è.
+- **Grafica:** Intel (i915, xe), AMD (amdgpu, anche le prime GCN, e radeon), NVIDIA solo
+  con il driver libero nouveau; driver per le macchine virtuali (QEMU, VirtualBox,
+  VMware, Hyper‑V).
+- **Firmware:** `packagegroup-project-os-desktop-hw`, 27 pacchetti di `linux-firmware`
+  più il database delle frequenze Wi‑Fi; compressi con zstd.
+- **Mancano, da scrivere come ricette proprie** (non sono in OpenEmbedded-Core):
+  firmware audio Intel SOF (portatili Intel dalla 11ª generazione), microcode Intel.
+  Il microcode va caricato all'avvio tramite initramfs per essere efficace: da decidere
+  con lo schema di avvio (passo 4).
+- **Strumento:** `tools/check-kernel-fragments.py` controlla che ogni opzione esista
+  nella versione del kernel e che il valore sia ammesso dal tipo; ha già trovato un
+  errore (`TG3` invece di `TIGON3`). Le dipendenze tra opzioni le verifica la build.
+- **Verifiche fatte:** bitbake risolve il grafo delle dipendenze dell'immagine senza
+  errori; firmware, regdb e frammenti entrano nella build. Da verificare alla prima
+  build: compilazione del kernel e avvisi sulle dipendenze delle opzioni.
+- **Correzione collegata:** l'immagine base ora include `MACHINE_EXTRA_RRECOMMENDS`;
+  prima moduli e firmware della macchina sarebbero rimasti fuori.
+
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
   sistema e strumenti di build propri in Rust. Le librerie C esterne (WebKitGTK, GTK,
@@ -344,6 +370,7 @@ project-os/
 │   └── meta-device-<nome>/       # un layer per telefono: kernel, firmware, pacchetto
 │                                 # recovery (pixel-…, samsung-…, oppo-…)
 ├── kas/          # configurazione della build Yocto (D-024): versioni, layer, macchina
+├── tools/        # strumenti di sviluppo (es. verifica dei frammenti del kernel)
 ├── build/        # uscite della build (non versionate)
 ├── sources/      # repository esterni scaricati da kas (non versionati)
 ├── branding/     # logo (segnaposto), tema GRUB, script di generazione, anteprime
