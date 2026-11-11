@@ -22,6 +22,20 @@ fi
 
 CONFIG="kas/desktop-amd64.yml:kas/dev.yml"
 
+# Macchina con poca RAM (per esempio un portatile): meno compilazioni in parallelo e
+# file di lavoro cancellati man mano (kas/low-resources.yml, D-034).
+# PROJECT_OS_LOW_RESOURCES=1 la forza, =0 la esclude; altrimenti si decide dalla RAM.
+mem_kb=$(awk '/^MemTotal:/ { print $2 }' /proc/meminfo)
+case "${PROJECT_OS_LOW_RESOURCES:-auto}" in
+    1) low=1 ;;
+    0) low=0 ;;
+    *) if [ "$mem_kb" -lt 15000000 ]; then low=1; else low=0; fi ;;
+esac
+if [ "$low" = 1 ]; then
+    CONFIG="$CONFIG:kas/low-resources.yml"
+    echo "Poche risorse: uso kas/low-resources.yml (build più lenta, meno RAM e disco)."
+fi
+
 case "${1:-immagine}" in
     immagine)      exec kas build "$CONFIG" ;;
     aggiornamento) exec kas build --target project-os-bundle "$CONFIG" ;;

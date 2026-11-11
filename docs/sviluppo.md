@@ -22,6 +22,12 @@ dell'emulatore si può aprire anche da un Ubuntu Desktop.
 
 Se il PC è già Linux (Ubuntu o Debian), si può lavorare direttamente lì.
 
+**Portatile o PC con poche risorse** (circa 8 GB di RAM e 40-50 GB liberi): per
+l'immagine della Fase 1 basta. Con meno di 16 GB di RAM `tools/build.sh` usa da solo
+`kas/low-resources.yml`: meno compilazioni in parallelo e file di lavoro cancellati man
+mano. La prima build diventa più lunga (anche una notte intera). Non basterà dalla
+Fase 2, quando si compila WebKitGTK.
+
 ## 2. Scaricare il progetto e preparare la macchina
 
 ```sh

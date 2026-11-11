@@ -325,6 +325,22 @@ di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo ste
 - **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
   bitbake. Gli script non sono ancora stati eseguiti su una macchina reale.
 
+### D-034 — Portatile come macchina di build provvisoria · `proposta` (sul ramo `build/ab-partitions`)
+- **Cosa:** finché non c'è la macchina di build completa (DA-11), la Fase 1 si può
+  costruire sul portatile dell'utente: Debian 13, 4 core, 7,4 GB di RAM, 42 GB liberi.
+  `kas/low-resources.yml` imposta 2 compiti bitbake e `make -j 3` (al massimo 6
+  compilazioni insieme, per non esaurire la RAM), `rm_work` (cancella i file di lavoro
+  di ogni ricetta finita) e l'arresto pulito della build sotto 5 GB liberi.
+  `tools/build.sh` la aggiunge da solo sotto 16 GB di RAM
+  (`PROJECT_OS_LOW_RESOURCES=1|0` per forzarla o escluderla).
+- **Perché:** l'immagine della Fase 1 dovrebbe stare in circa 30-40 GB con `rm_work`
+  (stima, da misurare alla prima build); la prima build è lunga, le successive riusano
+  la cache `sstate`.
+- **Limiti:** non basta per WebKitGTK (Fase 2), che vuole più di 2 GB di RAM per
+  processo di compilazione e molto più disco. DA-11 resta aperta.
+- **Alternativa scartata:** uno script di preparazione separato per il portatile:
+  `tools/setup-host.sh` copre già Debian 13.
+
 ### D-029 — API di sistema nell'oggetto globale `system` · `confermata` (nome e principio), dettagli `proposta`
 - **Cosa (R-29):** nel contesto dello script principale e delle finestre dell'app c'è un
   oggetto globale **`system`**, con un sotto-oggetto per area, come `chrome.*` nelle

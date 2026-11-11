@@ -55,6 +55,9 @@ in `MEMORY.md` come voce `confermata`.
   Yocto deve girare su una macchina dell'utente (VM o fisica): almeno 16 GB di RAM,
   250 GB di disco, molti core. Consigliato Ubuntu Server 24.04/26.04 LTS. Guida e script
   pronti (`docs/sviluppo.md`, `tools/setup-host.sh`); manca la macchina.
+  *Soluzione provvisoria (D-034, proposta):* il portatile dell'utente, Debian 13
+  (4 core, 7,4 GB di RAM, 42 GB liberi), con `kas/low-resources.yml`; basta per la
+  Fase 1, non per WebKitGTK (Fase 2).
 
 ---
 
@@ -224,5 +227,6 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 1 | Lavoro sospeso su richiesta dell'utente; preparati guida e script per costruire e provare l'immagine sul suo PC (D-028) |
 | 2026-11-11 | 0 | Aggiunto `README.md` di presentazione, su richiesta dell'utente; variante scura del logo segnaposto per sfondi chiari |
 | 2026-11-11 | 0 | Nuove specifiche: API nell'oggetto globale `system`, `include`/`includeAsync` con errore sui cicli, protocollo `app://` per la cartella isolata dell'app, design ibrido Windows 11 / Big Sur / MIUI (R-29…R-32, D-029…D-032) |
+| 2026-11-11 | 1 | Portatile dell'utente come macchina di build provvisoria: `kas/low-resources.yml`, attivata da `tools/build.sh` sotto 16 GB di RAM (D-034) |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
