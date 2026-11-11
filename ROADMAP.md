@@ -200,3 +200,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
+| 2026-11-11 | 0 | `README.md` per chi vuole conoscere il progetto: cosa offrirà, dispositivi, stato, licenza; variante scura del logo per sfondi chiari |
