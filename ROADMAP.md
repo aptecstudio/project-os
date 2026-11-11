@@ -19,11 +19,10 @@ Si lavora solo su fasi `approvata` o `in corso`.
 | 6 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 7 | Installazione, setup e aggiornamenti | `proposta` |
 
-Le Fasi 1 e 2 possono procedere in parallelo: il runtime si sviluppa su qualsiasi Linux con
-WebKitGTK, mentre si costruisce il sistema da sorgenti.
+Le fasi si eseguono **una alla volta**, in ordine (D-021).
 
-**Prossimo passo:** approvare le decisioni ancora `proposta` in `MEMORY.md` e le Fasi 1
-e 2. DA-03 (modelli dei telefoni) può attendere fino alla Fase 6.
+**Prossimo passo:** approvare i primi passi della Fase 1 (sotto) e indicare la macchina di
+sviluppo su cui provarli.
 
 ---
 
@@ -42,7 +41,8 @@ in `MEMORY.md` come voce `confermata`.
 - [ ] **DA-05 — Formato di distribuzione delle app** *(blocca Fase 3)*
   Pacchetto proprio firmato (archivio con `package.json` + firma). L'opzione `.deb` è
   decaduta con R-20.
-- [ ] **DA-06 — Nome del sistema e licenza del codice** *(blocca Fase 2)*
+- [x] **DA-06a — Licenza** → GPL-3.0 (D-020)
+- [ ] **DA-06b — Nome definitivo del sistema** *(non bloccante; per ora «project-os»)*
 - [x] **DA-07 — Linguaggio dei componenti nativi** → Rust (D-013)
 - [x] **DA-08 — Build system per il sistema da sorgenti** → Yocto/OpenEmbedded (D-012)
 - [x] **DA-09 — Modello di aggiornamento del sistema** → immagine immutabile A/B (D-018)
@@ -60,8 +60,9 @@ in `MEMORY.md` come voce `confermata`.
 - [x] Risolvere DA-01, DA-02, DA-04, DA-07
 - [x] Ridisegnare l'approccio: da Debian a sistema da sorgenti (R-20…R-24)
 - [x] Risolvere DA-08, DA-09, DA-10
-- [ ] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
-- [ ] Approvazione delle Fasi 1 e 2
+- [x] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
+- [x] Licenza GPL-3.0, file `LICENSE`
+- [ ] Approvazione dei primi passi della Fase 1
 
 ## Fase 1 — Prototipo del runtime app · `proposta`
 
@@ -169,3 +170,4 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 | 2026-11-11 | 0 | Decisi Yocto e aggiornamenti A/B immutabili (D-012, D-018); `AGENTS.md` §1 aggiornato con autorizzazione |
 | 2026-11-11 | 0 | Deciso il fork di WebKitGTK mantenuto dal progetto (D-019) |
 | 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` |
+| 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |

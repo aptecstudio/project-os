@@ -101,7 +101,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Perché:** R-13 e R-14 sono in tensione; un'app con root pieno annullerebbe ogni altra
   protezione. La mediazione mantiene la funzionalità con un rischio controllato.
 
-### D-006 — Modali di sistema tramite portali · `proposta`
+### D-006 — Modali di sistema tramite portali · `confermata` (2026-11-11)
 - **Cosa:** implementare un backend `xdg-desktop-portal` e un agente polkit propri che
   mostrano le richieste (selezione file, permessi, password, autenticazione) come modali
   HTML della shell.
@@ -130,7 +130,7 @@ di approccio, da Debian a sistema costruito da zero.*
   tramite bundling.
 - **Alternative scartate:** GJS, Node.js.
 
-### D-009 — Menu di avvio desktop: GRUB 2 con tema proprio · `proposta`
+### D-009 — Menu di avvio desktop: GRUB 2 con tema proprio · `confermata` (2026-11-11)
 - **Cosa:** GRUB 2 (UEFI) con un tema project-os: menu centrato, logo in alto, sfondo e
   font propri. Rilevamento di Windows e altri sistemi con `os-prober` (da riattivare con
   `GRUB_DISABLE_OS_PROBER=false`).
@@ -143,7 +143,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Alternative scartate:** systemd-boot (nessun tema grafico); rEFInd (da rivalutare se
   GRUB risulta scomodo da integrare senza Debian).
 
-### D-010 — Supporto di installazione desktop · `proposta`
+### D-010 — Supporto di installazione desktop · `confermata` (2026-11-11)
 - **Cosa:** un'immagine USB di installazione che avvia solo il minimo indispensabile
   (kernel, compositore, runtime, broker) e apre direttamente il wizard di installazione;
   nessuna sessione utente né app.
@@ -153,7 +153,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Il wizard gestisce:** lingua, tastiera, disco e partizioni (anche accanto a Windows
   esistente, senza toccarne l'avvio), cifratura del disco, utente, installazione di GRUB.
 
-### D-011 — Installazione mobile da recovery · `proposta`
+### D-011 — Installazione mobile da recovery · `confermata` (2026-11-11)
 - **Cosa:** per ogni modello supportato, un pacchetto installabile dalla recovery
   (es. zip flashabile da recovery custom), più le immagini fastboot dove servono.
   Al primo avvio parte l'app di setup HTML (vedi D-017 per i passi).
@@ -216,7 +216,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Perché:** R-22; sicurezza della memoria nei componenti più esposti (R-14).
 - **Alternative scartate:** C con wlroots.
 
-### D-014 — Spazio utente unico, strato hardware per piattaforma · `proposta`
+### D-014 — Spazio utente unico, strato hardware per piattaforma · `confermata` (2026-11-11)
 - **Cosa:** tutto ciò che sta sopra il kernel (libc, compositore, runtime, shell, app) è
   identico su desktop e mobile. Cambia solo lo **strato hardware**:
   - **desktop (amd64):** kernel Linux mainline, Mesa per la GPU, firmware linux-firmware;
@@ -229,19 +229,19 @@ di approccio, da Debian a sistema costruito da zero.*
   libhybris (da verificare presto, è il rischio tecnico principale lato mobile); lo
   sblocco del bootloader varia per modello (vedi D-004).
 
-### D-015 — Libreria C: glibc · `proposta`
+### D-015 — Libreria C: glibc · `confermata` (2026-11-11)
 - **Perché:** necessaria per libhybris (driver Android, D-014) e la più collaudata con
   WebKitGTK e GTK.
 - **Alternative scartate:** musl (incompatibile con libhybris, meno testata con WebKit).
 
-### D-016 — Init: systemd · `proposta`
+### D-016 — Init: systemd · `confermata` (2026-11-11)
 - **Cosa:** systemd come init, con udev, logind e journald.
 - **Perché:** gestione di sessioni e dispositivi (logind/udev) serve al compositore;
   sandboxing dei servizi integrato; supporto Halium già esistente.
 - **Alternative:** init leggeri (s6, dinit) o init proprio in Rust: meno dipendenze, ma
   udev/sessioni/seat da ricostruire.
 
-### D-017 — Setup differenziato desktop / mobile · `proposta`
+### D-017 — Setup differenziato desktop / mobile · `confermata` (2026-11-11)
 - **Cosa:** un'unica app di setup HTML con passi attivati in base alla piattaforma (R-24).
   - **Desktop (dall'immagine USB, D-010):** lingua → layout tastiera → fuso orario →
     rete (facoltativa) → disco: partizionamento/formattazione, anche accanto a
@@ -253,6 +253,18 @@ di approccio, da Debian a sistema costruito da zero.*
     step di disco o tastiera fisica.
 - **Perché:** su mobile il sistema è già scritto dalla recovery; su desktop il setup è
   anche l'installazione.
+
+---
+
+### D-020 — Licenza GPL-3.0 · `confermata` (2026-11-11)
+- **Cosa:** il codice di project-os è rilasciato con licenza GNU GPL v3 (file `LICENSE`).
+  Il fork di WebKit mantiene le licenze originali di WebKit (LGPL/BSD).
+- **Perché:** scelta dell'utente; chi modifica e distribuisce il sistema deve pubblicarne
+  il codice, evitando fork chiusi.
+
+### D-021 — Fasi in sequenza, non in parallelo · `confermata` (2026-11-11)
+- **Cosa:** si lavora su una fase alla volta, nell'ordine della roadmap.
+- **Perché:** richiesta dell'utente.
 
 ---
 
