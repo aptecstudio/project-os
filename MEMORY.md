@@ -40,8 +40,13 @@ Fissati dall'utente il 2026-11-11.
 | R-23 | Primo dispositivo mobile: **Google Pixel** dell'utente. Da non trascurare: vecchi modelli **Oppo** e **Samsung** in suo possesso. |
 | R-24 | **Setup differenziato:** su desktop comprende formattazione del disco, layout tastiera e configurazione di base; su mobile chiede altri dati o parte da step successivi (il sistema è già installato dalla recovery). |
 
+| R-25 | **Retrocompatibilità a tutti i livelli e in tutti i contesti del progetto**: hardware, avvio, formati, API, dati, aggiornamenti. |
+| R-26 | **Desktop:** avvio sia da UEFI sia da BIOS tradizionale, con la stessa immagine. |
+| R-27 | **Cifratura senza TPM:** la partizione dati deve funzionare anche sui PC più datati senza chip TPM. |
+| R-28 | **Processori desktop:** tutti i processori x86 a 64 bit (istruzioni x86-64 di base). |
+
 *R-16…R-19 aggiunti dall'utente il 2026-11-11. R-20…R-24 aggiunti lo stesso giorno: cambio
-di approccio, da Debian a sistema costruito da zero.*
+di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno.*
 
 ---
 
@@ -221,7 +226,7 @@ di approccio, da Debian a sistema costruito da zero.*
   distribuzione `project-os` (`layers/meta-project-os/conf/distro/project-os.conf`).
 - **Macchina `project-os-amd64`:** istruzioni x86-64-v2 (`corei7-64`), per funzionare
   sui PC dal 2008 in poi; x86-64-v3 scartato perché escluderebbe i PC precedenti al 2013
-  circa. Kernel `linux-yocto` 6.18 LTS con la configurazione di riferimento per PC a
+  circa. *Questa parte è superata da D-027 (x86-64 di base).* Kernel `linux-yocto` 6.18 LTS con la configurazione di riferimento per PC a
   64 bit (`common-pc-64`), avvio UEFI con GRUB.
 - **Funzioni della distribuzione escluse** (motivi nel file della distribuzione): x11,
   pulseaudio, nfs, zeroconf, 3g, nfc, ptest, multiarch, debuginfod.
@@ -254,6 +259,52 @@ di approccio, da Debian a sistema costruito da zero.*
   build: compilazione del kernel e avvisi sulle dipendenze delle opzioni.
 - **Correzione collegata:** l'immagine base ora include `MACHINE_EXTRA_RRECOMMENDS`;
   prima moduli e firmware della macchina sarebbero rimasti fuori.
+
+### D-027 — Processori: x86-64 di base · `confermata` (2026-11-11)
+- **Cosa:** `DEFAULTTUNE = "x86-64"`: tutti i processori a 64 bit (Athlon 64, Pentium 4
+  a 64 bit, Core 2 e successivi). Supera la parte di D-024 su x86-64-v2.
+- **Perché:** R-25, R-28. Costo accettato: prestazioni leggermente inferiori sui
+  processori moderni.
+- **Alternative scartate:** x86-64-v2 (esclude i PC prima del 2008 circa); 32 bit
+  (WebKit su 32 bit è sempre meno supportato, costo troppo alto).
+
+### D-026 — Partizioni A/B, avvio e partizione dati · `proposta` (in revisione sul ramo `build/ab-partitions`)
+- **Schema del disco (GPT)**, in `files/wic/project-os-ab.wks`:
+  | # | Nome | Dimensione | Contenuto |
+  |---|---|---|---|
+  | 1 | `bios_grub` | 1 MiB | GRUB per l'avvio da BIOS (passo 4e) |
+  | 2 | `esp` | 512 MiB | partizione EFI: GRUB, menu, tema, stato degli slot (`grubenv`); montata su `/efi`, accesso solo root |
+  | 3 | `root_a` | 4 GiB | sistema, copia A, sola lettura, kernel incluso |
+  | 4 | `root_b` | 4 GiB | sistema, copia B, scritta dagli aggiornamenti |
+  | 5 | `data` | resto | dati, creata al primo avvio, cifrata, montata su `/var` (`/home` → `/var/home`) |
+- **Scelta dello slot:** GRUB (`files/wic/project-os-grub.cfg`) avvia il primo slot di
+  `ORDER` valido e senza tentativi in sospeso, e segna il tentativo; `rauc-mark-good`
+  lo conferma a sistema avviato. Se l'avvio fallisce, al riavvio passa all'altro slot.
+  Nel menu lo slot attivo si chiama «project-os», l'altro «versione precedente».
+- **Aggiornamenti:** RAUC (`recipes-core/rauc/files/system.conf`); bundle firmati in
+  formato *verity*, compressi zstd (`project-os-bundle`). Il certificato della CA va
+  nell'immagine; chiavi fuori dal repository (`PROJECT_OS_KEYS`, `tools/gen-dev-keys.sh`).
+- **Partizione dati:** creata da `systemd-repart` sullo spazio libero, LUKS2. Sblocco
+  con `crypttab`: funziona senza TPM (R-27). In questa fase la chiave è **vuota**
+  (segnaposto, dati non protetti): il setup registrerà password e chiave di recupero,
+  e il TPM come metodo in più dove c'è (passo 4d e Fase 8).
+- **Kernel:** dm-crypt, dm-verity, AES-XTS, SHA-256, loop e squashfs zstd integrati
+  (`ab-crypt.cfg`).
+- **Decisioni collegate:** `systemd.gpt_auto=0` (le partizioni si montano solo come
+  descritto, mai per tipo); `/home` sulla partizione dati.
+- **Limiti noti, da risolvere nei sotto-passi:**
+  - kernel letto da GRUB dentro lo slot senza verifica: con erofs + dm-verity e
+    kernel unificato (UKI) firmato al passo 4c;
+  - `/etc` in sola lettura: macchina, rete e utenti non persistono fino al passo 4c
+    (sovrapposizione di `/etc` sulla partizione dati, dall'initramfs);
+  - avvio da BIOS: OpenEmbedded non installa GRUB per BIOS nelle immagini; lo
+    scriviamo al passo 4e;
+  - pacchetti che mettono file in `/var` al momento della build: coperti dalla
+    partizione dati montata sopra; da verificare alla prima build.
+- **Verifiche fatte:** bitbake risolve tutte le dipendenze di immagine e bundle senza
+  errori né avvisi; 159 opzioni del kernel verificate sul 6.18; lo script delle chiavi
+  produce una catena di certificati valida. Da verificare alla prima build: sintassi di
+  `grub.cfg`, moduli GRUB, creazione delle partizioni, avvio e aggiornamento A/B.
 
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di

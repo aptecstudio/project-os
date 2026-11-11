@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** passo 4 della Fase 1, schema partizioni A/B con verifica e dati
-cifrati. Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** revisione di partizioni A/B e aggiornamenti (ramo
+`build/ab-partitions`); poi 4c. Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -89,7 +89,15 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
       GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04, D-025)
   - [ ] 3a. Ricetta firmware audio Intel SOF
   - [ ] 3b. Ricetta microcode Intel, caricamento anticipato del microcode (con il passo 4)
-- [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
+- [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018, D-026)
+  - [x] 4a. Schema del disco: ESP, slot A/B, spazio BIOS, partizione dati cifrata
+        creata al primo avvio
+  - [x] 4b. Scelta dello slot in GRUB e aggiornamenti RAUC firmati
+  - [ ] 4c. Sistema erofs + dm-verity, initramfs systemd, kernel unificato (UKI) per
+        slot, `/etc` persistente
+  - [ ] 4d. Sblocco dei dati: password e chiave di recupero (senza TPM, R-27); TPM come
+        metodo in più dove presente
+  - [ ] 4e. Avvio da BIOS con GRUB nella stessa immagine (R-26)
 - [ ] 5. Menu di avvio GRUB (D-009):
   - [x] 5a. Logo segnaposto e tema in `branding/`, con anteprima (D-023)
   - [ ] 5b. Ricetta Yocto: font `.pf2`, installazione del tema, `os-prober` per
@@ -198,5 +206,7 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
+| 2026-11-11 | 0 | Nuovi requisiti: retrocompatibilità a tutti i livelli, avvio UEFI e BIOS, cifratura senza TPM, x86-64 di base (R-25…R-28, D-027) |
+| 2026-11-11 | 1 | Partizioni A/B, scelta dello slot in GRUB, RAUC, partizione dati cifrata al primo avvio, sul ramo `build/ab-partitions` (D-026, passi 4a e 4b) |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |

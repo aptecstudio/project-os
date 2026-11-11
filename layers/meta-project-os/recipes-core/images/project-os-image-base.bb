@@ -11,5 +11,25 @@ inherit core-image
 # packagegroup-core-boot non li include da solo.
 IMAGE_INSTALL = "packagegroup-core-boot ${MACHINE_EXTRA_RRECOMMENDS} ${CORE_IMAGE_EXTRA_INSTALL}"
 
+# Kernel dentro lo slot di sistema: GRUB lo carica dallo slot scelto (D-026)
+IMAGE_INSTALL += "kernel-image"
+
+# Aggiornamenti A/B firmati (D-018, D-026)
+IMAGE_INSTALL += "rauc"
+# squashfs-tools non serve: i bundle si montano con il driver del kernel
+BAD_RECOMMENDATIONS += "squashfs-tools"
+
+# Sistema in sola lettura (D-018); i dati vivono sulla partizione cifrata montata su /var
+IMAGE_FEATURES += "read-only-rootfs"
+
 # Nessun gestore di pacchetti nell'immagine (D-018)
 IMAGE_FEATURES:remove = "package-management"
+
+# /home sta sulla partizione dati: nell'immagine diventa un collegamento a /var/home
+ROOTFS_POSTPROCESS_COMMAND += "project_os_home_on_data"
+project_os_home_on_data() {
+    rm -rf ${IMAGE_ROOTFS}/home
+    ln -s var/home ${IMAGE_ROOTFS}/home
+    install -d ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d
+    echo "d /var/home 0755 root root -" > ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d/project-os-home.conf
+}

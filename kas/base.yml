@@ -24,6 +24,22 @@ repos:
     layers:
       meta:
 
+  # meta-oe: cryptsetup (cifratura e dm-verity), lvm2 (D-026)
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    branch: wrynose
+    commit: c0fcd7cca3760ef24e087ac4a31b8f357cb204da
+    path: sources/meta-openembedded
+    layers:
+      meta-oe:
+
+  # RAUC: aggiornamenti A/B firmati (D-018, D-026)
+  meta-rauc:
+    url: https://github.com/rauc/meta-rauc
+    branch: wrynose
+    commit: 38da0e5866a953e664001ba90b5edad68d68cd5d
+    path: sources/meta-rauc
+
   # Accanto a openembedded-core: oe-init-build-env lo trova in ../bitbake
   bitbake:
     url: https://git.openembedded.org/bitbake
@@ -33,6 +49,16 @@ repos:
     layers:
       .: disabled
 
+# Chiavi per firmare e verificare gli aggiornamenti (D-026). Restano FUORI dal
+# repository (AGENTS.md §4). Per lo sviluppo si generano con tools/gen-dev-keys.sh:
+#   export PROJECT_OS_KEYS=~/.config/project-os/keys
+# La cartella contiene: ca.cert.pem (verifica, va nell'immagine), signing.key.pem e
+# signing.cert.pem (firma dei pacchetti di aggiornamento).
+env:
+  PROJECT_OS_KEYS: null
+
 local_conf_header:
   base: |
     CONF_VERSION = "2"
+    RAUC_KEY_FILE = "${PROJECT_OS_KEYS}/signing.key.pem"
+    RAUC_CERT_FILE = "${PROJECT_OS_KEYS}/signing.cert.pem"

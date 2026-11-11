@@ -1,0 +1,4 @@
+# project-os — volumi cifrati (D-026)
+# Sblocco: prima prova la chiave vuota (sistema non ancora configurato), poi chiede la
+# password. Funziona senza TPM (R-25, R-27); il TPM si aggiungerà come metodo in più.
+data  PARTLABEL=data  -  luks,discard,try-empty-password=yes

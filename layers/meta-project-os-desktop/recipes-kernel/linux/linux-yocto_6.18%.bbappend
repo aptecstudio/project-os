@@ -17,4 +17,5 @@ SRC_URI:append:project-os-amd64 = " \
     file://wifi.cfg \
     file://ethernet.cfg \
     file://input-platform.cfg \
+    file://ab-crypt.cfg \
 "
