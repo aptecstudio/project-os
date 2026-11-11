@@ -13,6 +13,7 @@ local_conf_header:
   dev: |
     # Accesso root senza password, anche dalla console seriale
     EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login serial-autologin-root"
-    # Prova in QEMU con firmware UEFI: runqemu project-os-amd64 wic ovmf
-    IMAGE_CLASSES += "qemuboot"
-    EXTRA_IMAGEDEPENDS += "ovmf"
+    # Prova in QEMU: tools/run-qemu.sh usa QEMU e il firmware OVMF della macchina di
+    # build (installati da tools/setup-host.sh). Non si costruiscono qui: la classe
+    # qemuboot e la ricetta ovmf trascinerebbero QEMU con la grafica, quindi Mesa,
+    # LLVM e Clang, ore di compilazione per strumenti che non usiamo (D-035).

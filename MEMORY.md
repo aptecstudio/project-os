@@ -377,6 +377,30 @@ portatile.*
 - **Alternativa scartata:** uno script di preparazione separato per il portatile:
   `tools/setup-host.sh` copre già Debian 13.
 
+### D-035 — Download dal mirror di Yocto, niente QEMU costruito da Yocto · `proposta` (sul ramo `build/ab-partitions`)
+- **Problema (prima build sul portatile, 2026-11-11):**
+  - il server git `git.yoctoproject.org` serve i cloni a circa 17 KB/s, anche quelli
+    ridotti all'ultimo commit: il kernel `linux-yocto` (vari GB) avrebbe richiesto
+    giorni. La connessione non c'entra: da kernel.org si scarica a 13 MB/s, dal mirror
+    HTTP di Yocto a circa 3 MB/s;
+  - la classe `qemuboot` (inclusa dalla macchina tramite `qemuboot-x86.inc` e da
+    `kas/dev.yml`) e la ricetta `ovmf` facevano costruire QEMU con la grafica, quindi
+    Mesa, LLVM e Clang: ore di compilazione e rischio di esaurire la RAM, per
+    strumenti che non usiamo.
+- **Cosa:**
+  - `kas/base.yml`: `PREMIRRORS` porta i repository di `git.yoctoproject.org` sugli
+    archivi del mirror ufficiale `downloads.yoctoproject.org/mirror/sources/`. Il
+    commit resta quello fissato nella ricetta, verificato da git; se l'archivio è più
+    vecchio, bitbake scarica solo i commit mancanti dal server git;
+  - macchina e `kas/dev.yml` senza `qemuboot` e senza `ovmf`: la prova usa
+    `tools/run-qemu.sh` con QEMU e OVMF della macchina di build. Via anche le
+    variabili `QB_*`, che servivano solo a `runqemu`.
+- **Effetto:** i compiti di compilazione passano da circa 838 a 682; restano
+  `qemu-native` (piccolo, serve agli script di installazione dei pacchetti) e
+  `qemuwrapper-cross`.
+- **Alternative scartate:** clone ridotto (`BB_GIT_SHALLOW`), che resta lento sullo
+  stesso server; lasciare `runqemu`, che non serve perché c'è `tools/run-qemu.sh`.
+
 ### D-029 — API di sistema nell'oggetto globale `system` · `confermata` (nome e principio), dettagli `proposta`
 - **Cosa (R-29):** nel contesto dello script principale e delle finestre dell'app c'è un
   oggetto globale **`system`**, con un sotto-oggetto per area, come `chrome.*` nelle

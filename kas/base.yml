@@ -60,5 +60,11 @@ env:
 local_conf_header:
   base: |
     CONF_VERSION = "2"
+    # I repository git di git.yoctoproject.org (kernel linux-yocto, kernel-cache…) si
+    # scaricano prima dagli archivi del mirror HTTP ufficiale di Yocto: il server git
+    # serve i cloni a pochi KB/s (il kernel richiederebbe giorni). Il commit resta
+    # quello fissato nella ricetta; se l'archivio è vecchio, bitbake scarica solo i
+    # commit mancanti dal server git (D-035).
+    PREMIRRORS:prepend = "git://git.yoctoproject.org/.* https://downloads.yoctoproject.org/mirror/sources/ "
     RAUC_KEY_FILE = "${PROJECT_OS_KEYS}/signing.key.pem"
     RAUC_CERT_FILE = "${PROJECT_OS_KEYS}/signing.cert.pem"

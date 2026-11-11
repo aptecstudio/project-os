@@ -257,6 +257,7 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 0 | Aggiunto `README.md` di presentazione, su richiesta dell'utente; variante scura del logo segnaposto per sfondi chiari |
 | 2026-11-11 | 0 | Nuove specifiche: API nell'oggetto globale `system`, `include`/`includeAsync` con errore sui cicli, protocollo `app://` per la cartella isolata dell'app, design ibrido Windows 11 / Big Sur / MIUI (R-29…R-32, D-029…D-032) |
 | 2026-11-11 | 1 | Portatile dell'utente come macchina di build provvisoria: `kas/low-resources.yml`, attivata da `tools/build.sh` sotto 16 GB di RAM (D-034) |
+| 2026-11-11 | 1 | Prima build sul portatile fermata e rilanciata: kernel dal mirror HTTP di Yocto (il server git va a 17 KB/s), tolti QEMU/Mesa/LLVM costruiti da Yocto (D-035) |
 | 2026-11-11 | 9 | Nuovo requisito: interoperabilità tra dispositivi project-os come un ecosistema (R-33); proposte la Fase 9 e D-033, aperta DA-12 |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
