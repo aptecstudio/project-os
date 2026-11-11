@@ -61,12 +61,19 @@ Fissati dall'utente il 2026-11-11.
 
 ### D-004 — Due livelli di supporto ARM · `proposta`
 - **Cosa:** ARM64 generico (UEFI/device tree, es. SBC, macchine virtuali) col kernel
-  Debian; smartphone e tablet solo su un elenco di dispositivi supportati esplicitamente.
-- **Perché:** la maggior parte degli smartphone non avvia un kernel Debian standard;
-  servono kernel e firmware specifici per dispositivo (come fa postmarketOS/Mobian).
-  Promettere «tutti gli ARM» non è realistico.
+  Debian; smartphone e tablet solo su un elenco di modelli supportati esplicitamente.
+- **Obiettivo dell'utente (2026-11-11):** gli smartphone più diffusi sul mercato —
+  Google Pixel, Samsung, Xiaomi, Oppo.
+- **Vincoli noti:**
+  - la maggior parte di questi telefoni non avvia un kernel Debian standard: serve un
+    kernel per dispositivo, oppure il kernel Android del produttore tramite
+    Halium/libhybris (approccio di Droidian, anch'esso basato su Debian);
+  - con Halium la GPU passa dai driver Android: WebKitGTK va verificato su quel percorso;
+  - lo sblocco del bootloader varia: in genere possibile sui Pixel non vincolati
+    all'operatore, limitato o assente su vari modelli Samsung, Xiaomi e Oppo.
+- **Perché:** promettere «tutti gli ARM» non è realistico; si sceglie modello per modello.
 
-### D-005 — Sicurezza: broker dei permessi e sandbox per app · `proposta`
+### D-005 — Sicurezza: broker dei permessi e sandbox per app · `confermata` (2026-11-11)
 - **Cosa:**
   - un demone di sistema (*broker*) è l'unico a esporre API native; le app comunicano con
     esso tramite IPC autenticato (socket Unix, identità del processo verificata con
@@ -88,8 +95,27 @@ Fissati dall'utente il 2026-11-11.
 - **Perché:** R-10. È il punto in cui GTK e i servizi di sistema chiedono già
   un'interazione; sostituirlo lì copre anche il software non scritto per project-os.
 
-*Le decisioni su compositore/gestione finestre e runtime JavaScript sono aperte:
-vedi `ROADMAP.md` → Decisioni aperte.*
+### D-007 — Compositore Wayland proprio · `confermata` (2026-11-11)
+- **Cosa:** compositore minimale scritto per project-os (base wlroots o Smithay, vedi
+  DA-07). Ogni finestra di app è una superficie Wayland separata; la shell web disegna
+  pannelli e decorazioni via *layer-shell* e decide disposizione e animazioni delle
+  finestre tramite un protocollo privato compositore ↔ shell.
+- **Perché:** R-08 e R-14: animazioni sotto il controllo della shell web e finestre
+  isolate per processo.
+- **Alternative scartate:** kiosk con WebView interne (isolamento debole), compositore
+  esistente (poco controllo sulle animazioni).
+
+### D-008 — Script principale eseguito su JavaScriptCore · `confermata` (2026-11-11)
+- **Cosa:** lo script principale di ogni app gira in un contesto JavaScriptCore (il
+  motore JS di WebKit, API GLib `libjavascriptcoregtk-6.0`) ospitato da un processo
+  nativo di project-os, che espone solo le API di sistema concesse e crea le finestre
+  WebKitGTK dell'app.
+- **Perché:** stesso motore JS in script principale e finestre; nessuna API esposta per
+  default (al contrario di Node.js o GJS, che danno accesso a file e processi), quindi il
+  modello permessi parte da zero.
+- **Conseguenza:** niente moduli Node/npm nativi; le librerie JS pure restano utilizzabili
+  tramite bundling.
+- **Alternative scartate:** GJS, Node.js.
 
 ---
 
