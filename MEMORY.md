@@ -29,6 +29,12 @@ Fissati dall'utente il 2026-11-11.
 | R-13 | Un'applicazione può richiedere l'accesso root dal `package.json` e/o tramite API dedicate. |
 | R-14 | Il sistema deve essere **sicuro**. |
 | R-15 | Branch principale del repository: `main`. |
+| R-16 | **Mobile:** installazione tramite la recovery del dispositivo; il setup prosegue al primo avvio con interfaccia HTML. |
+| R-17 | **Desktop:** installazione con un'applicazione wizard in stile Windows/Debian, con rendering HTML come tutte le altre app. |
+| R-18 | **Desktop:** menu di avvio con voci centrate e logo del sistema (inizialmente un logo generico), che consenta il dual boot con Windows o altri sistemi. |
+| R-19 | Nessuna modalità live per ora. |
+
+*R-16…R-19 aggiunti dall'utente il 2026-11-11.*
 
 ---
 
@@ -117,6 +123,35 @@ Fissati dall'utente il 2026-11-11.
   tramite bundling.
 - **Alternative scartate:** GJS, Node.js.
 
+### D-009 — Menu di avvio desktop: GRUB 2 con tema proprio · `proposta`
+- **Cosa:** GRUB 2 (UEFI) con un tema project-os: menu centrato, logo in alto, sfondo e
+  font propri. Rilevamento di Windows e altri sistemi con `os-prober` (da riattivare con
+  `GRUB_DISABLE_OS_PROBER=false`). Avvio firmato con `shim-signed` per Secure Boot.
+- **Logo:** segnaposto generico in SVG, esportato in PNG per il tema, finché non si
+  definisce il marchio.
+- **Perché:** R-18. GRUB supporta temi grafici, multiboot e Secure Boot con pacchetti
+  firmati da Debian.
+- **Alternative scartate:** systemd-boot (nessun tema grafico); rEFInd (temi buoni ma
+  meno integrato con Secure Boot e con gli strumenti Debian).
+
+### D-010 — Supporto di installazione desktop · `proposta`
+- **Cosa:** un'immagine USB di installazione che avvia solo il minimo indispensabile
+  (kernel, compositore, runtime, broker) e apre direttamente il wizard di installazione;
+  nessuna sessione utente né app.
+- **Perché:** R-17 e R-19. Il wizard HTML ha bisogno del motore di rendering già in
+  esecuzione, quindi l'ambiente di installazione deve avviarsi; resta però un ambiente
+  chiuso dedicato all'installazione, non un sistema live usabile.
+- **Il wizard gestisce:** lingua, tastiera, disco e partizioni (anche accanto a Windows
+  esistente, senza toccarne l'avvio), cifratura del disco, utente, installazione di GRUB.
+
+### D-011 — Installazione mobile da recovery · `proposta`
+- **Cosa:** per ogni modello supportato, un pacchetto installabile dalla recovery
+  (es. zip flashabile da recovery custom), più le immagini fastboot dove servono.
+  Al primo avvio parte l'app di setup HTML (lingua, rete, utente, permessi).
+- **Perché:** R-16. È il metodo standard sui telefoni Android con bootloader sbloccato.
+- **Condiviso con desktop:** l'app di setup al primo avvio è la stessa, con layout
+  adattivo.
+
 ---
 
 ## 3. Stile grafico
@@ -134,12 +169,16 @@ project-os/
 ├── AGENTS.md  MEMORY.md  ROADMAP.md
 ├── build/        # ricette dell'immagine (mmdebstrap/debos), elenchi pacchetti per arch
 │   ├── packages/ # un file per gruppo, ogni pacchetto con commento sul perché
-│   └── overlays/ # file di configurazione copiati nell'immagine
+│   ├── overlays/ # file di configurazione copiati nell'immagine
+│   ├── boot/     # tema GRUB e configurazione di avvio
+│   └── devices/  # pacchetti recovery e file specifici per dispositivo mobile
+├── branding/     # logo (segnaposto) e risorse grafiche condivise
 ├── runtime/      # runtime delle app: avvio script principale, finestre WebKitGTK
 ├── broker/       # demone dei permessi e API native
 ├── portal/       # backend xdg-desktop-portal e agente polkit (modali HTML)
 ├── shell/        # shell di sistema: pannelli, launcher, notifiche, modali
-├── apps/         # applicazioni di sistema (impostazioni, file, terminale…)
+├── apps/         # applicazioni di sistema (impostazioni, file, terminale,
+│                 # installer desktop, setup al primo avvio…)
 ├── sdk/          # tipi e libreria JS delle API di sistema per le app
 └── docs/         # specifiche (formato package.json, API, modello permessi)
 ```

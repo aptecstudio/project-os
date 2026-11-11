@@ -17,7 +17,7 @@ Si lavora solo su fasi `approvata` o `in corso`.
 | 4 | Shell, stile grafico e modali di sistema | `proposta` |
 | 5 | Applicazioni di sistema | `proposta` |
 | 6 | ARM64 e dispositivi mobili | `proposta` |
-| 7 | Aggiornamenti, firma e installazione | `proposta` |
+| 7 | Aggiornamenti, firma e installazione (installer desktop, setup primo avvio) | `proposta` |
 
 **Prossimo passo:** decidere DA-07, approvare le decisioni ancora `proposta` in
 `MEMORY.md` e approvare la Fase 1.
@@ -78,6 +78,11 @@ prima di costruire l'immagine.
 
 - [ ] Ricetta `mmdebstrap --variant=minbase` riproducibile in `build/`
 - [ ] Elenchi pacchetti motivati (base, kernel e firmware, audio, Bluetooth, rete, grafica)
+- [ ] Logo segnaposto generico in `branding/` (SVG + PNG)
+- [ ] Menu di avvio GRUB con tema project-os: voci centrate, logo (D-009)
+- [ ] Dual boot: rilevamento Windows/altri sistemi con `os-prober`, prova in QEMU con
+      Windows installato
+- [ ] Avvio con Secure Boot tramite `shim-signed`
 - [ ] Avvio in QEMU/UEFI fino al compositore Wayland
 - [ ] Avvio automatico della shell (sessione utente, nessun display manager superfluo)
 - [ ] Prova su hardware reale Intel e AMD (audio, Bluetooth, Wi‑Fi, GPU)
@@ -111,14 +116,18 @@ prima di costruire l'immagine.
 
 - [ ] Immagine arm64 generica (QEMU, SBC)
 - [ ] Supporto ai dispositivi scelti in DA-03 (kernel, firmware, modem, sensori)
+- [ ] Pacchetto di installazione da recovery per ogni modello supportato (D-011)
 - [ ] Gesti touch, tastiera a schermo, rotazione, gestione energetica
 
 ## Fase 7 — Aggiornamenti, firma e installazione · `proposta`
 
 - [ ] Firma di pacchetti e immagini; chiavi fuori dal repository
 - [ ] Aggiornamenti di sistema sicuri (con eventuale rollback)
-- [ ] Secure Boot su amd64
-- [ ] Installer con interfaccia web
+- [ ] Immagine USB di installazione desktop, avvio diretto nel wizard, nessuna modalità
+      live (D-010, R-19)
+- [ ] App wizard di installazione desktop: lingua, tastiera, partizionamento accanto a
+      Windows, cifratura disco, utente, installazione GRUB (R-17)
+- [ ] App di setup al primo avvio, condivisa desktop/mobile, layout adattivo (R-16)
 
 ---
 
@@ -128,3 +137,4 @@ prima di costruire l'immagine.
 |---|---|---|
 | 2026-11-11 | 0 | Creati `AGENTS.md`, `MEMORY.md`, `ROADMAP.md` |
 | 2026-11-11 | 0 | Decisi compositore proprio, runtime JavaScriptCore, root mediato; marche ARM indicate |
+| 2026-11-11 | 0 | Aggiunti requisiti installazione (recovery mobile, wizard desktop), menu di avvio con dual boot, nessuna live (R-16…R-19); proposte D-009…D-011 |
