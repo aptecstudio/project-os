@@ -86,8 +86,8 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 - [ ] Kernel Linux mainline con supporto hardware moderno: audio, Bluetooth, Wi‑Fi,
       GPU (R-04); firmware da linux-firmware
 - [ ] systemd, udev, logind (D-016); rete, audio (PipeWire + WirePlumber), BlueZ
-- [ ] Fork `aptecstudio/webkit-project-os` di WebKit, allineato al ramo stabile
-      WebKitGTK (D-019)
+- [x] Fork `aptecstudio/WebKit` con ramo di lavoro `project-os/2.54` da
+      `webkitglib/2.54` (D-019)
 - [ ] Inventario delle vulnerabilità note sulla versione di partenza e verifica che
       siano tutte corrette nel fork
 - [ ] Procedura documentata: integrazione di ogni rilascio di sicurezza ufficiale,
@@ -168,3 +168,4 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 | 2026-11-11 | 0 | Cambio di approccio: da Debian a sistema da sorgenti, spazio utente unico desktop/mobile su base Android, Rust, Pixel come primo dispositivo, setup differenziato (R-20…R-24, D-012…D-017) |
 | 2026-11-11 | 0 | Decisi Yocto e aggiornamenti A/B immutabili (D-012, D-018); `AGENTS.md` §1 aggiornato con autorizzazione |
 | 2026-11-11 | 0 | Deciso il fork di WebKitGTK mantenuto dal progetto (D-019) |
+| 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` |

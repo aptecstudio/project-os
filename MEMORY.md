@@ -201,8 +201,13 @@ di approccio, da Debian a sistema costruito da zero.*
   sicurezza dedicato); allineato, aggiunge un livello nostro senza rinunciarvi.
 - **In Yocto:** la ricetta `webkitgtk` di `meta-project-os` punta al fork e al tag
   rilasciato da noi.
-- **Repository:** da creare come fork di `WebKit/WebKit` sotto `aptecstudio`
-  (nome proposto: `webkit-project-os`).
+- **Repository:** `aptecstudio/WebKit`, fork di `WebKit/WebKit` con tutti i rami.
+  - `main`: copia dell'ufficiale, senza nostre modifiche;
+  - `project-os/<versione>`: nostro ramo di lavoro, creato dal ramo stabile
+    `webkitglib/<versione>`; a ogni nuova stabile si crea il ramo successivo e si
+    riapplicano le nostre patch;
+  - primo ramo: `project-os/2.54`, da `webkitglib/2.54` (commit `2b614de`, creato il
+    2026-11-11; ultimo rilascio ufficiale a quella data: 2.54.2).
 
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
