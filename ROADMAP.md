@@ -86,7 +86,15 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 - [ ] Kernel Linux mainline con supporto hardware moderno: audio, Bluetooth, Wi‑Fi,
       GPU (R-04); firmware da linux-firmware
 - [ ] systemd, udev, logind (D-016); rete, audio (PipeWire + WirePlumber), BlueZ
-- [ ] Mesa, GTK 4, WebKitGTK stabile compilati da sorgenti
+- [ ] Fork `aptecstudio/webkit-project-os` di WebKit, allineato al ramo stabile
+      WebKitGTK (D-019)
+- [ ] Inventario delle vulnerabilità note sulla versione di partenza e verifica che
+      siano tutte corrette nel fork
+- [ ] Procedura documentata: integrazione di ogni rilascio di sicurezza ufficiale,
+      riapplicazione delle nostre patch, nuovo tag del fork
+- [ ] Irrobustimento: funzioni WebKit non necessarie disattivate, opzioni di
+      compilazione restrittive
+- [ ] Mesa e GTK 4 da sorgenti; WebKitGTK compilato dal fork
 - [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
 - [ ] Processo di monitoraggio delle vulnerabilità dei componenti (D-012)
 - [ ] Compositore Rust/Smithay minimo che avvia una finestra WebKitGTK
@@ -159,3 +167,4 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 | 2026-11-11 | 0 | Aggiunti requisiti installazione (recovery mobile, wizard desktop), menu di avvio con dual boot, nessuna live (R-16…R-19); proposte D-009…D-011 |
 | 2026-11-11 | 0 | Cambio di approccio: da Debian a sistema da sorgenti, spazio utente unico desktop/mobile su base Android, Rust, Pixel come primo dispositivo, setup differenziato (R-20…R-24, D-012…D-017) |
 | 2026-11-11 | 0 | Decisi Yocto e aggiornamenti A/B immutabili (D-012, D-018); `AGENTS.md` §1 aggiornato con autorizzazione |
+| 2026-11-11 | 0 | Deciso il fork di WebKitGTK mantenuto dal progetto (D-019) |

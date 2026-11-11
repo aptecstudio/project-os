@@ -171,7 +171,7 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Conseguenza importante:** la **sicurezza degli aggiornamenti** diventa responsabilità
   del progetto. Senza una distribuzione a monte, ogni falla nota (WebKit in particolare,
   che ne ha molte ogni anno) va seguita e corretta da noi. Serve un processo di
-  monitoraggio delle vulnerabilità fin dalla Fase 2.
+  monitoraggio delle vulnerabilità fin dalla Fase 2. Per WebKitGTK vedi D-019.
 
 ### D-018 — Sistema immutabile con aggiornamenti A/B · `confermata` (2026-11-11)
 - **Cosa:** partizione di sistema in sola lettura, verificata con dm-verity e firmata;
@@ -183,6 +183,26 @@ di approccio, da Debian a sistema costruito da zero.*
   su desktop e mobile, come Android e ChromeOS. Anche il «root» mediato (D-005) non può
   modificare la partizione di sistema.
 - **Alternative scartate:** gestore di pacchetti tradizionale (meno sicuro e prevedibile).
+
+### D-019 — Fork di WebKitGTK mantenuto dal progetto · `confermata` (2026-11-11)
+- **Cosa (deciso dall'utente):** WebKitGTK si compila da un fork del progetto, su cui
+  correggiamo noi le vulnerabilità.
+- **Modalità (proposta):** fork *allineato*, non divergente:
+  - il fork segue il ramo stabile ufficiale di WebKitGTK (`webkitglib/<versione>`) e
+    riceve ogni rilascio di sicurezza ufficiale appena esce (avvisi WSA);
+  - le nostre modifiche stanno in commit separati e documentati, riapplicati sopra ogni
+    nuova versione stabile;
+  - correzioni proprie: per vulnerabilità note senza correzione ufficiale, per
+    l'irrobustimento (funzioni disattivate che non servono, opzioni di compilazione più
+    restrittive) e per l'integrazione con il broker e il runtime JSC;
+  - ogni correzione nostra, quando è di interesse generale, va proposta a monte.
+- **Perché:** un fork che diverge perde le correzioni ufficiali, che sono la gran parte
+  di quelle disponibili (WebKit è un progetto da milioni di righe con un team di
+  sicurezza dedicato); allineato, aggiunge un livello nostro senza rinunciarvi.
+- **In Yocto:** la ricetta `webkitgtk` di `meta-project-os` punta al fork e al tag
+  rilasciato da noi.
+- **Repository:** da creare come fork di `WebKit/WebKit` sotto `aptecstudio`
+  (nome proposto: `webkit-project-os`).
 
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
