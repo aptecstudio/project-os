@@ -97,6 +97,7 @@ Lo sviluppo procede dal basso verso l'alto, una fase alla volta.
 | 6 | Applicazioni di sistema | ⏳ |
 | 7 | Smartphone e tablet (Pixel, poi Oppo e Samsung) | ⏳ |
 | 8 | Installazione, setup e aggiornamenti | ⏳ |
+| 9 | Ecosistema: interoperabilità tra dispositivi | ⏳ |
 
 Il dettaglio di ogni passo è in [`ROADMAP.md`](ROADMAP.md).
 

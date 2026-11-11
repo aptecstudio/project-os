@@ -48,9 +48,11 @@ Fissati dall'utente il 2026-11-11.
 | R-30 | **Caricamento dinamico degli script con `include("url")`** e la controparte **`includeAsync("url")`**, non con moduli CommonJS o ES. Ogni script incluso ha un oggetto `exports` con i simboli che espone a chi lo include; gli script inclusi sono messi in cache; l'importazione ciclica è impedita. |
 | R-31 | **Cartella radice isolata per ogni app:** script, immagini e altre risorse si caricano solo da lì, con un protocollo dedicato (`app://`), e solo l'app stessa può accedere alle proprie risorse. File esterni solo tramite le API di sistema del filesystem. |
 | R-32 | **Design:** ibrido tra Windows 11, macOS Big Sur e Xiaomi MIUI. |
+| R-33 | **Interoperabilità tra dispositivi:** i dispositivi su cui è installato project-os, desktop e mobile, collaborano tra loro come un unico ecosistema, sul modello di quello Apple. |
 
 *R-16…R-19 aggiunti dall'utente il 2026-11-11. R-20…R-24 aggiunti lo stesso giorno: cambio
-di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno. R-29…R-32 aggiunti lo stesso giorno (sera).*
+di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno. R-29…R-32 aggiunti lo stesso giorno (sera). R-33 aggiunto lo stesso giorno, dal
+portatile.*
 
 ---
 
@@ -324,6 +326,40 @@ di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo ste
   spiega la modifica e chiede conferma.
 - **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
   bitbake. Gli script non sono ancora stati eseguiti su una macchina reale.
+
+### D-033 — Ecosistema di dispositivi project-os · `proposta` (2026-11-11)
+- **Cosa:** un servizio di sistema in Rust (*demone di continuità*) che collega i
+  dispositivi dello stesso utente. Funzioni previste, in ordine di priorità (da
+  confermare, DA-12):
+  1. **associazione** dei dispositivi con codice QR o codice numerico; una coppia di
+     chiavi per dispositivo; elenco dei dispositivi fidati nelle Impostazioni;
+  2. **invio di file e link** tra dispositivi vicini;
+  3. **appunti condivisi**;
+  4. **notifiche, chiamate e SMS** del telefono mostrati e gestiti sul desktop;
+  5. **continuità delle app** (*handoff*): un'app riprende sul desktop ciò che si stava
+     facendo sul telefono e viceversa, tramite un'API dell'oggetto `system` (D-029);
+  6. **sincronizzazione** di impostazioni, rubrica, calendario, password e reti Wi‑Fi;
+  7. **hotspot immediato** dal telefono e **sblocco** del desktop con il telefono vicino;
+  8. in seguito: tablet come secondo schermo, tastiera e mouse condivisi.
+- **Principi (dai vincoli di sicurezza, AGENTS.md §5):**
+  - cifratura end-to-end tra dispositivi, su un canale autenticato dalle chiavi
+    dell'associazione (protocollo candidato: Noise); nessun dato in chiaro fuori dal
+    dispositivo;
+  - **nessun cloud obbligatorio**: tutto funziona in rete locale e Bluetooth; un
+    servizio di inoltro per i dispositivi lontani è facoltativo (DA-12);
+  - le app raggiungono l'ecosistema **solo tramite il broker** e solo con il permesso
+    dichiarato nel `package.json` (es. `devices.handoff`, `devices.share`);
+  - ogni dispositivo si può revocare; la revoca ne invalida le chiavi su tutti gli altri;
+  - protocollo con numero di versione e negoziazione, perché dispositivi con versioni
+    diverse di project-os continuino a parlarsi (retrocompatibilità, R-25).
+- **Scoperta dei dispositivi:** Bluetooth LE per la prossimità, poi rete locale. La
+  distribuzione esclude oggi `zeroconf` (Avahi): va deciso se riattivare mDNS solo per
+  questo servizio o usare un annuncio proprio (DA-12).
+- **Perché:** R-33. Ha senso solo con desktop e mobile funzionanti, quindi la fase viene
+  dopo la Fase 7; le fasi precedenti devono però prevederlo: permessi del broker
+  (Fase 3), API del runtime (Fase 4), pannello «Dispositivi» nelle Impostazioni (Fase 6).
+- **Riferimenti da studiare:** KDE Connect / GSConnect (protocollo aperto con funzioni
+  simili), Apple Continuity, Google Quick Share.
 
 ### D-034 — Portatile come macchina di build provvisoria · `proposta` (sul ramo `build/ab-partitions`)
 - **Cosa:** finché non c'è la macchina di build completa (DA-11), la Fase 1 si può

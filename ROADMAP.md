@@ -22,6 +22,7 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 6 | Applicazioni di sistema | `proposta` |
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
+| 9 | Ecosistema: interoperabilità tra dispositivi | `proposta` |
 
 **Prossimo passo:** l'utente prepara la macchina di build e prova l'immagine in QEMU
 (`docs/sviluppo.md`) dal ramo `build/ab-partitions`; con l'esito si rivede il ramo e si
@@ -58,6 +59,13 @@ in `MEMORY.md` come voce `confermata`.
   *Soluzione provvisoria (D-034, proposta):* il portatile dell'utente, Debian 13
   (4 core, 7,4 GB di RAM, 42 GB liberi), con `kas/low-resources.yml`; basta per la
   Fase 1, non per WebKitGTK (Fase 2).
+- [ ] **DA-12 — Ecosistema tra dispositivi** *(blocca la Fase 9; incide sulle Fasi 3, 4, 6)*
+  Da decidere: (a) solo rete locale e Bluetooth, oppure anche un servizio di inoltro
+  per i dispositivi lontani, e in quel caso ospitato da chi (dall'utente stesso, dal
+  progetto); (b) scoperta in rete con mDNS (riattivando `zeroconf`) o con un annuncio
+  proprio; (c) compatibilità con dispositivi che non usano project-os (es. protocollo
+  KDE Connect per Android e Linux) oppure ecosistema riservato ai soli project-os;
+  (d) ordine delle funzioni elencate in D-033.
 
 ---
 
@@ -142,6 +150,7 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 - [ ] Richieste root mediate con conferma e log di audit (R-13)
 - [ ] Formato pacchetto app firmato (DA-05)
 - [ ] Test di sicurezza con client Rust: un processo non supera i permessi concessi
+- [ ] Prevedere nel modello permessi le API dell'ecosistema (`devices.*`, D-033)
 
 ## Fase 4 — Runtime delle app · `proposta`
 
@@ -179,6 +188,7 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 - [ ] Gestore file
 - [ ] Terminale
 - [ ] Gestore applicazioni
+- [ ] Pannello «Dispositivi» nelle Impostazioni: associazione, elenco, revoca (D-033)
 
 ## Fase 7 — Mobile arm64 su base Android · `proposta`
 
@@ -206,6 +216,25 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 - [ ] Aggiornamenti A/B firmati con ritorno automatico alla versione precedente (D-018),
       su desktop e mobile
 
+## Fase 9 — Ecosistema: interoperabilità tra dispositivi · `proposta`
+
+Obiettivo: i dispositivi project-os dello stesso utente, desktop e mobile, lavorano
+insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
+
+- [ ] Specifica del protocollo (`docs/continuity.md`): associazione, chiavi, canale
+      cifrato end-to-end, scoperta, revoca, versioni
+- [ ] Demone di continuità in Rust, integrato con il broker
+- [ ] Associazione con codice QR o numerico; passo facoltativo nel setup (D-017)
+- [ ] Invio di file e link tra dispositivi vicini
+- [ ] Appunti condivisi
+- [ ] Notifiche, chiamate e SMS del telefono sul desktop
+- [ ] API di continuità delle app (*handoff*) nell'oggetto `system`, con permesso nel
+      manifest
+- [ ] Sincronizzazione di impostazioni, rubrica, calendario, password e reti Wi‑Fi
+- [ ] Hotspot immediato e sblocco del desktop con il telefono
+- [ ] Test di sicurezza: un dispositivo non associato o revocato non accede a nulla
+- [ ] In seguito: tablet come secondo schermo, tastiera e mouse condivisi
+
 ---
 
 ## Registro avanzamento
@@ -228,5 +257,6 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Aggiunto `README.md` di presentazione, su richiesta dell'utente; variante scura del logo segnaposto per sfondi chiari |
 | 2026-11-11 | 0 | Nuove specifiche: API nell'oggetto globale `system`, `include`/`includeAsync` con errore sui cicli, protocollo `app://` per la cartella isolata dell'app, design ibrido Windows 11 / Big Sur / MIUI (R-29…R-32, D-029…D-032) |
 | 2026-11-11 | 1 | Portatile dell'utente come macchina di build provvisoria: `kas/low-resources.yml`, attivata da `tools/build.sh` sotto 16 GB di RAM (D-034) |
+| 2026-11-11 | 9 | Nuovo requisito: interoperabilità tra dispositivi project-os come un ecosistema (R-33); proposte la Fase 9 e D-033, aperta DA-12 |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
