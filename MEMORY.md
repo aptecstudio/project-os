@@ -159,14 +159,30 @@ di approccio, da Debian a sistema costruito da zero.*
   Al primo avvio parte l'app di setup HTML (vedi D-017 per i passi).
 - **Perché:** R-16. È il metodo standard sui telefoni Android con bootloader sbloccato.
 
-### D-012 — Sistema costruito da sorgenti con un build system dichiarativo · `proposta`
+### D-012 — Sistema costruito da sorgenti con Yocto/OpenEmbedded · `confermata` (2026-11-11)
 - **Cosa:** ogni componente (toolchain, libc, librerie, WebKitGTK, kernel) è compilato da
-  sorgenti tramite ricette versionate nel repository. Strumento da scegliere in DA-08.
+  sorgenti con Yocto/OpenEmbedded, sul ramo LTS corrente. Il nostro codice sta in layer
+  propri: `meta-project-os` (spazio utente comune, uguale per tutte le piattaforme),
+  `meta-project-os-desktop` e `meta-project-os-mobile` (strato hardware, D-014), più un
+  layer per ogni dispositivo mobile.
+- **Alternative scartate:** Buildroot (fatica con WebKitGTK e con molti dispositivi),
+  strumento proprio in Rust (tutto da scrivere e mantenere).
 - **Perché:** R-20. Controllo completo su cosa entra nel sistema e build riproducibili.
 - **Conseguenza importante:** la **sicurezza degli aggiornamenti** diventa responsabilità
   del progetto. Senza una distribuzione a monte, ogni falla nota (WebKit in particolare,
   che ne ha molte ogni anno) va seguita e corretta da noi. Serve un processo di
   monitoraggio delle vulnerabilità fin dalla Fase 2.
+
+### D-018 — Sistema immutabile con aggiornamenti A/B · `confermata` (2026-11-11)
+- **Cosa:** partizione di sistema in sola lettura, verificata con dm-verity e firmata;
+  due slot (A/B): l'aggiornamento si scrive sullo slot inattivo e, se l'avvio fallisce,
+  si torna automaticamente al precedente. Dati utente e app su partizione separata
+  (cifrata). Le app si installano come pacchetti firmati (DA-05), fuori dall'immagine.
+  Strumento candidato: RAUC (integrato in Yocto).
+- **Perché:** R-14 (il sistema non è alterabile a runtime) e aggiornamenti atomici uguali
+  su desktop e mobile, come Android e ChromeOS. Anche il «root» mediato (D-005) non può
+  modificare la partizione di sistema.
+- **Alternative scartate:** gestore di pacchetti tradizionale (meno sicuro e prevedibile).
 
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
@@ -228,15 +244,13 @@ ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adat
 ```
 project-os/
 ├── AGENTS.md  MEMORY.md  ROADMAP.md
-├── build/        # build system (DA-08): ricette da sorgenti, immagini
-│   ├── recipes/  # una ricetta per componente, con motivazione dell'inclusione
-│   ├── overlays/ # file di configurazione copiati nell'immagine
-│   └── boot/     # tema GRUB e configurazione di avvio
-├── platforms/    # strato hardware (D-014): l'unica parte che cambia
-│   ├── desktop-amd64/     # kernel mainline, Mesa, firmware
-│   └── mobile-arm64/      # Halium/libhybris comune
-│       └── devices/       # un dispositivo per cartella: kernel, firmware,
-│                          # pacchetto recovery (pixel-…, samsung-…, oppo-…)
+├── layers/       # layer Yocto (D-012)
+│   ├── meta-project-os/          # spazio utente comune: ricette, immagini, tema GRUB
+│   ├── meta-project-os-desktop/  # strato hardware amd64: kernel mainline, Mesa, firmware
+│   ├── meta-project-os-mobile/   # strato hardware arm64 comune: Halium/libhybris
+│   └── meta-device-<nome>/       # un layer per telefono: kernel, firmware, pacchetto
+│                                 # recovery (pixel-…, samsung-…, oppo-…)
+├── build/        # configurazione della build Yocto (versioni dei layer esterni, local.conf)
 ├── branding/     # logo (segnaposto) e risorse grafiche condivise
 ├── runtime/      # runtime delle app: avvio script principale, finestre WebKitGTK
 ├── broker/       # demone dei permessi e API native

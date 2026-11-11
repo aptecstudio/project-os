@@ -1,6 +1,7 @@
 # AGENTS.md — Guida per agenti AI e persone
 
-> **Stato:** v1.0 — creato il 2026-11-11.
+> **Stato:** v1.1 — creato il 2026-11-11; §1 aggiornato lo stesso giorno con
+> autorizzazione dell'utente (cambio di approccio da Debian a sistema da sorgenti).
 > **Questo file è bloccato.** Vedi §2 prima di proporre qualsiasi modifica.
 
 ## 1. Scopo
@@ -9,8 +10,9 @@ Questo file è il punto di ingresso di **project-os** per chiunque ci lavori, ag
 Spiega come il progetto è organizzato, dove trovare i progressi fatti, le strategie adottate e
 il **perché** di ogni scelta, così che ogni contributo parta dallo stesso contesto.
 
-project-os è un sistema operativo basato su una versione **stabile di Debian**, ridotta
-all'essenziale, con interfaccia grafica **interamente web** (WebKitGTK su Wayland).
+project-os è un sistema operativo **costruito da sorgenti a partire dal kernel Linux**, con
+uno **spazio utente unico per desktop e mobile (su base Android)**, ridotto all'essenziale,
+con interfaccia grafica **interamente web** (WebKitGTK su Wayland).
 
 ## 2. Regole sui documenti di governo
 

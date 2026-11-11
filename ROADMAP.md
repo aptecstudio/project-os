@@ -22,8 +22,8 @@ Si lavora solo su fasi `approvata` o `in corso`.
 Le Fasi 1 e 2 possono procedere in parallelo: il runtime si sviluppa su qualsiasi Linux con
 WebKitGTK, mentre si costruisce il sistema da sorgenti.
 
-**Prossimo passo:** risolvere DA-08, DA-09 e DA-10; approvare le decisioni `proposta`
-in `MEMORY.md`; approvare le Fasi 1 e 2.
+**Prossimo passo:** approvare le decisioni ancora `proposta` in `MEMORY.md` e le Fasi 1
+e 2. DA-03 (modelli dei telefoni) può attendere fino alla Fase 6.
 
 ---
 
@@ -44,24 +44,10 @@ in `MEMORY.md` come voce `confermata`.
   decaduta con R-20.
 - [ ] **DA-06 — Nome del sistema e licenza del codice** *(blocca Fase 2)*
 - [x] **DA-07 — Linguaggio dei componenti nativi** → Rust (D-013)
-- [ ] **DA-08 — Build system per il sistema da sorgenti** *(blocca Fase 2)*
-  - **Yocto/OpenEmbedded:** standard industriale per sistemi su misura, gestisce bene
-    più architetture e dispositivi (layer per piattaforma), ricette WebKitGTK e strati
-    Halium già esistenti nella comunità; curva di apprendimento ripida, build lunghe.
-  - **Buildroot:** più semplice e veloce da imparare; meno adatto a uno stack grande
-    come WebKitGTK e a più dispositivi, nessun gestore pacchetti.
-  - **Strumento proprio in Rust (stile Linux From Scratch):** controllo totale, ma
-    tutto da scrivere e mantenere, compresi gli aggiornamenti di sicurezza.
-- [ ] **DA-09 — Modello di aggiornamento del sistema** *(blocca Fase 2, vincola Fase 7)*
-  - **Immagine immutabile A/B:** sistema in sola lettura verificato (dm-verity), due
-    slot, aggiornamento atomico con ritorno alla versione precedente se fallisce; come
-    Android e ChromeOS. Le app si installano a parte (DA-05).
-  - **Gestore di pacchetti tradizionale:** aggiornamento componente per componente,
-    più flessibile ma meno sicuro e meno prevedibile.
-- [ ] **DA-10 — Aggiornare `AGENTS.md`** *(richiede autorizzazione umana, AGENTS.md §2)*
-  §1 descrive ancora project-os come «basato su una versione stabile di Debian».
-  Modifica proposta: «costruito da sorgenti a partire dal kernel Linux, con uno spazio
-  utente unico per desktop e mobile (su base Android)».
+- [x] **DA-08 — Build system per il sistema da sorgenti** → Yocto/OpenEmbedded (D-012)
+- [x] **DA-09 — Modello di aggiornamento del sistema** → immagine immutabile A/B (D-018)
+- [x] **DA-10 — Aggiornare `AGENTS.md`** → autorizzato dall'utente il 2026-11-11, §1
+  aggiornato (AGENTS.md v1.1)
 
 ---
 
@@ -73,7 +59,7 @@ in `MEMORY.md` come voce `confermata`.
 - [x] Scrivere `ROADMAP.md`
 - [x] Risolvere DA-01, DA-02, DA-04, DA-07
 - [x] Ridisegnare l'approccio: da Debian a sistema da sorgenti (R-20…R-24)
-- [ ] Risolvere DA-08, DA-09, DA-10
+- [x] Risolvere DA-08, DA-09, DA-10
 - [ ] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
 - [ ] Approvazione delle Fasi 1 e 2
 
@@ -93,8 +79,10 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 
 ## Fase 2 — Sistema base da sorgenti, desktop amd64 · `proposta`
 
-- [ ] Configurare il build system scelto in DA-08
+- [ ] Configurare Yocto (ramo LTS corrente) e i layer `meta-project-os` e
+      `meta-project-os-desktop` (D-012)
 - [ ] Toolchain e glibc (D-015)
+- [ ] Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
 - [ ] Kernel Linux mainline con supporto hardware moderno: audio, Bluetooth, Wi‑Fi,
       GPU (R-04); firmware da linux-firmware
 - [ ] systemd, udev, logind (D-016); rete, audio (PipeWire + WirePlumber), BlueZ
@@ -157,7 +145,8 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
         codice di sblocco, permessi, preferenze
 - [ ] Secure Boot con chiavi project-os registrate dall'utente (D-009)
 - [ ] Firma di pacchetti e immagini; chiavi fuori dal repository
-- [ ] Aggiornamenti di sistema secondo DA-09
+- [ ] Aggiornamenti A/B firmati con ritorno automatico alla versione precedente (D-018),
+      su desktop e mobile
 
 ---
 
@@ -169,3 +158,4 @@ Linux con WebKitGTK, indipendentemente dall'immagine.
 | 2026-11-11 | 0 | Decisi compositore proprio, runtime JavaScriptCore, root mediato; marche ARM indicate |
 | 2026-11-11 | 0 | Aggiunti requisiti installazione (recovery mobile, wizard desktop), menu di avvio con dual boot, nessuna live (R-16…R-19); proposte D-009…D-011 |
 | 2026-11-11 | 0 | Cambio di approccio: da Debian a sistema da sorgenti, spazio utente unico desktop/mobile su base Android, Rust, Pixel come primo dispositivo, setup differenziato (R-20…R-24, D-012…D-017) |
+| 2026-11-11 | 0 | Decisi Yocto e aggiornamenti A/B immutabili (D-012, D-018); `AGENTS.md` §1 aggiornato con autorizzazione |
