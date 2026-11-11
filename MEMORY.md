@@ -372,6 +372,9 @@ portatile.*
 - **Perché:** l'immagine della Fase 1 dovrebbe stare in circa 30-40 GB con `rm_work`
   (stima, da misurare alla prima build); la prima build è lunga, le successive riusano
   la cache `sstate`.
+- **Misurato alla prima build (2026-11-11):** circa 3 ore e 45 minuti di build effettiva,
+  `build/` 26 GB e `sources/` 0,4 GB; RAM mai sotto i 3 GB disponibili; immagine `wic`
+  da 8,6 GB nominali (slot A e B da 4 GB) e 695 MB realmente occupati.
 - **Limiti:** non basta per WebKitGTK (Fase 2), che vuole più di 2 GB di RAM per
   processo di compilazione e molto più disco. DA-11 resta aperta.
 - **Alternativa scartata:** uno script di preparazione separato per il portatile:

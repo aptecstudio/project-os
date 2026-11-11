@@ -120,6 +120,8 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 - [x] Guida e script per la macchina di build e per l'emulatore (`docs/sviluppo.md`,
       `tools/setup-host.sh`, `tools/build.sh`, `tools/run-qemu.sh`, D-028)
 - [ ] Prima build completa e avvio in QEMU sulla macchina dell'utente
+  - [x] Prima build completa sul portatile (2026-11-11)
+  - [ ] Avvio in QEMU con `tools/run-qemu.sh`
 - [ ] Prova del dual boot in QEMU con Windows installato
 - [ ] Servizi di base: rete, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
@@ -257,6 +259,7 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 0 | Aggiunto `README.md` di presentazione, su richiesta dell'utente; variante scura del logo segnaposto per sfondi chiari |
 | 2026-11-11 | 0 | Nuove specifiche: API nell'oggetto globale `system`, `include`/`includeAsync` con errore sui cicli, protocollo `app://` per la cartella isolata dell'app, design ibrido Windows 11 / Big Sur / MIUI (R-29…R-32, D-029…D-032) |
 | 2026-11-11 | 1 | Portatile dell'utente come macchina di build provvisoria: `kas/low-resources.yml`, attivata da `tools/build.sh` sotto 16 GB di RAM (D-034) |
+| 2026-11-11 | 1 | **Prima build completa riuscita** sul portatile (19:42 → 23:25, con tre correzioni: D-035, `features_check` in `project-os-storage`, schema del disco `.wks.in`); immagine `wic` da 695 MB reali; manca la prova in QEMU |
 | 2026-11-11 | 1 | Prima build sul portatile fermata e rilanciata: kernel dal mirror HTTP di Yocto (il server git va a 17 KB/s), tolti QEMU/Mesa/LLVM costruiti da Yocto (D-035) |
 | 2026-11-11 | 9 | Nuovo requisito: interoperabilità tra dispositivi project-os come un ecosistema (R-33); proposte la Fase 9 e D-033, aperta DA-12 |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
