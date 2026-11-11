@@ -11,16 +11,19 @@ Si lavora solo su fasi `approvata` o `in corso`.
 | Fase | Titolo | Stato |
 |---|---|---|
 | 0 | Fondamenta e decisioni | `in corso` |
-| 1 | Prototipo del runtime app (su Debian esistente) | `proposta` |
-| 2 | Immagine base minimale amd64 | `proposta` |
+| 1 | Prototipo del runtime app (su macchina di sviluppo) | `proposta` |
+| 2 | Sistema base da sorgenti, desktop amd64 | `proposta` |
 | 3 | Broker, permessi e sandbox | `proposta` |
 | 4 | Shell, stile grafico e modali di sistema | `proposta` |
 | 5 | Applicazioni di sistema | `proposta` |
-| 6 | ARM64 e dispositivi mobili | `proposta` |
-| 7 | Aggiornamenti, firma e installazione (installer desktop, setup primo avvio) | `proposta` |
+| 6 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
+| 7 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** decidere DA-07, approvare le decisioni ancora `proposta` in
-`MEMORY.md` e approvare la Fase 1.
+Le Fasi 1 e 2 possono procedere in parallelo: il runtime si sviluppa su qualsiasi Linux con
+WebKitGTK, mentre si costruisce il sistema da sorgenti.
+
+**Prossimo passo:** risolvere DA-08, DA-09 e DA-10; approvare le decisioni `proposta`
+in `MEMORY.md`; approvare le Fasi 1 e 2.
 
 ---
 
@@ -29,23 +32,36 @@ Si lavora solo su fasi `approvata` o `in corso`.
 Da risolvere con l'utente prima di avviare le fasi indicate. Una volta decise, si spostano
 in `MEMORY.md` come voce `confermata`.
 
-- [x] **DA-01 — Gestione finestre e compositore Wayland** → compositore proprio
-  (`MEMORY.md` D-007)
-- [x] **DA-02 — Runtime dello script JavaScript principale** → JavaScriptCore
-  (`MEMORY.md` D-008)
-- [ ] **DA-03 — Dispositivi ARM di riferimento** *(blocca Fase 6)*
-  Marche indicate: Google Pixel, Samsung, Xiaomi, Oppo. Da scegliere: 1–2 modelli
-  specifici per partire e percorso kernel (mainline o Halium/libhybris), vedi D-004.
-- [x] **DA-04 — Modello dell'accesso root** → root mediato dal broker (`MEMORY.md` D-005)
-- [ ] **DA-07 — Linguaggio dei componenti nativi** *(blocca Fasi 1, 2)*
-  Compositore, host del runtime JSC e broker. Opzioni:
-  - **Rust** (compositore su Smithay): sicurezza della memoria nei componenti più
-    esposti, coerente con R-14.
-  - **C** (compositore su wlroots): API native di wlroots e WebKitGTK senza binding,
-    più esempi disponibili, rischio di errori di memoria.
+- [x] **DA-01 — Gestione finestre e compositore Wayland** → compositore proprio (D-007)
+- [x] **DA-02 — Runtime dello script JavaScript principale** → JavaScriptCore (D-008)
+- [ ] **DA-03 — Dispositivi mobili di riferimento** *(blocca Fase 6)*
+  Primo: il Google Pixel dell'utente (modello esatto da indicare). Poi: i vecchi modelli
+  Oppo e Samsung in suo possesso (modelli esatti da indicare). Per ognuno: bootloader
+  sbloccabile? recovery custom disponibile?
+- [x] **DA-04 — Modello dell'accesso root** → root mediato dal broker (D-005)
 - [ ] **DA-05 — Formato di distribuzione delle app** *(blocca Fase 3)*
-  Pacchetto proprio firmato (archivio con `package.json` + firma) oppure `.deb`.
+  Pacchetto proprio firmato (archivio con `package.json` + firma). L'opzione `.deb` è
+  decaduta con R-20.
 - [ ] **DA-06 — Nome del sistema e licenza del codice** *(blocca Fase 2)*
+- [x] **DA-07 — Linguaggio dei componenti nativi** → Rust (D-013)
+- [ ] **DA-08 — Build system per il sistema da sorgenti** *(blocca Fase 2)*
+  - **Yocto/OpenEmbedded:** standard industriale per sistemi su misura, gestisce bene
+    più architetture e dispositivi (layer per piattaforma), ricette WebKitGTK e strati
+    Halium già esistenti nella comunità; curva di apprendimento ripida, build lunghe.
+  - **Buildroot:** più semplice e veloce da imparare; meno adatto a uno stack grande
+    come WebKitGTK e a più dispositivi, nessun gestore pacchetti.
+  - **Strumento proprio in Rust (stile Linux From Scratch):** controllo totale, ma
+    tutto da scrivere e mantenere, compresi gli aggiornamenti di sicurezza.
+- [ ] **DA-09 — Modello di aggiornamento del sistema** *(blocca Fase 2, vincola Fase 7)*
+  - **Immagine immutabile A/B:** sistema in sola lettura verificato (dm-verity), due
+    slot, aggiornamento atomico con ritorno alla versione precedente se fallisce; come
+    Android e ChromeOS. Le app si installano a parte (DA-05).
+  - **Gestore di pacchetti tradizionale:** aggiornamento componente per componente,
+    più flessibile ma meno sicuro e meno prevedibile.
+- [ ] **DA-10 — Aggiornare `AGENTS.md`** *(richiede autorizzazione umana, AGENTS.md §2)*
+  §1 descrive ancora project-os come «basato su una versione stabile di Debian».
+  Modifica proposta: «costruito da sorgenti a partire dal kernel Linux, con uno spazio
+  utente unico per desktop e mobile (su base Android)».
 
 ---
 
@@ -53,19 +69,20 @@ in `MEMORY.md` come voce `confermata`.
 
 - [x] Creare il repository `project-os` con branch principale `main`
 - [x] Scrivere `AGENTS.md` (regole per agenti e persone)
-- [x] Scrivere `MEMORY.md` (requisiti R-01…R-15, decisioni proposte D-001…D-006)
+- [x] Scrivere `MEMORY.md` (requisiti e decisioni)
 - [x] Scrivere `ROADMAP.md`
-- [x] Risolvere le decisioni aperte DA-01, DA-02, DA-04
-- [ ] Risolvere DA-07 (linguaggio nativo)
-- [ ] Approvazione umana delle decisioni proposte in `MEMORY.md`
-- [ ] Approvazione della Fase 1
+- [x] Risolvere DA-01, DA-02, DA-04, DA-07
+- [x] Ridisegnare l'approccio: da Debian a sistema da sorgenti (R-20…R-24)
+- [ ] Risolvere DA-08, DA-09, DA-10
+- [ ] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
+- [ ] Approvazione delle Fasi 1 e 2
 
 ## Fase 1 — Prototipo del runtime app · `proposta`
 
-Obiettivo: dimostrare il modello applicativo (R-07, R-09) su una Debian 13 esistente,
-prima di costruire l'immagine.
+Obiettivo: dimostrare il modello applicativo (R-07, R-09) su una macchina di sviluppo
+Linux con WebKitGTK, indipendentemente dall'immagine.
 
-- [ ] Verificare il pacchetto WebKitGTK stabile disponibile in Trixie e la sua versione
+- [ ] Progetto Rust (workspace Cargo) con binding a WebKitGTK 6.0 e JavaScriptCore
 - [ ] Host nativo che crea un contesto JavaScriptCore ed esegue lo script principale
 - [ ] Avviare un'app da `package.json`: lettura manifest, esecuzione dello script principale
 - [ ] API `window`: apertura, chiusura e comunicazione con finestre WebKitGTK legate al processo
@@ -74,27 +91,32 @@ prima di costruire l'immagine.
 - [ ] Specifica v0 del formato `package.json` (`docs/manifest.md`)
 - [ ] App di esempio «hello» con due finestre
 
-## Fase 2 — Immagine base minimale amd64 · `proposta`
+## Fase 2 — Sistema base da sorgenti, desktop amd64 · `proposta`
 
-- [ ] Ricetta `mmdebstrap --variant=minbase` riproducibile in `build/`
-- [ ] Elenchi pacchetti motivati (base, kernel e firmware, audio, Bluetooth, rete, grafica)
+- [ ] Configurare il build system scelto in DA-08
+- [ ] Toolchain e glibc (D-015)
+- [ ] Kernel Linux mainline con supporto hardware moderno: audio, Bluetooth, Wi‑Fi,
+      GPU (R-04); firmware da linux-firmware
+- [ ] systemd, udev, logind (D-016); rete, audio (PipeWire + WirePlumber), BlueZ
+- [ ] Mesa, GTK 4, WebKitGTK stabile compilati da sorgenti
+- [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
+- [ ] Processo di monitoraggio delle vulnerabilità dei componenti (D-012)
+- [ ] Compositore Rust/Smithay minimo che avvia una finestra WebKitGTK
 - [ ] Logo segnaposto generico in `branding/` (SVG + PNG)
 - [ ] Menu di avvio GRUB con tema project-os: voci centrate, logo (D-009)
-- [ ] Dual boot: rilevamento Windows/altri sistemi con `os-prober`, prova in QEMU con
-      Windows installato
-- [ ] Avvio con Secure Boot tramite `shim-signed`
-- [ ] Avvio in QEMU/UEFI fino al compositore Wayland
-- [ ] Avvio automatico della shell (sessione utente, nessun display manager superfluo)
+- [ ] Dual boot: rilevamento di Windows e altri sistemi, prova in QEMU con Windows
+- [ ] Avvio in QEMU/UEFI fino alla shell
 - [ ] Prova su hardware reale Intel e AMD (audio, Bluetooth, Wi‑Fi, GPU)
 - [ ] Misura dimensione immagine e memoria a riposo; registrarle in `MEMORY.md`
 
 ## Fase 3 — Broker, permessi e sandbox · `proposta`
 
 - [ ] Specifica del modello permessi (`docs/permissions.md`)
-- [ ] Demone broker con IPC autenticato
-- [ ] Sandbox per app (bubblewrap + seccomp), negazione per default
+- [ ] Demone broker in Rust con IPC autenticato
+- [ ] Sandbox per app (namespace + seccomp), negazione per default
 - [ ] API di base: filesystem, dispositivi, finestre, servizi di sistema (R-12)
 - [ ] Richieste root mediate con conferma e log di audit (R-13)
+- [ ] Formato pacchetto app firmato (DA-05)
 - [ ] Test di sicurezza: un'app non può superare i permessi concessi
 
 ## Fase 4 — Shell, stile grafico e modali di sistema · `proposta`
@@ -112,22 +134,30 @@ prima di costruire l'immagine.
 - [ ] Terminale
 - [ ] Gestore applicazioni
 
-## Fase 6 — ARM64 e dispositivi mobili · `proposta`
+## Fase 6 — Mobile arm64 su base Android · `proposta`
 
-- [ ] Immagine arm64 generica (QEMU, SBC)
-- [ ] Supporto ai dispositivi scelti in DA-03 (kernel, firmware, modem, sensori)
-- [ ] Pacchetto di installazione da recovery per ogni modello supportato (D-011)
+- [ ] **Verifica di fattibilità (da anticipare appena possibile):** WebKitGTK con EGL via
+      libhybris sul Pixel dell'utente; è il rischio tecnico principale lato mobile (D-014)
+- [ ] Stesso spazio utente compilato per arm64, senza modifiche
+- [ ] Strato `platforms/mobile-arm64`: Halium/libhybris
+- [ ] Pixel: kernel e firmware del produttore, GPU, touch, audio, Wi‑Fi, Bluetooth
+- [ ] Pixel: modem (chiamate, SMS, dati), sensori, fotocamera
+- [ ] Pacchetto di installazione da recovery per il Pixel (D-011)
+- [ ] Oppo e Samsung: valutazione modelli (bootloader, recovery), poi porting
 - [ ] Gesti touch, tastiera a schermo, rotazione, gestione energetica
 
-## Fase 7 — Aggiornamenti, firma e installazione · `proposta`
+## Fase 7 — Installazione, setup e aggiornamenti · `proposta`
 
-- [ ] Firma di pacchetti e immagini; chiavi fuori dal repository
-- [ ] Aggiornamenti di sistema sicuri (con eventuale rollback)
-- [ ] Immagine USB di installazione desktop, avvio diretto nel wizard, nessuna modalità
+- [ ] Immagine USB di installazione desktop: avvio diretto nel wizard, nessuna modalità
       live (D-010, R-19)
-- [ ] App wizard di installazione desktop: lingua, tastiera, partizionamento accanto a
-      Windows, cifratura disco, utente, installazione GRUB (R-17)
-- [ ] App di setup al primo avvio, condivisa desktop/mobile, layout adattivo (R-16)
+- [ ] App di setup con passi per piattaforma (D-017):
+  - [ ] desktop: lingua, tastiera, fuso orario, rete, partizionamento e formattazione
+        (anche accanto a Windows), cifratura, utente, installazione con GRUB
+  - [ ] mobile (primo avvio dopo la recovery): lingua, Wi‑Fi/SIM, fuso orario, utente e
+        codice di sblocco, permessi, preferenze
+- [ ] Secure Boot con chiavi project-os registrate dall'utente (D-009)
+- [ ] Firma di pacchetti e immagini; chiavi fuori dal repository
+- [ ] Aggiornamenti di sistema secondo DA-09
 
 ---
 
@@ -138,3 +168,4 @@ prima di costruire l'immagine.
 | 2026-11-11 | 0 | Creati `AGENTS.md`, `MEMORY.md`, `ROADMAP.md` |
 | 2026-11-11 | 0 | Decisi compositore proprio, runtime JavaScriptCore, root mediato; marche ARM indicate |
 | 2026-11-11 | 0 | Aggiunti requisiti installazione (recovery mobile, wizard desktop), menu di avvio con dual boot, nessuna live (R-16…R-19); proposte D-009…D-011 |
+| 2026-11-11 | 0 | Cambio di approccio: da Debian a sistema da sorgenti, spazio utente unico desktop/mobile su base Android, Rust, Pixel come primo dispositivo, setup differenziato (R-20…R-24, D-012…D-017) |
