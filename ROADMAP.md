@@ -260,3 +260,4 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 9 | Nuovo requisito: interoperabilità tra dispositivi project-os come un ecosistema (R-33); proposte la Fase 9 e D-033, aperta DA-12 |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
+| 2026-11-11 | 0 | `README.md` per chi vuole conoscere il progetto: cosa offrirà, dispositivi, stato, licenza; variante scura del logo per sfondi chiari |

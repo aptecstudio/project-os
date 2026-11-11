@@ -9,97 +9,49 @@
 
 <p align="center">
   Un sistema operativo costruito da zero sul kernel Linux, con un'interfaccia
-  interamente web. Per desktop e smartphone.
+  interamente web. Lo stesso sistema per PC e smartphone.
 </p>
 
 <p align="center">
-  <em>Progetto hobbistico in sviluppo: non è ancora utilizzabile.</em>
+  <strong>In sviluppo, non ancora utilizzabile.</strong> Oggi non c'è un'immagine da
+  scaricare e installare: questa pagina descrive dove sta andando il progetto.
 </p>
 
 ---
 
-## L'idea
+## Cos'è
 
-Tutto quello che si vede sullo schermo (pannelli, finestre, impostazioni, finestre di
-sistema, persino l'installazione) è fatto con **HTML, CSS e JavaScript**, e disegnato
-dal motore **WebKit**. Sotto c'è un sistema Linux essenziale, costruito pezzo per pezzo
+project-os è un sistema operativo per **PC Intel e AMD** e per **smartphone e tablet**.
+Tutto quello che vedi sullo schermo (pannelli, finestre, impostazioni, finestre di
+dialogo, perfino l'installazione) è fatto con **HTML, CSS e JavaScript** e disegnato dal
+motore web **WebKit**. Sotto c'è un sistema Linux essenziale, costruito pezzo per pezzo
 dai sorgenti, senza partire da una distribuzione esistente.
 
-Ogni applicazione è **uno script JavaScript principale** che apre le proprie finestre,
-come in Electron, ma su WebKitGTK e con un modello di sicurezza molto più stretto.
-L'app dichiara nel suo `package.json` di quali funzioni del sistema ha bisogno, e ottiene
-solo quelle.
+## Cosa avrai
 
-Lo stesso sistema gira su **PC Intel e AMD** e su **smartphone e tablet ARM**: cambia
-solo lo strato che parla con l'hardware.
+- **Un'interfaccia sola, ovunque.** Su PC e telefono giri lo stesso sistema e le stesse
+  app; cambia solo il modo in cui si adattano allo schermo e al tocco. Lo stile grafico
+  unisce elementi di Windows 11, macOS e MIUI.
+- **I tuoi dispositivi che lavorano insieme.** PC e telefono con project-os si
+  riconoscono e collaborano, come in un ecosistema:
+  - file e link mandati da un dispositivo all'altro;
+  - appunti condivisi;
+  - notifiche, chiamate e SMS del telefono sul PC;
+  - riprendere sul PC ciò che stavi facendo sul telefono, e viceversa.
 
-## Principi
-
-- **Sicurezza prima di tutto.** Il progetto è disegnato così:
-  - ogni app gira isolata e accede a file, dispositivi e servizi solo tramite un
-    intermediario che verifica i permessi;
-  - l'accesso root è sempre mediato, confermato dall'utente e registrato;
-  - il sistema è in sola lettura e verificato;
-  - gli aggiornamenti sono firmati e atomici, con ritorno automatico alla versione
-    precedente se qualcosa va storto.
-- **Retrocompatibilità a tutti i livelli.** L'obiettivo è che:
-  - il sistema giri su ogni processore a 64 bit e si avvii sia da UEFI sia da BIOS;
-  - la cifratura dei dati funzioni anche senza chip TPM.
-- **Essenziale.** Ogni componente del sistema c'è per un motivo, scritto nero su bianco.
-
-Molte di queste parti sono ancora in costruzione: lo stato preciso è in
-[`ROADMAP.md`](ROADMAP.md).
-- **Web fino in fondo.** Rendering e animazioni sono tutti del motore web, comprese le
-  finestre di dialogo del sistema.
-
-## Come è fatto
-
-```
-┌────────────────────────────────────────────────────────────┐
-│  App e shell: HTML + CSS + JavaScript                      │
-├────────────────────────────────────────────────────────────┤
-│  Runtime delle app: script principale su JavaScriptCore,   │
-│  finestre WebKitGTK (Rust)                                 │
-├──────────────────────────────┬─────────────────────────────┤
-│  Broker dei permessi e       │  Compositore Wayland        │
-│  sandbox (Rust)              │  (Rust, Smithay)            │
-├──────────────────────────────┴─────────────────────────────┤
-│  Sistema base: systemd, glibc, PipeWire, BlueZ …           │
-│  in sola lettura, due copie A/B, aggiornamenti RAUC        │
-├──────────────────────────────┬─────────────────────────────┤
-│  Desktop: kernel Linux 6.18, │  Mobile: kernel e driver    │
-│  Mesa, firmware              │  Android (Halium/libhybris) │
-└──────────────────────────────┴─────────────────────────────┘
-```
-
-| Componente | Scelta |
-|---|---|
-| Costruzione del sistema | Yocto Project 6.0 «Wrynose» (LTS), con kas |
-| Kernel | Linux 6.18 LTS |
-| Avvio | GRUB, con menu a tema e dual boot |
-| Aggiornamenti | RAUC, due copie del sistema (A/B) |
-| Motore web | WebKitGTK, da un [fork mantenuto dal progetto](https://github.com/aptecstudio/WebKit) |
-| Linguaggio dei componenti nativi | Rust |
-| Grafica e input | Wayland |
-
-## A che punto siamo
-
-Lo sviluppo procede dal basso verso l'alto, una fase alla volta.
-
-| Fase | | Stato |
-|---|---|---|
-| 0 | Fondamenta e decisioni | ✅ quasi completata |
-| 1 | Sistema base: build, kernel, avvio, partizioni A/B | 🔨 in corso |
-| 2 | Stack grafico: WebKitGTK e compositore | ⏳ |
-| 3 | Broker, permessi e sandbox | ⏳ |
-| 4 | Runtime delle app | ⏳ |
-| 5 | Shell, stile grafico e finestre di sistema | ⏳ |
-| 6 | Applicazioni di sistema | ⏳ |
-| 7 | Smartphone e tablet (Pixel, poi Oppo e Samsung) | ⏳ |
-| 8 | Installazione, setup e aggiornamenti | ⏳ |
-| 9 | Ecosistema: interoperabilità tra dispositivi | ⏳ |
-
-Il dettaglio di ogni passo è in [`ROADMAP.md`](ROADMAP.md).
+  Tutto cifrato da un dispositivo all'altro, senza un cloud obbligatorio.
+- **App che chiedono solo ciò che serve.** Ogni app dichiara in anticipo cosa vuole
+  usare (file, fotocamera, rete…) e ottiene solo quello che approvi. Le app girano
+  isolate l'una dall'altra; quando una chiede privilegi di amministratore, il sistema
+  te lo chiede con una finestra chiara e se lo annota.
+- **Un sistema che non si rompe.** Il sistema è in sola lettura e verificato a ogni
+  avvio. Gli aggiornamenti sono firmati e si installano su una seconda copia: se
+  qualcosa va storto, al riavvio torni da solo alla versione precedente. I tuoi dati
+  stanno su una partizione cifrata.
+- **Anche su PC non recenti.** L'obiettivo è funzionare su PC a 64 bit anche datati,
+  con avvio UEFI o BIOS e cifratura che non richiede il chip TPM.
+- **Accanto a Windows.** Il menu di avvio rileva Windows e gli altri sistemi già
+  installati, per scegliere ogni volta quale avviare.
 
 <p align="center">
   <img src="branding/previews/grub-menu.png" alt="Anteprima del menu di avvio" width="720">
@@ -107,10 +59,42 @@ Il dettaglio di ogni passo è in [`ROADMAP.md`](ROADMAP.md).
   <sub>Anteprima del menu di avvio, con il logo segnaposto.</sub>
 </p>
 
-## Provarlo
+## Su cosa girerà
 
-Oggi si costruisce l'immagine desktop e la si avvia nell'emulatore QEMU, fino a un
-terminale testuale. Serve una macchina Linux robusta: la prima build richiede alcune ore.
+| Dispositivo | Come si installa |
+|---|---|
+| PC desktop e portatili Intel/AMD a 64 bit | Da chiavetta USB, con una procedura guidata: lingua, tastiera, disco (anche accanto a Windows), cifratura, utente |
+| Google Pixel (primo telefono supportato) | Dalla recovery del telefono; al primo avvio una procedura guidata chiede rete, utente e codice di sblocco |
+| Vecchi modelli Oppo e Samsung | In seguito, modello per modello |
+
+Sui telefoni serve un bootloader sbloccabile: dipende dal modello e, a volte,
+dall'operatore.
+
+## A che punto siamo
+
+Lo sviluppo procede dal basso verso l'alto, una fase alla volta: prima il sistema di
+base, poi la grafica, poi le app.
+
+| Fase | | Stato |
+|---|---|---|
+| 0 | Fondamenta e decisioni | quasi completata |
+| 1 | Sistema base: kernel, avvio, partizioni | in corso |
+| 2 | Grafica: WebKit e compositore | da fare |
+| 3 | Permessi e isolamento delle app | da fare |
+| 4 | Runtime delle app | da fare |
+| 5 | Interfaccia e stile grafico | da fare |
+| 6 | App di sistema: impostazioni, file, terminale | da fare |
+| 7 | Smartphone e tablet | da fare |
+| 8 | Installazione e aggiornamenti | da fare |
+| 9 | Ecosistema tra dispositivi | da fare |
+
+Il dettaglio di ogni passo è in [`ROADMAP.md`](ROADMAP.md).
+
+## Per chi vuole costruirlo
+
+Oggi si può solo costruire da sorgenti il sistema di base e avviarlo nell'emulatore
+QEMU, fino a un terminale testuale. Serve una macchina Linux (Ubuntu 24.04/26.04 o
+Debian 13); la prima build richiede diverse ore.
 
 ```sh
 git clone https://github.com/aptecstudio/project-os.git
@@ -122,17 +106,23 @@ tools/run-qemu.sh     # la avvia nell'emulatore
 
 Requisiti, limiti attuali e soluzione dei problemi: [`docs/sviluppo.md`](docs/sviluppo.md).
 
-## Documenti del progetto
+## Come è fatto
 
-| Documento | Contenuto |
+| Componente | Scelta |
 |---|---|
-| [`AGENTS.md`](AGENTS.md) | Regole di lavoro per persone e agenti AI |
-| [`MEMORY.md`](MEMORY.md) | Requisiti, decisioni prese e il loro perché |
-| [`ROADMAP.md`](ROADMAP.md) | Passi fatti e da fare |
-| [`docs/sviluppo.md`](docs/sviluppo.md) | Come costruire e provare il sistema |
+| Costruzione del sistema | Yocto Project 6.0 (LTS), con kas |
+| Kernel | Linux 6.18 LTS; sui telefoni, kernel e driver del produttore |
+| Avvio | GRUB, con menu a tema e dual boot |
+| Aggiornamenti | Due copie del sistema (A/B), pacchetti firmati |
+| Motore web | WebKitGTK, da un [fork mantenuto dal progetto](https://github.com/aptecstudio/WebKit) |
+| Componenti nativi | Rust |
+| Grafica e input | Wayland |
+
+Le scelte e il loro perché sono in [`MEMORY.md`](MEMORY.md); le regole di lavoro per
+chi contribuisce, persone o agenti AI, in [`AGENTS.md`](AGENTS.md).
 
 ## Licenza
 
-Il codice di project-os è rilasciato con licenza [GNU GPL v3](LICENSE).
-Il fork di WebKit mantiene le licenze originali di WebKit. Il font Inter, usato nel menu
-di avvio, è distribuito con licenza SIL Open Font License 1.1.
+Il codice di project-os è rilasciato con licenza [GNU GPL v3](LICENSE). Il fork di
+WebKit mantiene le licenze originali di WebKit. Il font Inter, usato nel menu di avvio,
+è distribuito con licenza SIL Open Font License 1.1.
