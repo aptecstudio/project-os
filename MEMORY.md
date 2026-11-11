@@ -276,6 +276,26 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Alternativa scartata:** partire dal prototipo del runtime su una distribuzione
   esistente.
 
+### D-023 — Logo segnaposto e tema GRUB · `proposta` (in revisione sul ramo `feat/branding-grub-theme`)
+- **Cosa:**
+  - logo generico in `branding/logo/project-os-logo.svg`: riquadro arrotondato con
+    gradiente blu‑viola e anello bianco; da sostituire col marchio definitivo;
+  - tema GRUB in `branding/grub-theme/`: logo e nome in alto, voci centrate larghe
+    520 px, voce scelta evidenziata da un riquadro chiaro semitrasparente, conto alla
+    rovescia e aiuto tasti in basso;
+  - tutte le immagini si rigenerano con `branding/tools/render.py` (SVG → PNG con
+    `rsvg-convert`, sfondo e riquadri con Pillow/NumPy); `branding/previews/` contiene
+    un'anteprima approssimata, che non va nell'immagine.
+- **Font:** Inter (licenza OFL‑1.1). I file `.pf2` per GRUB non stanno nel repository:
+  la ricetta Yocto scaricherà Inter dal progetto ufficiale e li genererà con
+  `grub-mkfont` (Regular 14 e 18, Medium 18, SemiBold 28).
+- **Sfondo:** retinatura ordinata al posto del rumore, per evitare le bande di colore con
+  un PNG leggero (224 KB contro 1,6 MB).
+- **Testi del menu:** in italiano per ora; la localizzazione del menu di avvio è da
+  decidere più avanti.
+- **Perché:** R-18; il tema vive in `branding/` come sorgente unico, e la ricetta lo
+  copierà nell'immagine.
+
 ---
 
 ## 3. Stile grafico
@@ -283,6 +303,11 @@ di approccio, da Debian a sistema costruito da zero.*
 *Da definire nella Fase 5.* Annotare qui: palette, tipografia, spaziature, raggi,
 ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adattivo
 (desktop ↔ mobile).
+
+**Punto di partenza (dal tema di avvio, D-023; provvisorio):**
+- Fondo `#0B0D12`, alone `#2A2F6B`; accento a gradiente `#5B8CFF` → `#8A5BFF`.
+- Testo principale `#F2F4F8`, secondario `#9AA3B2`, attenuato `#7D8597`, minimo `#596173`.
+- Font: Inter. Raggio degli elementi selezionabili: 10 px.
 
 ---
 
@@ -298,7 +323,7 @@ project-os/
 │   └── meta-device-<nome>/       # un layer per telefono: kernel, firmware, pacchetto
 │                                 # recovery (pixel-…, samsung-…, oppo-…)
 ├── build/        # configurazione della build Yocto (versioni dei layer esterni, local.conf)
-├── branding/     # logo (segnaposto) e risorse grafiche condivise
+├── branding/     # logo (segnaposto), tema GRUB, script di generazione, anteprime
 ├── runtime/      # runtime delle app: avvio script principale, finestre WebKitGTK
 ├── broker/       # demone dei permessi e API native
 ├── portal/       # backend xdg-desktop-portal e agente polkit (modali HTML)

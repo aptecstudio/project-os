@@ -1,0 +1,79 @@
+# project-os — tema GRUB (D-009, D-023)
+#
+# Menu di avvio centrato con logo. I font .pf2 non sono nel repository: la ricetta
+# Yocto li genera con grub-mkfont dal font Inter (licenza OFL-1.1) e li installa
+# accanto a questo file:
+#   Inter Regular 14, Inter Regular 18, Inter Medium 18, Inter SemiBold 28
+# Le immagini PNG si rigenerano con branding/tools/render.py.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#0B0D12"
+terminal-font: "Inter Regular 14"
+terminal-box: "terminal_box_*.png"
+
+# Logo
++ image {
+  left = 50%-48
+  top = 20%
+  width = 96
+  height = 96
+  file = "logo.png"
+}
+
+# Nome del sistema
++ label {
+  left = 0
+  top = 20%+116
+  width = 100%
+  height = 36
+  align = "center"
+  font = "Inter SemiBold 28"
+  color = "#F2F4F8"
+  text = "project-os"
+}
+
+# Voci di avvio (project-os, Windows e altri sistemi rilevati da os-prober)
++ boot_menu {
+  left = 50%-260
+  top = 20%+180
+  width = 520
+  height = 36%
+  item_font = "Inter Regular 18"
+  item_color = "#9AA3B2"
+  selected_item_font = "Inter Medium 18"
+  selected_item_color = "#FFFFFF"
+  selected_item_pixmap_style = "select_*.png"
+  item_height = 44
+  item_padding = 16
+  item_spacing = 6
+  icon_width = 0
+  icon_height = 0
+  item_icon_space = 0
+  scrollbar = false
+}
+
+# Conto alla rovescia dell'avvio automatico
++ label {
+  id = "__timeout__"
+  left = 0
+  top = 100%-96
+  width = 100%
+  height = 24
+  align = "center"
+  font = "Inter Regular 14"
+  color = "#7D8597"
+  text = "Avvio automatico tra %d secondi"
+}
+
+# Aiuto tasti
++ label {
+  left = 0
+  top = 100%-64
+  width = 100%
+  height = 24
+  align = "center"
+  font = "Inter Regular 14"
+  color = "#596173"
+  text = "↑ ↓ per scegliere  ·  Invio per avviare  ·  E per modificare  ·  C per la riga di comando"
+}

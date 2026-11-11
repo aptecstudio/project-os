@@ -14,7 +14,7 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | Fase | Titolo | Stato |
 |---|---|---|
 | 0 | Fondamenta e decisioni | `in corso` |
-| 1 | Sistema base: Yocto, kernel, avvio | `proposta` |
+| 1 | Sistema base: Yocto, kernel, avvio | `in corso` |
 | 2 | Stack grafico: WebKitGTK dal fork e compositore | `proposta` |
 | 3 | Broker, permessi e sandbox | `proposta` |
 | 4 | Runtime delle app (script JS e finestre) | `proposta` |
@@ -23,7 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** approvare i primi passi della Fase 1 e preparare la macchina di build.
+**Prossimo passo:** revisione del tema GRUB (ramo `feat/branding-grub-theme`); poi, uno
+alla volta e con conferma dell'utente, gli altri passi anticipabili senza macchina di build.
 
 ---
 
@@ -67,10 +68,11 @@ in `MEMORY.md` come voce `confermata`.
 - [x] Approvazione umana delle decisioni `proposta` in `MEMORY.md`
 - [x] Licenza GPL-3.0, file `LICENSE`
 - [x] Roadmap riordinata dal basso verso l'alto (D-022)
-- [ ] Approvazione dei primi passi della Fase 1
+- [x] Avvio della Fase 1 approvato: si procede un passo alla volta, con conferma
+      dell'utente a ogni passo
 - [ ] Macchina di build pronta (DA-11)
 
-## Fase 1 — Sistema base: Yocto, kernel, avvio · `proposta`
+## Fase 1 — Sistema base: Yocto, kernel, avvio · `in corso`
 
 Obiettivo: un'immagine amd64 costruita da sorgenti che si avvia in QEMU/UEFI e su
 hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
@@ -83,8 +85,10 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 - [ ] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
       GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04)
 - [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
-- [ ] 5. Menu di avvio GRUB con tema project-os e logo segnaposto in `branding/`;
-      rilevamento di Windows e altri sistemi (D-009)
+- [ ] 5. Menu di avvio GRUB (D-009):
+  - [x] 5a. Logo segnaposto e tema in `branding/`, con anteprima (D-023)
+  - [ ] 5b. Ricetta Yocto: font `.pf2`, installazione del tema, `os-prober` per
+        rilevare Windows e altri sistemi
 
 **Passi successivi:**
 - [ ] Prova del dual boot in QEMU con Windows installato
@@ -188,3 +192,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` (numerazione attuale: Fase 2) |
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
+| 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima, sul ramo `feat/branding-grub-theme` (D-023) |
