@@ -30,8 +30,7 @@ dai sorgenti, senza partire da una distribuzione esistente.
 ## Cosa avrai
 
 - **Un'interfaccia sola, ovunque.** Su PC e telefono giri lo stesso sistema e le stesse
-  app; cambia solo il modo in cui si adattano allo schermo e al tocco. Lo stile grafico
-  unisce elementi di Windows 11, macOS e MIUI.
+  app; cambia solo il modo in cui si adattano allo schermo e al tocco.
 - **I tuoi dispositivi che lavorano insieme.** PC e telefono con project-os si
   riconoscono e collaborano, come in un ecosistema:
   - file e link mandati da un dispositivo all'altro;
