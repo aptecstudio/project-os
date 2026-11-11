@@ -1,0 +1,8 @@
+# short-description: project-os desktop — avvio UEFI semplice (Fase 1, passo 2)
+# long-description: Partizione EFI con GRUB e partizione di sistema ext4.
+# Provvisorio: al passo 4 diventa lo schema A/B con dm-verity e dati cifrati (D-018).
+
+part /boot --source bootimg_efi --sourceparams="loader=${EFI_PROVIDER}" --label boot --active --align 1024 --use-uuid --fixed-size 256M
+part / --source rootfs --fstype=ext4 --label root --align 1024 --use-uuid
+
+bootloader --ptable gpt --timeout=5 --append="rootwait console=ttyS0,115200 console=tty0"

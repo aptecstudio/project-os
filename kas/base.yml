@@ -1,0 +1,38 @@
+# project-os — configurazione di build comune (kas, D-024)
+#
+# Fissa le versioni esatte di bitbake e OpenEmbedded-Core (Yocto 6.0 «Wrynose», LTS) e
+# attiva il layer dello spazio utente comune. Non si usa da sola: si include da un file
+# di piattaforma, per esempio kas/desktop-amd64.yml.
+
+header:
+  version: 14
+
+distro: project-os
+target: project-os-image-base
+
+repos:
+  # Questo repository: i nostri layer
+  project-os:
+    layers:
+      layers/meta-project-os:
+
+  openembedded-core:
+    url: https://git.openembedded.org/openembedded-core
+    branch: wrynose
+    commit: 2285da08068a6d1b4a64c9a52d85a58be50e4679
+    path: sources/openembedded-core
+    layers:
+      meta:
+
+  # Accanto a openembedded-core: oe-init-build-env lo trova in ../bitbake
+  bitbake:
+    url: https://git.openembedded.org/bitbake
+    branch: "2.18"
+    commit: 6e260eb6ab1631607ea414d9ff8ede1155faa5d9
+    path: sources/bitbake
+    layers:
+      .: disabled
+
+local_conf_header:
+  base: |
+    CONF_VERSION = "2"

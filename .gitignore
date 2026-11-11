@@ -1,0 +1,6 @@
+# Uscite della build Yocto (kas)
+/build/
+/sources/
+
+# Python
+__pycache__/
