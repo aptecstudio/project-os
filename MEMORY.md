@@ -306,6 +306,21 @@ di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo ste
   produce una catena di certificati valida. Da verificare alla prima build: sintassi di
   `grub.cfg`, moduli GRUB, creazione delle partizioni, avvio e aggiornamento A/B.
 
+### D-028 — Strumenti per la macchina di build e l'emulatore · `proposta` (sul ramo `build/ab-partitions`)
+- **Guida:** `docs/sviluppo.md`, per l'utente che lavora dal proprio PC.
+- **Script:** `tools/setup-host.sh` (programmi per Yocto, kas via pipx, QEMU, OVMF,
+  chiavi di sviluppo; chiede conferma prima di toccare AppArmor), `tools/build.sh`
+  (build di sviluppo, aggiornamento, shell bitbake), `tools/run-qemu.sh` (emulatore).
+- **Emulatore:** QEMU `q35` con firmware UEFI OVMF; disco **NVMe**, perché il driver è
+  integrato nel kernel e non c'è ancora initramfs (un disco virtio non verrebbe visto);
+  copia dell'immagine con 16 GB liberi per la partizione dati; KVM se disponibile,
+  altrimenti processore `qemu64` (x86-64 di base, D-027).
+- **Macchina di build consigliata:** Ubuntu Server 24.04/26.04 LTS. Su Ubuntu 24.04 e
+  successivi bitbake ha bisogno dei namespace utente, limitati da AppArmor: lo script
+  spiega la modifica e chiede conferma.
+- **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
+  bitbake. Gli script non sono ancora stati eseguiti su una macchina reale.
+
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
   sistema e strumenti di build propri in Rust. Le librerie C esterne (WebKitGTK, GTK,

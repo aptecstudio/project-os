@@ -23,8 +23,9 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** revisione di partizioni A/B e aggiornamenti (ramo
-`build/ab-partitions`); poi 4c. Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** l'utente prepara la macchina di build e prova l'immagine in QEMU
+(`docs/sviluppo.md`) dal ramo `build/ab-partitions`; con l'esito si rivede il ramo e si
+prosegue con 4c. Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -50,9 +51,10 @@ in `MEMORY.md` come voce `confermata`.
 - [x] **DA-09 — Modello di aggiornamento del sistema** → immagine immutabile A/B (D-018)
 - [x] **DA-10 — Aggiornare `AGENTS.md`** → autorizzato dall'utente il 2026-11-11, §1
   aggiornato (AGENTS.md v1.1)
-- [ ] **DA-11 — Macchina di build** *(blocca Fase 1)*
+- [ ] **DA-11 — Macchina di build** *(blocca le verifiche della Fase 1)*
   Yocto deve girare su una macchina dell'utente (VM o fisica): almeno 16 GB di RAM,
-  250 GB di disco, molti core. Sistema host da scegliere tra quelli supportati da Yocto.
+  250 GB di disco, molti core. Consigliato Ubuntu Server 24.04/26.04 LTS. Guida e script
+  pronti (`docs/sviluppo.md`, `tools/setup-host.sh`); manca la macchina.
 
 ---
 
@@ -104,6 +106,9 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
         rilevare Windows e altri sistemi
 
 **Passi successivi:**
+- [x] Guida e script per la macchina di build e per l'emulatore (`docs/sviluppo.md`,
+      `tools/setup-host.sh`, `tools/build.sh`, `tools/run-qemu.sh`, D-028)
+- [ ] Prima build completa e avvio in QEMU sulla macchina dell'utente
 - [ ] Prova del dual boot in QEMU con Windows installato
 - [ ] Servizi di base: rete, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
@@ -208,5 +213,6 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
 | 2026-11-11 | 0 | Nuovi requisiti: retrocompatibilità a tutti i livelli, avvio UEFI e BIOS, cifratura senza TPM, x86-64 di base (R-25…R-28, D-027) |
 | 2026-11-11 | 1 | Partizioni A/B, scelta dello slot in GRUB, RAUC, partizione dati cifrata al primo avvio, sul ramo `build/ab-partitions` (D-026, passi 4a e 4b) |
+| 2026-11-11 | 1 | Lavoro sospeso su richiesta dell'utente; preparati guida e script per costruire e provare l'immagine sul suo PC (D-028) |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
