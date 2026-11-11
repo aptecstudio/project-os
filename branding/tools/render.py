@@ -6,6 +6,7 @@ Richiede: rsvg-convert, Python 3 con Pillow e NumPy; per l'anteprima il font Int
 
 Produce:
   branding/logo/project-os-logo-{256,96}.png
+  branding/logo/project-os-logo-dark-256.png   (variante scura, per sfondi chiari)
   branding/grub-theme/{logo,background}.png
   branding/grub-theme/select_{nw,n,ne,w,c,e,sw,s,se}.png
   branding/grub-theme/terminal_box_{nw,n,ne,w,c,e,sw,s,se}.png
@@ -137,6 +138,11 @@ def main() -> None:
     PREVIEWS.mkdir(exist_ok=True)
     for px in (256, 96):
         render_svg(LOGO_SVG, ROOT / "logo" / f"project-os-logo-{px}.png", px)
+    # Variante scura dello stesso segnaposto, per sfondi chiari (es. README su GitHub)
+    dark_svg = PREVIEWS / "logo-dark.svg"
+    dark_svg.write_text(LOGO_SVG.read_text().replace("#FFFFFF", "#0B0D12"))
+    render_svg(dark_svg, ROOT / "logo" / "project-os-logo-dark-256.png", 256)
+    dark_svg.unlink()
     render_svg(LOGO_SVG, THEME / "logo.png", 96)
 
     bg = background()

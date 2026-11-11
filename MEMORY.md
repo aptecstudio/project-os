@@ -429,6 +429,7 @@ ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adat
 ```
 project-os/
 ├── AGENTS.md  MEMORY.md  ROADMAP.md
+├── README.md     # presentazione del progetto (richiesta dall'utente il 2026-11-11)
 ├── layers/       # layer Yocto (D-012)
 │   ├── meta-project-os/          # spazio utente comune: ricette, immagini, tema GRUB
 │   ├── meta-project-os-desktop/  # strato hardware amd64: kernel mainline, Mesa, firmware
