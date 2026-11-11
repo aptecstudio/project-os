@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** revisione del tema GRUB (ramo `feat/branding-grub-theme`); poi, uno
-alla volta e con conferma dell'utente, gli altri passi anticipabili senza macchina di build.
+**Prossimo passo:** passo 1 della Fase 1, struttura dei layer Yocto (scritta ora,
+verificata alla prima build). Si procede un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -192,4 +192,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 2 | Creati il fork `aptecstudio/WebKit` e il ramo `project-os/2.54` (numerazione attuale: Fase 2) |
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
-| 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima, sul ramo `feat/branding-grub-theme` (D-023) |
+| 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |

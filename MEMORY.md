@@ -276,10 +276,11 @@ di approccio, da Debian a sistema costruito da zero.*
 - **Alternativa scartata:** partire dal prototipo del runtime su una distribuzione
   esistente.
 
-### D-023 — Logo segnaposto e tema GRUB · `proposta` (in revisione sul ramo `feat/branding-grub-theme`)
+### D-023 — Logo segnaposto e tema GRUB · `confermata` (2026-11-11)
 - **Cosa:**
-  - logo generico in `branding/logo/project-os-logo.svg`: riquadro arrotondato con
-    gradiente blu‑viola e anello bianco; da sostituire col marchio definitivo;
+  - logo generico in `branding/logo/project-os-logo.svg`, **monocromo bianco** (anello e
+    punto centrale) su fondo scuro, nello stile dell'avvio di elementary OS, come chiesto
+    dall'utente; resta un **segnaposto**, il marchio definitivo è da decidere;
   - tema GRUB in `branding/grub-theme/`: logo e nome in alto, voci centrate larghe
     520 px, voce scelta evidenziata da un riquadro chiaro semitrasparente, conto alla
     rovescia e aiuto tasti in basso;
@@ -305,7 +306,7 @@ ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adat
 (desktop ↔ mobile).
 
 **Punto di partenza (dal tema di avvio, D-023; provvisorio):**
-- Fondo `#0B0D12`, alone `#2A2F6B`; accento a gradiente `#5B8CFF` → `#8A5BFF`.
+- Fondo `#0B0D12`, alone `#2A2F6B`. Logo e marchio: **monocromo bianco** `#FFFFFF`.
 - Testo principale `#F2F4F8`, secondario `#9AA3B2`, attenuato `#7D8597`, minimo `#596173`.
 - Font: Inter. Raggio degli elementi selezionabili: 10 px.
 
