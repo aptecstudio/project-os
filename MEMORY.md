@@ -44,9 +44,13 @@ Fissati dall'utente il 2026-11-11.
 | R-26 | **Desktop:** avvio sia da UEFI sia da BIOS tradizionale, con la stessa immagine. |
 | R-27 | **Cifratura senza TPM:** la partizione dati deve funzionare anche sui PC più datati senza chip TPM. |
 | R-28 | **Processori desktop:** tutti i processori x86 a 64 bit (istruzioni x86-64 di base). |
+| R-29 | **API delle app come oggetti nel contesto dello script**, come le API `chrome.*` delle estensioni: le app le raggiungono da un oggetto globale, senza importarle. |
+| R-30 | **Caricamento dinamico degli script con `include("url")`** e la controparte **`includeAsync("url")`**, non con moduli CommonJS o ES. Ogni script incluso ha un oggetto `exports` con i simboli che espone a chi lo include; gli script inclusi sono messi in cache; l'importazione ciclica è impedita. |
+| R-31 | **Cartella radice isolata per ogni app:** script, immagini e altre risorse si caricano solo da lì, con un protocollo dedicato (`app://`), e solo l'app stessa può accedere alle proprie risorse. File esterni solo tramite le API di sistema del filesystem. |
+| R-32 | **Design:** ibrido tra Windows 11, macOS Big Sur e Xiaomi MIUI. |
 
 *R-16…R-19 aggiunti dall'utente il 2026-11-11. R-20…R-24 aggiunti lo stesso giorno: cambio
-di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno.*
+di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno. R-29…R-32 aggiunti lo stesso giorno (sera).*
 
 ---
 
@@ -321,6 +325,76 @@ di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo ste
 - **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
   bitbake. Gli script non sono ancora stati eseguiti su una macchina reale.
 
+### D-029 — API di sistema nell'oggetto globale `system` · `confermata` (nome e principio), dettagli `proposta`
+- **Cosa (R-29):** nel contesto dello script principale e delle finestre dell'app c'è un
+  oggetto globale **`system`**, con un sotto-oggetto per area, come `chrome.*` nelle
+  estensioni. Proposta iniziale degli spazi:
+  | Spazio | Contenuto |
+  |---|---|
+  | `system.runtime` | informazioni sull'app, messaggi tra script principale e finestre |
+  | `system.windows` | creare, chiudere, spostare finestre dell'app |
+  | `system.process` | sottoprocessi dell'app (R-09) |
+  | `system.fs` | file fuori dalla cartella dell'app, nei limiti concessi (R-31) |
+  | `system.storage` | dati privati dell'app, persistenti |
+  | `system.devices` | dispositivi (fotocamera, audio, USB, Bluetooth…) |
+  | `system.services` | servizi di sistema (rete, notifiche, energia…) |
+  | `system.dialogs` | finestre di dialogo di sistema in HTML (R-10) |
+  | `system.permissions` | permessi concessi, richiesta di nuovi permessi |
+  | `system.root` | operazioni privilegiate mediate dal broker (R-13, D-005) |
+- **Regola di sicurezza:** uno spazio esiste nell'oggetto `system` solo se l'app lo ha
+  dichiarato nel `package.json` e l'utente l'ha concesso; altrimenti è `undefined`,
+  come le API `chrome.*` non dichiarate nel manifest (AGENTS.md §5.1).
+- **Stile (proposta):** funzioni asincrone che restituiscono `Promise`; eventi con
+  `system.<spazio>.on<Evento>.addListener()`, come nelle estensioni; errori come
+  eccezioni con codice (`PermissionDenied`, `NotFound`…).
+- **Perché `system`:** scelta dell'utente; indipendente dal nome definitivo del sistema.
+- **Da definire nella Fase 4:** elenco completo delle funzioni, in `docs/api/`.
+
+### D-030 — `include()` e `includeAsync()` · `confermata` (principio), dettagli `proposta`
+- **Cosa (R-30):**
+  - `include(url)` carica ed esegue uno script e **restituisce il suo `exports`**;
+    `includeAsync(url)` fa lo stesso e restituisce una `Promise` dell'`exports`;
+  - lo script incluso gira in un proprio ambito (non sporca le variabili di chi lo
+    include) e vede le variabili `exports`, `include`, `includeAsync` e `system`;
+  - **cache:** ogni script è eseguito una sola volta per contesto; le inclusioni
+    successive dello stesso indirizzo restituiscono lo stesso `exports`;
+  - **cicli:** se uno script ne include un altro che è ancora in caricamento lungo la
+    stessa catena, l'inclusione fallisce con un errore `IncludeCycleError` che mostra
+    la catena (es. `app://a.js → app://b.js → app://a.js`). Vale anche per
+    `includeAsync`: si controlla la catena di chi ha richiesto il caricamento, così due
+    caricamenti asincroni non restano bloccati ad aspettarsi a vicenda (scelta
+    dell'utente: errore, non `exports` parziali come in Node.js).
+- **Indirizzi ammessi (proposta):** solo `app://`, cioè la cartella dell'app (R-31);
+  gli indirizzi relativi si risolvono rispetto allo script che include. Nessuno script
+  da rete: il codice remoto non deve poter raggiungere le API native (AGENTS.md §5.4).
+- **Dove (proposta):** nello script principale (JavaScriptCore, D-008) e nelle finestre.
+  Nello script principale `include` sincrono è naturale; nelle finestre WebKit va
+  verificato come realizzarlo senza bloccare l'interfaccia (punto tecnico della Fase 4).
+
+### D-031 — Cartella dell'app e protocollo `app://` · `confermata` (principio), dettagli `proposta`
+- **Cosa (R-31):** ogni app ha una cartella radice isolata; le sue risorse si
+  raggiungono con **`app://` seguito dal percorso dentro quella cartella**, per esempio
+  `app://img/logo.png` o `app://lib/utils.js`.
+- **Solo l'app accede alle proprie risorse (scelta dell'utente):** lo stesso indirizzo
+  in due app punta a due cartelle diverse; un'app non ha modo di indicare risorse di
+  un'altra. Proposta di realizzazione: ogni app ha un proprio contesto WebKit (processi,
+  sessione di rete, storage, cookie separati) e un proprio gestore del protocollo
+  `app://`, legato alla sua cartella.
+- **Regole di sicurezza (proposta):**
+  - percorsi normalizzati: niente `..` o collegamenti simbolici che escono dalla cartella;
+  - cartella dell'app in sola lettura (è il pacchetto installato); i dati scritti
+    dall'app stanno altrove, tramite `system.storage` o `system.fs`;
+  - nessun accesso a `file://`; file esterni solo tramite `system.fs`, nei limiti dei
+    permessi;
+  - `app://` registrato in WebKit come contesto sicuro, così le API web che lo
+    richiedono funzionano.
+
+### D-032 — Design ibrido Windows 11, macOS Big Sur, Xiaomi MIUI · `confermata` (requisito), dettagli Fase 5
+- **Cosa (R-32):** lo stile grafico combina i tre riferimenti; si definisce nella Fase 5
+  e si registra in §3.
+- **Ispirazione, non copia:** si riprendono linguaggio visivo e comportamenti, non
+  icone, loghi, sfondi o altri elementi grafici protetti dei tre sistemi.
+
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
   sistema e strumenti di build propri in Rust. Le librerie C esterne (WebKitGTK, GTK,
@@ -417,6 +491,15 @@ di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo ste
 ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adattivo
 (desktop ↔ mobile).
 
+**Riferimenti (R-32, D-032):** ibrido tra Windows 11, macOS Big Sur e Xiaomi MIUI.
+Prima lettura dei tratti da combinare, da confermare nella Fase 5:
+- da **Windows 11**: materiali traslucidi e sfocati (tipo Mica/Acrylic), angoli
+  arrotondati, menu e pannelli fluttuanti, layout delle finestre agganciabili;
+- da **macOS Big Sur**: forte traslucenza («vibrancy») di barre e pannelli laterali,
+  angoli molto arrotondati, icone e controlli morbidi, animazioni fluide;
+- da **MIUI**: su mobile, centro di controllo a riquadri grandi, schede arrotondate,
+  tipografia grande e marcata, gesti.
+
 **Punto di partenza (dal tema di avvio, D-023; provvisorio):**
 - Fondo `#0B0D12`, alone `#2A2F6B`. Logo e marchio: **monocromo bianco** `#FFFFFF`.
 - Testo principale `#F2F4F8`, secondario `#9AA3B2`, attenuato `#7D8597`, minimo `#596173`.
@@ -447,7 +530,7 @@ project-os/
 ├── shell/        # shell di sistema: pannelli, launcher, notifiche, modali
 ├── apps/         # applicazioni di sistema (impostazioni, file, terminale,
 │                 # installer desktop, setup al primo avvio…)
-├── sdk/          # tipi e libreria JS delle API di sistema per le app
+├── sdk/          # tipi e libreria JS delle API di sistema (oggetto `system`)
 └── docs/         # specifiche (formato package.json, API, modello permessi)
 ```
 

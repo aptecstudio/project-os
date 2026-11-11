@@ -146,6 +146,13 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 
 - [ ] Workspace Cargo con binding a WebKitGTK 6.0 e JavaScriptCore
 - [ ] Specifica v0 del formato `package.json` (`docs/manifest.md`)
+- [ ] Specifica delle API dell'oggetto `system` (`docs/api/`, D-029)
+- [ ] Protocollo `app://` legato alla cartella dell'app, contesto WebKit separato per
+      app, verifiche sui percorsi (D-031)
+- [ ] `include()` e `includeAsync()`: ambito proprio, `exports`, cache, errore sui cicli
+      con la catena (D-030); test dei casi limite (cicli sincroni e asincroni, errori a
+      metà caricamento)
+- [ ] Oggetto `system` esposto solo con gli spazi dichiarati e concessi (D-029)
 - [ ] Host nativo che legge il manifest, crea un contesto JavaScriptCore isolato ed
       esegue lo script principale
 - [ ] API `window`: apertura, chiusura e comunicazione con finestre WebKitGTK legate al
@@ -156,7 +163,8 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 
 ## Fase 5 — Shell, stile grafico e modali di sistema · `proposta`
 
-- [ ] Definire lo stile grafico e registrarlo in `MEMORY.md` §3
+- [ ] Definire lo stile grafico, ibrido Windows 11 / macOS Big Sur / MIUI (D-032), e
+      registrarlo in `MEMORY.md` §3
 - [ ] Shell: pannello, launcher, gestione finestre, notifiche
 - [ ] Libreria di modali HTML predefinite (R-10)
 - [ ] Backend `xdg-desktop-portal` e agente polkit con modali HTML
@@ -215,5 +223,6 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 1 | Partizioni A/B, scelta dello slot in GRUB, RAUC, partizione dati cifrata al primo avvio, sul ramo `build/ab-partitions` (D-026, passi 4a e 4b) |
 | 2026-11-11 | 1 | Lavoro sospeso su richiesta dell'utente; preparati guida e script per costruire e provare l'immagine sul suo PC (D-028) |
 | 2026-11-11 | 0 | Aggiunto `README.md` di presentazione, su richiesta dell'utente; variante scura del logo segnaposto per sfondi chiari |
+| 2026-11-11 | 0 | Nuove specifiche: API nell'oggetto globale `system`, `include`/`includeAsync` con errore sui cicli, protocollo `app://` per la cartella isolata dell'app, design ibrido Windows 11 / Big Sur / MIUI (R-29…R-32, D-029…D-032) |
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
