@@ -275,7 +275,7 @@ portatile.*
   (WebKit su 32 bit è sempre meno supportato, costo troppo alto).
 
 ### D-026 — Partizioni A/B, avvio e partizione dati · `proposta` (in revisione sul ramo `build/ab-partitions`)
-- **Schema del disco (GPT)**, in `files/wic/project-os-ab.wks`:
+- **Schema del disco (GPT)**, in `files/wic/project-os-ab.wks.in` (estensione `.in`: bitbake vi sostituisce le variabili come `${EFI_PROVIDER}`):
   | # | Nome | Dimensione | Contenuto |
   |---|---|---|---|
   | 1 | `bios_grub` | 1 MiB | GRUB per l'avvio da BIOS (passo 4e) |

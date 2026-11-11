@@ -1,4 +1,5 @@
 # short-description: project-os desktop — partizioni A/B (D-026)
+# File .wks.in: bitbake sostituisce le variabili (${EFI_PROVIDER}) prima di passarlo a wic.
 # long-description: GPT avviabile da UEFI e (dal passo 4e) da BIOS.
 #   1 bios_grub   1 MiB   spazio per GRUB quando il PC avvia da BIOS (R-26)
 #   2 esp         512 MiB partizione EFI: GRUB, menu, tema, stato degli slot
