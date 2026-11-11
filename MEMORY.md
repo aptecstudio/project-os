@@ -592,3 +592,10 @@ project-os/
 
 *Da completare quando si scelgono linguaggi e strumenti.* Già fissate (AGENTS.md):
 documentazione e commit in italiano, identificatori in inglese, Conventional Commits.
+
+**Branch di lavoro (preferenza dell'utente, 2026-11-11):** si lavora su **un solo
+branch alla volta**, quello aperto in revisione (oggi `build/ab-partitions`). I nuovi
+passi e gli aggiornamenti di `MEMORY.md` e `ROADMAP.md` vanno lì come commit successivi;
+non si aprono branch paralleli. Si apre un nuovo branch solo dopo l'unione in `main`.
+Prima di iniziare, `git fetch` e ripartire dal branch remoto aggiornato: si lavora da
+più dispositivi.
