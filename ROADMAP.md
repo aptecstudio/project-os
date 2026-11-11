@@ -23,8 +23,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 7 | Mobile arm64 su base Android (Pixel, poi Oppo e Samsung) | `proposta` |
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 
-**Prossimo passo:** passo 1 della Fase 1, struttura dei layer Yocto (scritta ora,
-verificata alla prima build). Si procede un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** revisione dei layer Yocto (ramo `build/yocto-layers`); poi passo 3
+(configurazione del kernel e firmware). Un passo alla volta, con conferma dell'utente.
 
 ---
 
@@ -78,10 +78,13 @@ Obiettivo: un'immagine amd64 costruita da sorgenti che si avvia in QEMU/UEFI e s
 hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 
 **Primi passi (da approvare):**
-- [ ] 1. Configurare Yocto (ramo LTS più recente) e creare i layer `meta-project-os` e
-      `meta-project-os-desktop`, con la configurazione di build in `build/` (D-012)
-- [ ] 2. Immagine minima: kernel Linux mainline, glibc, systemd; avvio in QEMU/UEFI
+- [x] 1. Configurare Yocto 6.0 «Wrynose» (LTS) con kas e creare i layer
+      `meta-project-os` e `meta-project-os-desktop` (D-012, D-024); bitbake legge la
+      configurazione senza errori. Da confermare alla prima build completa.
+- [ ] 2. Immagine minima: kernel Linux 6.18 LTS, glibc, systemd; avvio in QEMU/UEFI
       fino a un terminale testuale (D-015, D-016)
+  - [x] 2a. Ricetta dell'immagine, macchina e schema di partizioni scritti
+  - [ ] 2b. Prima build e avvio in QEMU sulla macchina di build (DA-11)
 - [ ] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
       GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04)
 - [ ] 4. Schema partizioni A/B con dm-verity, partizione dati cifrata, RAUC (D-018)
@@ -193,3 +196,4 @@ Obiettivo: il modello applicativo (R-07, R-09) sopra broker e compositore.
 | 2026-11-11 | 0 | Approvate D-006, D-009…D-011, D-014…D-017; licenza GPL-3.0; fasi in sequenza |
 | 2026-11-11 | 0 | Roadmap riordinata dal basso verso l'alto: sistema base → grafica → broker → runtime → shell → app → mobile → installazione (D-022) |
 | 2026-11-11 | 1 | Logo segnaposto e tema GRUB con anteprima (D-023); logo reso monocromo bianco su richiesta; tema approvato e unito in `main` |
+| 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, sul ramo `build/yocto-layers` (D-024); controllo di lettura con bitbake superato |

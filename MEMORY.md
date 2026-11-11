@@ -209,6 +209,26 @@ di approccio, da Debian a sistema costruito da zero.*
   - primo ramo: `project-os/2.54`, da `webkitglib/2.54` (commit `2b614de`, creato il
     2026-11-11; ultimo rilascio ufficiale a quella data: 2.54.2).
 
+### D-024 — Configurazione della build Yocto · `proposta` (in revisione sul ramo `build/yocto-layers`)
+- **Versioni fissate:** Yocto 6.0 «Wrynose» (LTS), OpenEmbedded-Core `2285da0`, bitbake
+  2.18 `6e260eb`. Si aggiornano solo con un commit dedicato.
+- **Strumento:** [kas](https://kas.readthedocs.io): file YAML in `kas/` che descrivono
+  repository, versioni, layer, macchina e distribuzione; la build si ricrea con un solo
+  comando (`kas build kas/desktop-amd64.yml`). `kas/dev.yml` aggiunge le impostazioni di
+  sviluppo (root senza password, prova in QEMU): **mai** per immagini rilasciate.
+  Alternativa scartata: `bitbake-setup` (nuovo in Yocto 6.0, ancora poco documentato).
+- **Sorgenti senza poky:** OpenEmbedded-Core e bitbake direttamente, con la nostra
+  distribuzione `project-os` (`layers/meta-project-os/conf/distro/project-os.conf`).
+- **Macchina `project-os-amd64`:** istruzioni x86-64-v2 (`corei7-64`), per funzionare
+  sui PC dal 2008 in poi; x86-64-v3 scartato perché escluderebbe i PC precedenti al 2013
+  circa. Kernel `linux-yocto` 6.18 LTS con la configurazione di riferimento per PC a
+  64 bit (`common-pc-64`), avvio UEFI con GRUB.
+- **Funzioni della distribuzione escluse** (motivi nel file della distribuzione): x11,
+  pulseaudio, nfs, zeroconf, 3g, nfc, ptest, multiarch, debuginfod.
+- **Verifica fatta:** bitbake legge configurazione, immagine e kernel senza errori né
+  avvisi (controllo di sola lettura, nessuna compilazione). Da verificare alla prima
+  build: download, compilazione, schema di partizioni `wic`, sintassi dei file kas.
+
 ### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
 - **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
   sistema e strumenti di build propri in Rust. Le librerie C esterne (WebKitGTK, GTK,
@@ -323,7 +343,9 @@ project-os/
 │   ├── meta-project-os-mobile/   # strato hardware arm64 comune: Halium/libhybris
 │   └── meta-device-<nome>/       # un layer per telefono: kernel, firmware, pacchetto
 │                                 # recovery (pixel-…, samsung-…, oppo-…)
-├── build/        # configurazione della build Yocto (versioni dei layer esterni, local.conf)
+├── kas/          # configurazione della build Yocto (D-024): versioni, layer, macchina
+├── build/        # uscite della build (non versionate)
+├── sources/      # repository esterni scaricati da kas (non versionati)
 ├── branding/     # logo (segnaposto), tema GRUB, script di generazione, anteprime
 ├── runtime/      # runtime delle app: avvio script principale, finestre WebKitGTK
 ├── broker/       # demone dei permessi e API native

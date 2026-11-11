@@ -1,0 +1,18 @@
+# project-os — impostazioni SOLO PER SVILUPPO
+#
+# Da aggiungere a una build di piattaforma:
+#   kas build kas/desktop-amd64.yml:kas/dev.yml
+#
+# Rende l'immagine insicura di proposito (root senza password): non va mai usata per
+# un'immagine rilasciata (AGENTS.md §5.6).
+
+header:
+  version: 14
+
+local_conf_header:
+  dev: |
+    # Accesso root senza password, anche dalla console seriale
+    EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login serial-autologin-root"
+    # Prova in QEMU con firmware UEFI: runqemu project-os-amd64 wic ovmf
+    IMAGE_CLASSES += "qemuboot"
+    EXTRA_IMAGEDEPENDS += "ovmf"
