@@ -499,8 +499,10 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   - `MEMORY.md` and `ROADMAP.md` translated with unchanged content;
   - `AGENTS.md` §6 rewritten as a fixed rule, with the user's explicit authorization
     (v1.2): repository in English, communication with the user (chat, questions and
-    multiple-choice prompts) in Italian. The rest of `AGENTS.md` is still in Italian,
-    awaiting a separate authorization to translate it.
+    multiple-choice prompts) in Italian. Then the whole of `AGENTS.md` translated into
+    English with the user's authorization (v1.3), content and meaning unchanged; the
+    only adjustment is in §4, where "commit messages … in Italian" became "language: see
+    §6", to avoid two opposite rules.
 - **Not regenerated:** the OS images (they will be rebuilt in the next steps, as the
   user asked) and `branding/previews/grub-menu.png`, whose Italian texts are drawn in
   the image: `branding/tools/render.py` already has the English texts, the preview is
