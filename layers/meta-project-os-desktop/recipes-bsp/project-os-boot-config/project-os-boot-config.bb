@@ -11,7 +11,7 @@ INHIBIT_DEFAULT_DEPS = "1"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 # Variabili lette da project-os-grub.cfg e scritte da RAUC (bootloader=grub)
-GRUBENV_VARS = "ORDER=A B;A_OK=true;A_TRY=false;B_OK=false;B_TRY=false"
+GRUBENV_VARS = "ORDER=A B;A_OK=1;A_TRY=0;B_OK=0;B_TRY=0"
 
 do_compile() {
     # Formato di GRUB: intestazione, una variabile per riga, riempimento con '#' fino a

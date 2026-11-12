@@ -1,0 +1,18 @@
+# Partizione EFI (D-026): GRUB, menu e stato degli slot (grubenv), che RAUC e
+# rauc-mark-good aggiornano. Fa parte del sistema e non di fstab: la riga di fstab
+# scritta da wic esisteva solo nel disco di prima installazione, non negli slot
+# scritti dagli aggiornamenti.
+[Unit]
+Description=Partizione EFI di project-os (/efi)
+Documentation=https://github.com/aptecstudio/project-os
+Before=local-fs.target
+
+[Mount]
+What=/dev/disk/by-partlabel/esp
+Where=/efi
+Type=vfat
+# Accesso solo root
+Options=umask=0077,nodev,nosuid,noexec
+
+[Install]
+RequiredBy=local-fs.target

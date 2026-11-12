@@ -317,9 +317,8 @@ portatile.*
     mancava `mkfs.ext4`. Aggiunto `e2fsprogs-mke2fs` alle dipendenze di
     `project-os-storage`;
   - wic scriveva in fstab l'ESP come `/dev/sda2`, che non esiste con dischi NVMe o
-    virtio: ora `--use-uuid` (riga `UUID=`, numero di serie del volume FAT generato
-    alla build). Scartato `--use-label`: l'etichetta `ESP` può ripetersi su altri
-    dischi dello stesso PC;
+    virtio. Primo tentativo, `--use-uuid` (riga `UUID=`): *superato* il giorno stesso,
+    vedi sotto (la riga di fstab di wic non arriva negli aggiornamenti);
   - poi `/efi` non si montava: la cartella non esisteva e nel sistema in sola lettura
     systemd non può crearla. L'immagine la crea alla build (`project_os_efi_mountpoint`,
     permessi 0700).
@@ -327,8 +326,23 @@ portatile.*
   `running`, nessun servizio fallito; RAUC avviato da A, slot A *good* (`rauc-mark-good`
   funziona), slot B *bad* perché ancora vuoto; `/` ext4 in sola lettura, `/efi` e
   `/var` (LUKS2, 15,6 GB) montate. Dopo un riavvio i dati in `/var/home` restano e
-  systemd-repart non modifica nulla. Resta da provare: aggiornamento A/B con un bundle
-  e ritorno alla versione precedente.
+  systemd-repart non modifica nulla.
+- **Prova dell'aggiornamento A/B (2026-11-12, QEMU):** tre errori trovati e corretti:
+  - il bundle cercava l'immagine `.ext4` dello slot, che la build non produceva: la
+    macchina ora genera `wic wic.bmap ext4`;
+  - RAUC scrive in `grubenv` i valori `1`/`0`, mentre `grub.cfg` e il `grubenv`
+    iniziale usavano `true`/`false`: dopo il primo aggiornamento (e già dopo
+    `rauc-mark-good`) nessuno slot risultava avviabile e il menu restava fermo senza
+    conto alla rovescia. Ora tutto usa `1`/`0`, come lo schema di riferimento di RAUC;
+  - nello slot B `/efi` non si montava: la riga di fstab la scrive wic solo nel disco di
+    prima installazione, non nell'immagine dello slot. Ora la monta `efi.mount`
+    (`project-os-storage`) per etichetta GPT `esp`, come gli slot e la partizione dati;
+    tolto il punto di montaggio dallo schema `wks`. Scartato aggiungere la riga a fstab
+    nella ricetta: il numero di serie FAT cambia a ogni build.
+- **Esito:** installazione del bundle firmato da A (firma verificata) → riavvio → GRUB
+  sceglie B da solo → `rauc-mark-good` lo conferma (`B_TRY=0`). Avvio di B interrotto con
+  un reset subito dopo GRUB (`B_TRY=1` rimasto) → al riavvio GRUB torna da solo ad A,
+  che gira senza errori. Il ritorno automatico alla versione precedente funziona.
 
 ### D-028 — Strumenti per la macchina di build e l'emulatore · `proposta` (sul ramo `build/ab-partitions`)
 - **Guida:** `docs/sviluppo.md`, per l'utente che lavora dal proprio PC.

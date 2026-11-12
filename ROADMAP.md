@@ -24,9 +24,8 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 | 9 | Ecosistema: interoperabilità tra dispositivi | `proposta` |
 
-**Prossimo passo:** l'immagine si avvia in QEMU fino al login (2026-11-12). Facoltativo
-prima dell'unione: prova di un aggiornamento A/B con bundle RAUC. Poi revisione e unione
-in `main` del ramo `build/ab-partitions`, e passo 4c. Un passo alla volta, con conferma
+**Prossimo passo:** immagine, aggiornamento A/B e ritorno automatico provati in QEMU
+(2026-11-12). Revisione e unione in `main` del ramo `build/ab-partitions`, poi passo 4c. Un passo alla volta, con conferma
 dell'utente.
 
 ---
@@ -124,8 +123,8 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
   - [x] Prima build completa sul portatile (2026-11-11)
   - [x] Avvio in QEMU con `tools/run-qemu.sh` (2026-11-12): login, partizione dati
         cifrata, slot A confermato da RAUC, dati persistenti dopo il riavvio
-- [ ] Prova in QEMU di un aggiornamento A/B con bundle RAUC e del ritorno automatico
-      alla versione precedente
+- [x] Prova in QEMU di un aggiornamento A/B con bundle RAUC e del ritorno automatico
+      alla versione precedente (2026-11-12)
 - [ ] Prova del dual boot in QEMU con Windows installato
 - [ ] Servizi di base: rete, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
@@ -271,3 +270,4 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
 | 2026-11-11 | 0 | `README.md` per chi vuole conoscere il progetto: cosa offrirà, dispositivi, stato, licenza; variante scura del logo per sfondi chiari |
 | 2026-11-12 | 1 | Prima prova in QEMU: GRUB e kernel partono; corretti `mkfs.ext4` mancante per systemd-repart, ESP in fstab come `/dev/sda2` e cartella `/efi` mancante; `run-qemu.sh` apre la finestra anche da app snap. **Si arriva al login**: dati cifrati montati e persistenti, slot A confermato da RAUC |
+| 2026-11-12 | 1 | Prova A/B in QEMU: bundle installato, avvio automatico dello slot B e ritorno ad A dopo un avvio interrotto; corretti immagine `ext4` per il bundle, valori `1`/`0` in `grubenv`, montaggio di `/efi` con `efi.mount` |
