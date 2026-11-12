@@ -264,12 +264,15 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Firmware:** `packagegroup-project-os-desktop-hw`, 27 `linux-firmware` packages plus
   the Wi‑Fi frequency database; compressed with zstd.
 - **Missing, to be written as own recipes** (they are not in OpenEmbedded-Core): Intel
-  SOF audio firmware (Intel laptops from the 11th generation), Intel microcode. The
+  SOF audio firmware (Intel laptops from the 11th generation; *done in D-039*), Intel
+  microcode. The
   microcode has to be loaded at boot through an initramfs to be effective: to be
   decided with the boot layout (step 4).
 - **Tool:** `tools/check-kernel-fragments.py` checks that each option exists in the
   kernel version and that the value is allowed by the type; it already found an error
   (`TG3` instead of `TIGON3`). The build checks the dependencies between options.
+  *Not enough: options dropped for a missing dependency went unnoticed; since D-041 the
+  build compares the fragments with the final configuration.*
 - **Checks done:** bitbake resolves the image dependency graph without errors;
   firmware, regdb and fragments enter the build. To check at the first build: kernel
   compilation and warnings about option dependencies. *First build (2026-11-11): the
@@ -576,6 +579,111 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   until it is confirmed); the kernel warns that the GPT backup header is not at the end
   of the disk on the first boot in QEMU (the emulator disk is enlarged after the image
   is written).
+
+### D-039 — Intel SOF audio firmware from sof-bin · `confirmed` (2026-11-12, merged into `main`)
+- **What:** own recipe `sof-bin` (`layers/meta-project-os-desktop/recipes-bsp/sof-bin/`),
+  version 2026.09.2, from the official releases of the SOF project
+  (`github.com/thesofproject/sof-bin`), added to `packagegroup-project-os-desktop-hw`.
+  The tarball is pinned by SHA-256, the same digest GitHub publishes for the release
+  asset. Installed in `/lib/firmware/intel` with the upstream layout (`sof`,
+  `sof-ipc4`, `sof-ipc4-lib`, `sof-ipc4-tplg`, `sof-tplg`, `sof-ace-tplg` link).
+- **Why:** R-04. Internal speakers and microphones of most Intel laptops from the 11th
+  generation on go through the audio DSP, which needs this firmware; the kernel drivers
+  were already enabled (D-025). linux-firmware 20260410 contains only the older `avs`
+  firmware, not SOF.
+- **Left out (R-02):** the debugging tools (`tools/`: sof-logger and others), the
+  debug-log dictionaries (`*.ldc`, read only by sof-logger), the topologies for NXP
+  i.MX and MediaTek ARM DSPs and the AMD topologies (the AMD driver looks in `amd/`, and
+  sof-bin has no AMD firmware). Only the Intel licence remains (BSD-3-Clause with
+  Intel's patent grant); the NXP licence covered only the i.MX files.
+- **Compression:** every file compressed with zstd like the rest of the firmware
+  (D-025); symbolic links re-pointed to the `.zst` names, repeating until nothing
+  changes because some links point to other links (e.g. `arl` → `mtl`); the build
+  stops if a broken link remains. Result: 570 files and 70 links, 17 MB installed
+  (about 57 MB uncompressed), 12.7 MB package.
+- **AMD:** the kernel also enables SOF for recent AMD laptops (Rembrandt, ACP 6.3/7.0),
+  but neither linux-firmware 20260410 nor sof-bin ships AMD SOF firmware. Most AMD
+  laptops use the ACP drivers without SOF; to be checked on real hardware.
+- **Updates:** a new sof-bin release is a new recipe version with its new digest; the
+  release notes of the SOF project are part of vulnerability monitoring (D-012).
+- **Discarded alternatives:** using upstream `install.sh` (it installs the tools and
+  needs rsync); installing only the platforms enabled in the kernel (saves little and
+  is easy to get wrong when new platforms are enabled).
+- **Checks done:** package contents (all files compressed and valid zstd, no broken
+  links, no `.ldc` or ARM files); image boots in QEMU (`running`, no failed units) with
+  the firmware in `/lib/firmware/intel`; system 627 MB in the slot (610 MB before),
+  idle memory unchanged (about 76 MB). Real
+  check on an Intel laptop in the hardware test session (ROADMAP step 6.8, D-040; QEMU
+  has no audio DSP).
+
+### D-040 — Real hardware checks in one test session · `requirement` (2026-11-12)
+- **What (user's request):** the checks that need real PCs (QEMU cannot do them: audio
+  DSP, Wi‑Fi, Bluetooth, GPUs, laptop platform, BIOS and Windows dual boot, TPM…) are
+  not done step by step: they are gathered in a list, step 6 of Phase 1 in
+  `ROADMAP.md`, and done all together in one session, after steps 3b–5b.
+- **How to apply:** every step that leaves something to check on real hardware adds a
+  row to the step 6 table (check, hardware needed, originating step or decision) and
+  says so in its own entry; the step itself is closed when its QEMU checks pass.
+- **Why:** fewer sessions on physical machines, the same image tested on all of them,
+  and a single place to see what is still unproven.
+
+### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `confirmed` (2026-11-12, merged into `main`)
+- **Problem (found while reviewing the video drivers):** some options of our fragments
+  never reached the kernel, and no check noticed:
+  - `DRM_VMWGFX` (VMware) and `DRM_HYPERV` (Hyper‑V) depend on `HYPERVISOR_GUEST`,
+    which was off;
+  - `I2C_DESIGNWARE_PLATFORM`, the I2C controller of the touchpads and touchscreens of
+    most recent laptops, depends on `I2C_DESIGNWARE_CORE`, which was off; on top of
+    that `GPIOLIB` and every Intel/AMD pin-control driver were off, so touchpad
+    interrupts, buttons and sensors on GPIO lines could not work.
+  `do_kernel_configcheck` does not report options dropped for a missing dependency, and
+  `tools/check-kernel-fragments.py` checks only names and types (D-025).
+- **What:**
+  - new task `do_project_os_configcheck` in the kernel bbappend, after
+    `do_kernel_configcheck` and before `do_compile`: every `CONFIG_…` line (and every
+    "is not set") of our fragments must be in the final `.config` with the same
+    value, otherwise the build stops listing file, line, requested and actual value;
+  - new fragment `virt-guest.cfg`: `HYPERVISOR_GUEST`, paravirtualization and KVM guest
+    support; Hyper‑V core, VMBus and synthetic disk built in (`=y`: Generation 2 VMs
+    boot from it and there is no initramfs), network, integration services, balloon,
+    mouse and keyboard; VMware paravirtual SCSI built in, vmxnet3, VMCI, balloon;
+  - `input-platform.cfg`: DesignWare I2C core, platform and PCI front ends, Intel LPSS
+    (PCI and ACPI, plus the LPSS clocks of older Atom devices), `GPIOLIB` and the
+    pin-control drivers built in (`=y`, so GPIO interrupts exist when I2C-HID devices
+    are probed) for AMD and for consumer Intel platforms from Haswell/Bay Trail to
+    Meteor Lake and the generic platform driver of newer ones; server platforms left
+    out.
+- **Checks done:** `tools/check-kernel-fragments.py`: 200 options, 0 errors; the new
+  task finds all of them in the final configuration; `do_kernel_configcheck` reports
+  nothing. QEMU: system `running`, no failed units, "Hypervisor detected: KVM" and
+  kvm-clock in use, the new modules (`vmwgfx`, `hyperv_drm`, DesignWare I2C, Intel
+  LPSS) in the image; system 629 MB, idle memory about 76 MB after a normal boot
+  (104 MB right after the first boot, which creates and encrypts the data partition).
+  Touchpads, buttons and VMware/Hyper‑V are checked in the hardware test
+  session (ROADMAP step 6.14 and 6.20, D-040).
+- **Discarded alternatives:** raising `KCONF_AUDIT_LEVEL` of linux-yocto (it reports
+  many options of yocto-kernel-cache that are not ours, and only as warnings); a
+  separate script to run by hand (it would be forgotten, like the dependency check).
+
+### D-042 — Plan of step 3b + 4c: initramfs, persistent /etc, erofs + dm-verity, UKI · `confirmed` (choices of the user, 2026-11-12), details `proposed`
+- **Sub-steps**, each tested in QEMU with boot, A/B update and rollback:
+  1. **4c.1** systemd initramfs, with Intel (new recipe, from Intel's official files)
+     and AMD microcode loaded early (**3b**);
+  2. **4c.2** persistent `/etc`;
+  3. **4c.3** erofs system verified by dm-verity (a corrupted block stops the boot);
+  4. **4c.4** unified kernel image (UKI) per slot.
+- **`/etc` (user's choice):** an **overlay** — the `/etc` of the image stays read-only
+  as the lower layer, changes go to an upper layer on the encrypted data partition,
+  mounted by the initramfs. Against the known risk (a modified file hides the new
+  version brought by an update), every update compares the changed files with the new
+  image and reports the conflicts. Discarded: stateless `/etc` (every program that
+  writes to `/etc` would need its own configuration).
+- **UKI and BIOS (user's choice):** for each slot the EFI partition holds both a UKI
+  (UEFI, ready for Secure Boot in Phase 8) and separate kernel + initramfs (used by
+  GRUB when the PC boots from BIOS, R-26); RAUC updates them together with the slot.
+  Cost: about 2 × 40 MB more on the 512 MB EFI partition. Discarded: separate kernel
+  only until Phase 8 (the UKI would come later, with a second change of the boot
+  chain).
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a

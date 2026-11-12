@@ -29,8 +29,9 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 3a (Intel SOF audio firmware), then 3b with 4c, 4d, 4e, 5b, in
-roadmap order. One step at a time, with the user's confirmation. One step
+**Next step:** step 4c.1 (systemd initramfs with early microcode, together with 3b) on
+the `build/verified-boot` branch; then 4c.2–4c.4, 4d, 4e, 5b, and the real hardware
+test session (step 6) with all the hardware checks together. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
 
 ---
@@ -107,14 +108,21 @@ with boot menu, A/B partitions and full hardware support.
   - [x] 2b. First build and boot in QEMU on the build host (laptop, D-034)
 - [x] 3. Kernel configuration for modern hardware (audio, Bluetooth, Wi‑Fi, Intel/AMD
       GPU) and firmware from linux-firmware, each with its reason (R-04, D-025)
-  - [ ] 3a. Intel SOF audio firmware recipe
+  - [x] 3a. Intel SOF audio firmware recipe (`sof-bin` 2026.09.2, D-039); listening
+        test in step 6
   - [ ] 3b. Intel microcode recipe, early microcode loading (with step 4)
 - [ ] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
   - [x] 4b. Slot selection in GRUB and signed RAUC updates
   - [ ] 4c. erofs + dm-verity system, systemd initramfs, unified kernel image (UKI) per
-        slot, persistent `/etc`
+        slot, persistent `/etc` (plan in D-042)
+    - [ ] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b)
+    - [ ] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
+          reported
+    - [ ] 4c.3 erofs system verified by dm-verity
+    - [ ] 4c.4 UKI per slot on the EFI partition, plus separate kernel + initramfs for
+          BIOS boot
   - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
         extra method where present
   - [ ] 4e. BIOS boot with GRUB in the same image (R-26)
@@ -122,6 +130,33 @@ with boot menu, A/B partitions and full hardware support.
   - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
   - [ ] 5b. Yocto recipe: `.pf2` fonts, theme installation, `os-prober` to detect
         Windows and other systems
+- [ ] 6. **Real hardware test session** (D-040): all the checks that QEMU cannot do,
+      done together in one step on real PCs, after steps 3b–5b. Every step that leaves
+      something to check on real hardware adds it to this list instead of keeping it
+      open on its own.
+
+      | # | Check | Hardware | From |
+      |---|---|---|---|
+      | 6.1 | UEFI boot from the PC's own firmware, GRUB menu and automatic slot choice | any UEFI PC | D-026 |
+      | 6.2 | BIOS boot with the same image | PC with legacy BIOS (or CSM) | step 4e, R-26 |
+      | 6.3 | Dual boot: Windows detected by `os-prober` and bootable from the menu | PC with Windows | step 5b, D-009 |
+      | 6.4 | Encrypted data partition: creation, unlocking with password and recovery key, without TPM | PC without TPM | steps 4a, 4d, R-27 |
+      | 6.5 | TPM as an extra unlock method | PC with TPM 2.0 | step 4d |
+      | 6.6 | A/B update and automatic rollback, EFI partition check after a power cut | any PC | D-026, D-038 |
+      | 6.7 | Graphics: Intel (i915/xe), AMD (amdgpu/radeon), NVIDIA (nouveau), screen from the first moment, laptop brightness | PCs with each GPU | D-025 |
+      | 6.8 | Intel audio with SOF: speakers, headphones, microphones | Intel laptop, 11th generation or later | step 3a, D-039 |
+      | 6.9 | AMD audio: does the laptop need SOF firmware (not available today)? | recent AMD laptop | D-039 |
+      | 6.10 | HD Audio and HDMI/DisplayPort audio on desktops | desktop PC | D-025 |
+      | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database | PCs/adapters available | D-025 |
+      | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones | PCs/adapters available | D-025 |
+      | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025 |
+      | 6.14 | Input: keyboard, I2C touchpad and touchscreen (DesignWare I2C, GPIO interrupts), laptop buttons, USB devices, USB 4/Thunderbolt | Intel and AMD laptops | D-025, D-041 |
+      | 6.15 | Laptop platform: battery, AC adapter, buttons, fans, temperatures, CPU frequency | laptop | D-025 |
+      | 6.16 | Disks: NVMe, SATA, USB sticks, SD card reader, NTFS and exFAT partitions | PCs available | D-025 |
+      | 6.17 | Early microcode loading (Intel and AMD) | Intel and AMD PCs | step 3b |
+      | 6.18 | Baseline x86-64: boot on an old 64-bit processor (before 2008) | old PC, if available | D-027, R-28 |
+      | 6.19 | Measurements: image size, idle memory, boot time | every PC tested | D-034 |
+      | 6.20 | Boot and display as a guest of VMware and Hyper‑V (Generation 2), and of VirtualBox | the three hypervisors | D-041 |
 
 **Next steps:**
 - [x] Guide and scripts for the build host and the emulator (`docs/development.md`,
@@ -143,10 +178,10 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
-- [ ] Test on real Intel and AMD hardware (audio, Bluetooth, Wi‑Fi, GPU)
+- [ ] Size budget of the firmware: the NVIDIA firmware for nouveau (GSP) is 109 MB of
+      the 627 MB image; keep only the versions the kernel loads (D-041 review)
 - [ ] Measure image size and idle memory; record them in `MEMORY.md`
-      *(first measurement in QEMU: 612 MB, ~70 MB of RAM, D-034; to be repeated on real
-      hardware)*
+      *(QEMU: 610 MB, ~77 MB of RAM, D-038; on real hardware in step 6.19)*
 - [ ] Regenerate `branding/previews/grub-menu.png` with the English menu texts
       (`branding/tools/render.py`, with step 5b)
 
@@ -295,3 +330,7 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | User's review: D-026, D-028, D-034, D-035, D-036 confirmed; `build/ab-partitions` merged into `main` |
 | 2026-11-12 | 1 | Phase 1 cleanup (D-038): package inventory with reasons, removed syslog, udhcpc, Pine64 keymaps, libssh/libgcrypt and the volatile tmpfs layout; EFI partition checked at every boot; kernel configcheck clean; full QEMU test including A/B update and rollback |
 | 2026-11-12 | 1 | D-038 approved by the user; `build/phase1-cleanup` merged into `main` |
+| 2026-11-12 | 1 | Step 3a: `sof-bin` recipe for the Intel SOF audio firmware, compressed with zstd, without debug files and ARM topologies (D-039) |
+| 2026-11-12 | 1 | Real hardware checks gathered in one test session, step 6, with the full list (D-040, at the user's request) |
+| 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |
+| 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |
