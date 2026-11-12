@@ -13,7 +13,6 @@ RDEPENDS:${PN} = " \
     ${BLUETOOTH} \
     ${ETHERNET} \
     ${AUDIO} \
-    ${CPU} \
 "
 
 # Graphics: Intel (i915, xe), AMD (amdgpu, radeon), NVIDIA (nouveau)
@@ -62,5 +61,5 @@ ETHERNET = "linux-firmware-rtl-nic"
 # laptops (sof-bin, D-039)
 AUDIO = "linux-firmware-cirrus sof-bin"
 
-# AMD microcode. Intel microcode: recipe still to be written (not in OpenEmbedded-Core).
-CPU = "linux-firmware-microcode-amd"
+# CPU microcode (Intel and AMD) is not installed here: it is loaded early from the
+# microcode.cpio archive built by project-os-microcode (step 3b, D-043)

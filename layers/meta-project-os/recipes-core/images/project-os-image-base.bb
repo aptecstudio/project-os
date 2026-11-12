@@ -43,3 +43,19 @@ ROOTFS_POSTPROCESS_COMMAND += "project_os_efi_mountpoint"
 project_os_efi_mountpoint() {
     install -d -m 0700 ${IMAGE_ROOTFS}/efi
 }
+
+# initramfs next to the kernel, in /boot of the slot (D-043): GRUB loads first the
+# archives the machine lists in PROJECT_OS_EARLY_INITRD (e.g. CPU microcode, which the
+# kernel must find uncompressed at the very start), then the initramfs.
+PROJECT_OS_EARLY_INITRD ??= ""
+PROJECT_OS_EARLY_INITRD_DEPENDS ??= ""
+do_rootfs[depends] += "project-os-initramfs:do_image_complete ${PROJECT_OS_EARLY_INITRD_DEPENDS}"
+ROOTFS_POSTPROCESS_COMMAND += "project_os_install_initramfs"
+project_os_install_initramfs() {
+    install -d ${IMAGE_ROOTFS}/boot
+    install -m 0644 ${DEPLOY_DIR_IMAGE}/project-os-initramfs-${MACHINE}.cpio.zst \
+        ${IMAGE_ROOTFS}/boot/initramfs.cpio.zst
+    for f in ${PROJECT_OS_EARLY_INITRD}; do
+        install -m 0644 ${DEPLOY_DIR_IMAGE}/$f ${IMAGE_ROOTFS}/boot/$(basename $f)
+    done
+}

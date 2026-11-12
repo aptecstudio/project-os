@@ -29,9 +29,9 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4c.1 (systemd initramfs with early microcode, together with 3b) on
-the `build/verified-boot` branch; then 4c.2–4c.4, 4d, 4e, 5b, and the real hardware
-test session (step 6) with all the hardware checks together. One step at a time, with the user's confirmation. One step
+**Next step:** step 4c.2 (persistent `/etc` overlay) on the `build/verified-boot`
+branch; then 4c.3, 4c.4, 4d, 4e, 5b, and the real hardware test session (step 6) with
+all the hardware checks together. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
 
 ---
@@ -110,14 +110,16 @@ with boot menu, A/B partitions and full hardware support.
       GPU) and firmware from linux-firmware, each with its reason (R-04, D-025)
   - [x] 3a. Intel SOF audio firmware recipe (`sof-bin` 2026.09.2, D-039); listening
         test in step 6
-  - [ ] 3b. Intel microcode recipe, early microcode loading (with step 4)
+  - [x] 3b. Intel microcode recipe, early microcode loading (with step 4c.1, D-043);
+        real check in step 6.17
 - [ ] 4. A/B partition layout with dm-verity, encrypted data partition, RAUC (D-018, D-026)
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
   - [x] 4b. Slot selection in GRUB and signed RAUC updates
   - [ ] 4c. erofs + dm-verity system, systemd initramfs, unified kernel image (UKI) per
         slot, persistent `/etc` (plan in D-042)
-    - [ ] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b)
+    - [x] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b,
+          D-043)
     - [ ] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
           reported
     - [ ] 4c.3 erofs system verified by dm-verity
@@ -178,8 +180,9 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
-- [ ] Size budget of the firmware: the NVIDIA firmware for nouveau (GSP) is 109 MB of
-      the 627 MB image; keep only the versions the kernel loads (D-041 review)
+- [ ] Size budget: the NVIDIA firmware for nouveau (GSP) is 109 MB of the image, keep
+      only the versions the kernel loads (D-041 review); the initramfs is 18.9 MB
+      compressed because of systemd's hard dependencies (D-043)
 - [ ] Measure image size and idle memory; record them in `MEMORY.md`
       *(QEMU: 610 MB, ~77 MB of RAM, D-038; on real hardware in step 6.19)*
 - [ ] Regenerate `branding/previews/grub-menu.png` with the English menu texts
@@ -334,3 +337,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | Real hardware checks gathered in one test session, step 6, with the full list (D-040, at the user's request) |
 | 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |
 | 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |
+| 2026-11-12 | 1 | Steps 4c.1 and 3b: systemd initramfs and early Intel/AMD microcode loaded by GRUB; boot, A/B update and rollback tested in QEMU (D-043) |

@@ -685,6 +685,44 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   only until Phase 8 (the UKI would come later, with a second change of the boot
   chain).
 
+### D-043 — systemd initramfs and early microcode (steps 4c.1 and 3b) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+- **initramfs** (`project-os-initramfs`, in `meta-project-os`): systemd in initrd mode
+  (`/init` → systemd, `/etc/initrd-release` from `os-release`). It finds the slot given
+  by `root=PARTLABEL=…`, checks it with fsck, mounts it on `/sysroot` and switches to
+  it. Packages: `systemd`, `udev`, udev rules, `mount`, `fsck`, `e2fsck`,
+  `os-release`, without recommendations; systemd's hard dependencies (PAM, D-Bus,
+  OpenSSL, kbd, cryptsetup libraries…) come along. `cpio.zst`: 18.9 MB, 51 MB
+  unpacked — to be slimmed in the size budget.
+- **Microcode** (`project-os-microcode`, in `meta-project-os-desktop`): builds
+  `microcode.cpio`, an uncompressed archive with `kernel/x86/microcode/GenuineIntel.bin`
+  (all of `intel-ucode/` from Intel's official release `microcode-20261110`, pinned to
+  the commit of its tag; `intel-ucode-with-caveats/` left out, as Intel advises) and
+  `AuthenticAMD.bin` (the `amd-ucode` containers of linux-firmware 20260410, the same
+  file and digest as OE-Core's recipe). Reproducible: fixed times and owner, sorted
+  entries. 19.5 MB.
+- **Boot:** the machine lists early archives in `PROJECT_OS_EARLY_INITRD`; the image
+  copies them and the initramfs into `/boot` of the slot, and GRUB loads
+  `initrd microcode.cpio initramfs.cpio.zst`: the kernel finds the microcode
+  uncompressed at the start of the first archive, as early loading requires. Boot
+  files stay inside the slot, so the A/B update carries them (until step 4c.4 moves
+  them to the EFI partition).
+- **Removed:** `linux-firmware-microcode-amd` from the image (late loading is no longer
+  needed).
+- **Why:** microcode loaded early fixes processor bugs and vulnerabilities before any
+  code runs (late loading is unsafe on many processors); the initramfs is needed by
+  the next sub-steps (encrypted `/etc` overlay, dm-verity).
+- **Discarded alternatives:** OE's shell-based `initramfs-framework` (a second init
+  system to maintain, while systemd already handles fsck, crypttab and veritysetup);
+  `iucode-tool` to build the Intel file (concatenation is what the kernel loader
+  expects, no extra tool needed); microcode built into the kernel
+  (`CONFIG_EXTRA_FIRMWARE`, it would tie every microcode update to a kernel rebuild).
+- **Checks done (QEMU):** boot through the initramfs ("Switching root" at about 2 s),
+  system `running`, no failed units; A/B update to slot B through its own initramfs,
+  confirmed; interrupted boot of B → automatic rollback to A. Slot: 667 MB (629 MB
+  before: kernel, initramfs and microcode in `/boot`). In a virtual machine the kernel
+  skips microcode updates (the hypervisor handles them): the real check is in the
+  hardware test session (ROADMAP step 6.17, D-040).
+
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
   global **`system`** object, with one sub-object per area, like `chrome.*` in
