@@ -29,10 +29,9 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** review and merge of the `build/sof-firmware` branch (step 3a, D-039; kernel
-configuration check, VM guests and laptop GPIO/I2C, D-041);
-then 3b with 4c, 4d, 4e, 5b, in roadmap order, and the real hardware test session
-(step 6) with all the hardware checks together. One step at a time, with the user's confirmation. One step
+**Next step:** step 4c.1 (systemd initramfs with early microcode, together with 3b) on
+the `build/verified-boot` branch; then 4c.2–4c.4, 4d, 4e, 5b, and the real hardware
+test session (step 6) with all the hardware checks together. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
 
 ---
@@ -117,7 +116,13 @@ with boot menu, A/B partitions and full hardware support.
         first boot
   - [x] 4b. Slot selection in GRUB and signed RAUC updates
   - [ ] 4c. erofs + dm-verity system, systemd initramfs, unified kernel image (UKI) per
-        slot, persistent `/etc`
+        slot, persistent `/etc` (plan in D-042)
+    - [ ] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b)
+    - [ ] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
+          reported
+    - [ ] 4c.3 erofs system verified by dm-verity
+    - [ ] 4c.4 UKI per slot on the EFI partition, plus separate kernel + initramfs for
+          BIOS boot
   - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
         extra method where present
   - [ ] 4e. BIOS boot with GRUB in the same image (R-26)
@@ -328,3 +333,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | Step 3a: `sof-bin` recipe for the Intel SOF audio firmware, compressed with zstd, without debug files and ARM topologies (D-039) |
 | 2026-11-12 | 1 | Real hardware checks gathered in one test session, step 6, with the full list (D-040, at the user's request) |
 | 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |
+| 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |

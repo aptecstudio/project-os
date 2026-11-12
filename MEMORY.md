@@ -580,7 +580,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   of the disk on the first boot in QEMU (the emulator disk is enlarged after the image
   is written).
 
-### D-039 — Intel SOF audio firmware from sof-bin · `proposed` (2026-11-12, on the `build/sof-firmware` branch)
+### D-039 — Intel SOF audio firmware from sof-bin · `confirmed` (2026-11-12, merged into `main`)
 - **What:** own recipe `sof-bin` (`layers/meta-project-os-desktop/recipes-bsp/sof-bin/`),
   version 2026.09.2, from the official releases of the SOF project
   (`github.com/thesofproject/sof-bin`), added to `packagegroup-project-os-desktop-hw`.
@@ -627,7 +627,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Why:** fewer sessions on physical machines, the same image tested on all of them,
   and a single place to see what is still unproven.
 
-### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `proposed` (2026-11-12, on the `build/sof-firmware` branch)
+### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `confirmed` (2026-11-12, merged into `main`)
 - **Problem (found while reviewing the video drivers):** some options of our fragments
   never reached the kernel, and no check noticed:
   - `DRM_VMWGFX` (VMware) and `DRM_HYPERV` (Hyper‑V) depend on `HYPERVISOR_GUEST`,
@@ -664,6 +664,26 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Discarded alternatives:** raising `KCONF_AUDIT_LEVEL` of linux-yocto (it reports
   many options of yocto-kernel-cache that are not ours, and only as warnings); a
   separate script to run by hand (it would be forgotten, like the dependency check).
+
+### D-042 — Plan of step 3b + 4c: initramfs, persistent /etc, erofs + dm-verity, UKI · `confirmed` (choices of the user, 2026-11-12), details `proposed`
+- **Sub-steps**, each tested in QEMU with boot, A/B update and rollback:
+  1. **4c.1** systemd initramfs, with Intel (new recipe, from Intel's official files)
+     and AMD microcode loaded early (**3b**);
+  2. **4c.2** persistent `/etc`;
+  3. **4c.3** erofs system verified by dm-verity (a corrupted block stops the boot);
+  4. **4c.4** unified kernel image (UKI) per slot.
+- **`/etc` (user's choice):** an **overlay** — the `/etc` of the image stays read-only
+  as the lower layer, changes go to an upper layer on the encrypted data partition,
+  mounted by the initramfs. Against the known risk (a modified file hides the new
+  version brought by an update), every update compares the changed files with the new
+  image and reports the conflicts. Discarded: stateless `/etc` (every program that
+  writes to `/etc` would need its own configuration).
+- **UKI and BIOS (user's choice):** for each slot the EFI partition holds both a UKI
+  (UEFI, ready for Secure Boot in Phase 8) and separate kernel + initramfs (used by
+  GRUB when the PC boots from BIOS, R-26); RAUC updates them together with the slot.
+  Cost: about 2 × 40 MB more on the 512 MB EFI partition. Discarded: separate kernel
+  only until Phase 8 (the UKI would come later, with a second change of the boot
+  chain).
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
