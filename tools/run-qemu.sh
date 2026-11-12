@@ -68,6 +68,17 @@ else
     CPU=qemu64
 fi
 
+# Lanciato da un'app snap (es. VS Code): le sue variabili GTK/GIO fanno caricare a
+# QEMU librerie dello snap incompatibili e la finestra non si apre.
+if [ -n "${SNAP:-}" ]; then
+    unset GTK_PATH GTK_EXE_PREFIX GTK_MODULES GTK_IM_MODULE_FILE GIO_MODULE_DIR \
+          GDK_PIXBUF_MODULE_FILE GDK_PIXBUF_MODULEDIR GSETTINGS_SCHEMA_DIR LOCPATH
+    if [ -n "${XDG_DATA_DIRS_VSCODE_SNAP_ORIG:-}" ]; then
+        XDG_DATA_DIRS="$XDG_DATA_DIRS_VSCODE_SNAP_ORIG"
+        export XDG_DATA_DIRS
+    fi
+fi
+
 if [ "$TEXT" -eq 1 ]; then
     DISPLAY_ARGS="-nographic -serial mon:stdio"
 else

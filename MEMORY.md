@@ -311,6 +311,24 @@ portatile.*
   errori né avvisi; 159 opzioni del kernel verificate sul 6.18; lo script delle chiavi
   produce una catena di certificati valida. Da verificare alla prima build: sintassi di
   `grub.cfg`, moduli GRUB, creazione delle partizioni, avvio e aggiornamento A/B.
+- **Prima prova in QEMU (2026-11-12):** GRUB parte, legge `grubenv`, sceglie lo slot A e
+  avvia il kernel; systemd arriva in modalità di emergenza per due errori, corretti:
+  - systemd-repart crea e cifra la partizione dati ma non la formatta: nell'immagine
+    mancava `mkfs.ext4`. Aggiunto `e2fsprogs-mke2fs` alle dipendenze di
+    `project-os-storage`;
+  - wic scriveva in fstab l'ESP come `/dev/sda2`, che non esiste con dischi NVMe o
+    virtio: ora `--use-uuid` (riga `UUID=`, numero di serie del volume FAT generato
+    alla build). Scartato `--use-label`: l'etichetta `ESP` può ripetersi su altri
+    dischi dello stesso PC;
+  - poi `/efi` non si montava: la cartella non esisteva e nel sistema in sola lettura
+    systemd non può crearla. L'immagine la crea alla build (`project_os_efi_mountpoint`,
+    permessi 0700).
+- **Esito dopo le correzioni (2026-11-12, QEMU con KVM):** si arriva al login; sistema
+  `running`, nessun servizio fallito; RAUC avviato da A, slot A *good* (`rauc-mark-good`
+  funziona), slot B *bad* perché ancora vuoto; `/` ext4 in sola lettura, `/efi` e
+  `/var` (LUKS2, 15,6 GB) montate. Dopo un riavvio i dati in `/var/home` restano e
+  systemd-repart non modifica nulla. Resta da provare: aggiornamento A/B con un bundle
+  e ritorno alla versione precedente.
 
 ### D-028 — Strumenti per la macchina di build e l'emulatore · `proposta` (sul ramo `build/ab-partitions`)
 - **Guida:** `docs/sviluppo.md`, per l'utente che lavora dal proprio PC.
@@ -325,7 +343,10 @@ portatile.*
   successivi bitbake ha bisogno dei namespace utente, limitati da AppArmor: lo script
   spiega la modifica e chiede conferma.
 - **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
-  bitbake. Gli script non sono ancora stati eseguiti su una macchina reale.
+  bitbake. Eseguiti sul portatile dell'utente il 2026-11-11 e 2026-11-12.
+- **Correzione (2026-11-12):** lanciato da un'app snap (VS Code installato come snap),
+  QEMU ereditava le variabili GTK/GIO dello snap e non apriva la finestra (errore di
+  `libpthread` di `core20`). `tools/run-qemu.sh` le toglie quando `SNAP` è impostata.
 
 ### D-033 — Ecosistema di dispositivi project-os · `proposta` (2026-11-11)
 - **Cosa:** un servizio di sistema in Rust (*demone di continuità*) che collega i
@@ -375,6 +396,8 @@ portatile.*
 - **Misurato alla prima build (2026-11-11):** circa 3 ore e 45 minuti di build effettiva,
   `build/` 26 GB e `sources/` 0,4 GB; RAM mai sotto i 3 GB disponibili; immagine `wic`
   da 8,6 GB nominali (slot A e B da 4 GB) e 695 MB realmente occupati.
+- **Misurato in QEMU (2026-11-12):** sistema 612 MB occupati nello slot; memoria in uso
+  a riposo circa 70 MB su 2 GB. Build incrementale dopo una correzione: 2-3 minuti.
 - **Limiti:** non basta per WebKitGTK (Fase 2), che vuole più di 2 GB di RAM per
   processo di compilazione e molto più disco. DA-11 resta aperta.
 - **Alternativa scartata:** uno script di preparazione separato per il portatile:

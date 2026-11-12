@@ -33,3 +33,10 @@ project_os_home_on_data() {
     install -d ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d
     echo "d /var/home 0755 root root -" > ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d/project-os-home.conf
 }
+
+# Punto di montaggio della partizione EFI (fstab): con il sistema in sola lettura
+# systemd non può crearlo all'avvio. Accesso solo root, come l'ESP montata (umask=0077).
+ROOTFS_POSTPROCESS_COMMAND += "project_os_efi_mountpoint"
+project_os_efi_mountpoint() {
+    install -d -m 0700 ${IMAGE_ROOTFS}/efi
+}

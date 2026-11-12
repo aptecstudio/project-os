@@ -30,5 +30,6 @@ do_install() {
 SYSTEMD_SERVICE:${PN} = "var.mount"
 
 FILES:${PN} += "${nonarch_libdir}/repart.d ${systemd_system_unitdir}"
-RDEPENDS:${PN} = "systemd cryptsetup"
+# e2fsprogs-mke2fs: mkfs.ext4, con cui systemd-repart formatta la partizione dati
+RDEPENDS:${PN} = "systemd cryptsetup e2fsprogs-mke2fs"
 REQUIRED_DISTRO_FEATURES = "systemd"

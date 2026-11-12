@@ -24,9 +24,10 @@ Le fasi si eseguono **una alla volta**, in ordine (D-021).
 | 8 | Installazione, setup e aggiornamenti | `proposta` |
 | 9 | Ecosistema: interoperabilità tra dispositivi | `proposta` |
 
-**Prossimo passo:** l'utente prepara la macchina di build e prova l'immagine in QEMU
-(`docs/sviluppo.md`) dal ramo `build/ab-partitions`; con l'esito si rivede il ramo e si
-prosegue con 4c. Un passo alla volta, con conferma dell'utente.
+**Prossimo passo:** l'immagine si avvia in QEMU fino al login (2026-11-12). Facoltativo
+prima dell'unione: prova di un aggiornamento A/B con bundle RAUC. Poi revisione e unione
+in `main` del ramo `build/ab-partitions`, e passo 4c. Un passo alla volta, con conferma
+dell'utente.
 
 ---
 
@@ -94,10 +95,10 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 - [x] 1. Configurare Yocto 6.0 «Wrynose» (LTS) con kas e creare i layer
       `meta-project-os` e `meta-project-os-desktop` (D-012, D-024); bitbake legge la
       configurazione senza errori. Da confermare alla prima build completa.
-- [ ] 2. Immagine minima: kernel Linux 6.18 LTS, glibc, systemd; avvio in QEMU/UEFI
+- [x] 2. Immagine minima: kernel Linux 6.18 LTS, glibc, systemd; avvio in QEMU/UEFI
       fino a un terminale testuale (D-015, D-016)
   - [x] 2a. Ricetta dell'immagine, macchina e schema di partizioni scritti
-  - [ ] 2b. Prima build e avvio in QEMU sulla macchina di build (DA-11)
+  - [x] 2b. Prima build e avvio in QEMU sulla macchina di build (portatile, D-034)
 - [x] 3. Configurazione del kernel per l'hardware moderno (audio, Bluetooth, Wi‑Fi,
       GPU Intel/AMD) e firmware da linux-firmware, ognuno con motivazione (R-04, D-025)
   - [ ] 3a. Ricetta firmware audio Intel SOF
@@ -119,15 +120,19 @@ hardware reale, con menu di avvio, partizioni A/B e supporto hardware completo.
 **Passi successivi:**
 - [x] Guida e script per la macchina di build e per l'emulatore (`docs/sviluppo.md`,
       `tools/setup-host.sh`, `tools/build.sh`, `tools/run-qemu.sh`, D-028)
-- [ ] Prima build completa e avvio in QEMU sulla macchina dell'utente
+- [x] Prima build completa e avvio in QEMU sulla macchina dell'utente
   - [x] Prima build completa sul portatile (2026-11-11)
-  - [ ] Avvio in QEMU con `tools/run-qemu.sh`
+  - [x] Avvio in QEMU con `tools/run-qemu.sh` (2026-11-12): login, partizione dati
+        cifrata, slot A confermato da RAUC, dati persistenti dopo il riavvio
+- [ ] Prova in QEMU di un aggiornamento A/B con bundle RAUC e del ritorno automatico
+      alla versione precedente
 - [ ] Prova del dual boot in QEMU con Windows installato
 - [ ] Servizi di base: rete, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
 - [ ] Ogni componente con motivazione registrata (AGENTS.md §5.5)
 - [ ] Processo di monitoraggio delle vulnerabilità dei componenti (D-012)
 - [ ] Prova su hardware reale Intel e AMD (audio, Bluetooth, Wi‑Fi, GPU)
 - [ ] Misura dimensione immagine e memoria a riposo; registrarle in `MEMORY.md`
+      *(prima misura in QEMU: 612 MB, ~70 MB di RAM, D-034; da ripetere su hardware reale)*
 
 ## Fase 2 — Stack grafico: WebKitGTK dal fork e compositore · `proposta`
 
@@ -265,3 +270,4 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 1 | Layer Yocto, distribuzione, macchina amd64, immagine base e configurazione kas, (D-024); controllo di lettura con bitbake superato; approvati kas e x86-64-v2, uniti in `main` |
 | 2026-11-11 | 1 | Kernel e firmware per l'hardware desktop, (D-025): 147 opzioni verificate sul 6.18, 27 pacchetti firmware; approvato e unito in `main` |
 | 2026-11-11 | 0 | `README.md` per chi vuole conoscere il progetto: cosa offrirà, dispositivi, stato, licenza; variante scura del logo per sfondi chiari |
+| 2026-11-12 | 1 | Prima prova in QEMU: GRUB e kernel partono; corretti `mkfs.ext4` mancante per systemd-repart, ESP in fstab come `/dev/sda2` e cartella `/efi` mancante; `run-qemu.sh` apre la finestra anche da app snap. **Si arriva al login**: dati cifrati montati e persistenti, slot A confermato da RAUC |
