@@ -1,6 +1,8 @@
 # project-os — impostazioni per macchine di build con poche risorse (DA-11, D-034)
 #
-# tools/build.sh la aggiunge da solo se la macchina ha meno di 16 GB di RAM. A mano:
+# Seconda scelta, da attivare esplicitamente (D-036):
+#   tools/build.sh --poche-risorse
+# oppure, senza lo script:
 #   kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml
 #
 # Pensata per un portatile con circa 8 GB di RAM, 4 core e 40-50 GB di disco liberi.

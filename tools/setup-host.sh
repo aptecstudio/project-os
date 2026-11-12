@@ -100,4 +100,5 @@ fi
 say "Fatto. Prossimi passi:"
 echo "  1. esci e rientra (o apri un nuovo terminale), per kas e il gruppo kvm"
 echo "  2. tools/build.sh            prima build: diverse ore"
+echo "     (PC con meno di 16 GB di RAM: tools/build.sh --poche-risorse)"
 echo "  3. tools/run-qemu.sh         avvia l'immagine nell'emulatore"

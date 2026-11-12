@@ -402,8 +402,9 @@ portatile.*
   `kas/low-resources.yml` imposta 2 compiti bitbake e `make -j 3` (al massimo 6
   compilazioni insieme, per non esaurire la RAM), `rm_work` (cancella i file di lavoro
   di ogni ricetta finita) e l'arresto pulito della build sotto 5 GB liberi.
-  `tools/build.sh` la aggiunge da solo sotto 16 GB di RAM
-  (`PROJECT_OS_LOW_RESOURCES=1|0` per forzarla o escluderla).
+  ~~`tools/build.sh` la aggiunge da solo sotto 16 GB di RAM
+  (`PROJECT_OS_LOW_RESOURCES=1|0` per forzarla o escluderla).~~ *Scelta automatica
+  superata da D-036: ora la modalità si sceglie con `--poche-risorse`.*
 - **Perché:** l'immagine della Fase 1 dovrebbe stare in circa 30-40 GB con `rm_work`
   (stima, da misurare alla prima build); la prima build è lunga, le successive riusano
   la cache `sstate`.
@@ -440,6 +441,30 @@ portatile.*
   `qemuwrapper-cross`.
 - **Alternative scartate:** clone ridotto (`BB_GIT_SHALLOW`), che resta lento sullo
   stesso server; lasciare `runqemu`, che non serve perché c'è `tools/run-qemu.sh`.
+
+### D-036 — Due modalità di build: predefinita a piene prestazioni, poche risorse su richiesta · `proposta` (2026-11-12, sul ramo `build/ab-partitions`)
+- **Cosa (richiesta dell'utente):** `tools/build.sh` costruisce per default a piene
+  prestazioni (`kas/desktop-amd64.yml:kas/dev.yml`, impostazioni di bitbake: tutti i
+  core, file di lavoro conservati). La modalità per poche risorse (`kas/low-resources.yml`,
+  D-034) resta come seconda scelta e si attiva solo esplicitamente con
+  `tools/build.sh --poche-risorse` (o `PROJECT_OS_LOW_RESOURCES=1`, compatibile con lo
+  script precedente, R-25).
+- **Controllo delle risorse:** lo script misura RAM e spazio libero. In modalità
+  predefinita avvisa sotto 15 GB di RAM (un PC da 16 GB ne mostra un po' meno) e, alla
+  prima build, sotto 100 GB liberi (stima: senza `rm_work`; da misurare sulla macchina
+  di build); con `--poche-risorse`, sotto 45 GB liberi (misurati circa 27 GB, D-034).
+  Da terminale chiede conferma, da script (CI) avvisa e prosegue.
+- **Perché:** il repository è pubblico e chiunque deve poter riprodurre la build senza
+  aiuto: la configurazione consigliata è quella predefinita, le scelte sono
+  esplicite e documentate (`docs/sviluppo.md` §3, con i comandi kas equivalenti), gli
+  errori dicono cosa fare. Un passaggio automatico nascosto rendeva meno prevedibile la
+  build e non rispecchiava la macchina di riferimento.
+- **Alternative scartate:** due script separati (duplicazione di controlli e chiavi);
+  file kas apposito per la modalità predefinita (non serve: sono le impostazioni di
+  bitbake); fermare la build sotto soglia (chi sa cosa fa deve poter proseguire).
+- **Verifiche fatte:** sintassi; con un `kas` finto, tutti i casi (aiuto, opzione
+  sconosciuta, predefinita, aggiornamento, shell, `--poche-risorse`, variabile, conferma
+  da terminale con risposta sì e no, avvisi su RAM e disco alla prima build).
 
 ### D-029 — API di sistema nell'oggetto globale `system` · `confermata` (nome e principio), dettagli `proposta`
 - **Cosa (R-29):** nel contesto dello script principale e delle finestre dell'app c'è un

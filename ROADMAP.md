@@ -57,8 +57,8 @@ in `MEMORY.md` come voce `confermata`.
   250 GB di disco, molti core. Consigliato Ubuntu Server 24.04/26.04 LTS. Guida e script
   pronti (`docs/sviluppo.md`, `tools/setup-host.sh`); manca la macchina.
   *Soluzione provvisoria (D-034, proposta):* il portatile dell'utente, Debian 13
-  (4 core, 7,4 GB di RAM, 42 GB liberi), con `kas/low-resources.yml`; basta per la
-  Fase 1, non per WebKitGTK (Fase 2).
+  (4 core, 7,4 GB di RAM, 42 GB liberi), con `tools/build.sh --poche-risorse` (D-036);
+  basta per la Fase 1, non per WebKitGTK (Fase 2).
 - [ ] **DA-12 — Ecosistema tra dispositivi** *(blocca la Fase 9; incide sulle Fasi 3, 4, 6)*
   Da decidere: (a) solo rete locale e Bluetooth, oppure anche un servizio di inoltro
   per i dispositivi lontani, e in quel caso ospitato da chi (dall'utente stesso, dal
@@ -271,3 +271,4 @@ insieme come un unico ecosistema (R-33, D-033). Richiede DA-12.
 | 2026-11-11 | 0 | `README.md` per chi vuole conoscere il progetto: cosa offrirà, dispositivi, stato, licenza; variante scura del logo per sfondi chiari |
 | 2026-11-12 | 1 | Prima prova in QEMU: GRUB e kernel partono; corretti `mkfs.ext4` mancante per systemd-repart, ESP in fstab come `/dev/sda2` e cartella `/efi` mancante; `run-qemu.sh` apre la finestra anche da app snap. **Si arriva al login**: dati cifrati montati e persistenti, slot A confermato da RAUC |
 | 2026-11-12 | 1 | Prova A/B in QEMU: bundle installato, avvio automatico dello slot B e ritorno ad A dopo un avvio interrotto; corretti immagine `ext4` per il bundle, valori `1`/`0` in `grubenv`, montaggio di `/efi` con `efi.mount` |
+| 2026-11-12 | 1 | `tools/build.sh`: modalità predefinita a piene prestazioni, poche risorse con `--poche-risorse`; controllo di RAM e disco con avvisi; guida aggiornata per chi riproduce la build senza aiuto (D-036) |

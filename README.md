@@ -99,7 +99,7 @@ Debian 13); la prima build richiede diverse ore.
 git clone https://github.com/aptecstudio/project-os.git
 cd project-os
 tools/setup-host.sh   # prepara la macchina
-tools/build.sh        # costruisce l'immagine
+tools/build.sh        # costruisce l'immagine (PC con poche risorse: --poche-risorse)
 tools/run-qemu.sh     # la avvia nell'emulatore
 ```
 

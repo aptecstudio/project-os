@@ -22,11 +22,9 @@ dell'emulatore si può aprire anche da un Ubuntu Desktop.
 
 Se il PC è già Linux (Ubuntu o Debian), si può lavorare direttamente lì.
 
-**Portatile o PC con poche risorse** (circa 8 GB di RAM e 40-50 GB liberi): per
-l'immagine della Fase 1 basta. Con meno di 16 GB di RAM `tools/build.sh` usa da solo
-`kas/low-resources.yml`: meno compilazioni in parallelo e file di lavoro cancellati man
-mano. La prima build diventa più lunga (anche una notte intera). Non basterà dalla
-Fase 2, quando si compila WebKitGTK.
+**Portatile o PC con poche risorse** (circa 8 GB di RAM, 4 core e 45 GB liberi): per
+l'immagine della Fase 1 basta, con la modalità `--poche-risorse` (sezione 3). Non
+basterà dalla Fase 2, quando si compila WebKitGTK.
 
 ## 2. Scaricare il progetto e preparare la macchina
 
@@ -44,20 +42,41 @@ Alla fine esci e rientra (o apri un nuovo terminale).
 
 ## 3. Costruire l'immagine
 
-```sh
-tools/build.sh
-```
+Ci sono due modalità. Scegli in base alla macchina:
 
-La **prima build richiede diverse ore** (da 2 a 8 secondi la macchina) e scarica
-alcuni GB di sorgenti in `build/` e `sources/`. Le build successive riusano il lavoro
-già fatto e richiedono pochi minuti, se cambia poco.
+| | Predefinita | Poche risorse |
+|---|---|---|
+| Comando | `tools/build.sh` | `tools/build.sh --poche-risorse` |
+| Per | la macchina di build consigliata (sezione 1) | un portatile o un PC con meno di 16 GB di RAM |
+| Compilazioni in parallelo | tutti i core | al massimo 6 (2 ricette × 3 processi) |
+| File di lavoro delle ricette | conservati: le build successive sono più rapide | cancellati man mano: meno disco |
+| Disco alla prima build | circa 100 GB (stima) | circa 30 GB (misurati), 45 GB liberi consigliati |
+| Prima build | da 1 a 3 ore (stima, secondo la macchina) | circa 4 ore su 4 core (misurate), di più su PC lenti |
 
-Altri comandi:
+Se la macchina sembra troppo piccola per la modalità predefinita (meno di 16 GB di RAM
+o poco spazio libero), lo script lo dice e chiede conferma prima di partire. Puoi
+sempre interrompere con Ctrl-C e ripartire con l'altra modalità: il lavoro già fatto
+non si perde.
+
+La prima build scarica alcuni GB di sorgenti in `sources/` e lavora in `build/`. Le
+build successive riusano il lavoro già fatto e richiedono pochi minuti, se cambia poco.
+
+Altri comandi (valgono anche con `--poche-risorse`):
 
 | Comando | Cosa fa |
 |---|---|
 | `tools/build.sh aggiornamento` | pacchetto di aggiornamento firmato (RAUC) |
 | `tools/build.sh shell` | terminale con i comandi di bitbake |
+| `tools/build.sh --help` | aiuto dello script |
+
+**Senza gli script.** Tutto quello che fanno gli script è descritto nei file `kas/`; la
+build si può lanciare anche direttamente con [kas](https://kas.readthedocs.io):
+
+```sh
+export PROJECT_OS_KEYS=~/.config/project-os/keys
+kas build kas/desktop-amd64.yml:kas/dev.yml                          # predefinita
+kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml    # poche risorse
+```
 
 ## 4. Provare l'immagine nell'emulatore
 
@@ -89,6 +108,8 @@ Non c'è ancora interfaccia grafica: arriva con le Fasi 2 (WebKit e compositore)
 
 ## 6. Se qualcosa va storto
 
+- **Build interrotta per memoria esaurita** (processi chiusi dal sistema, messaggi
+  come «Killed» o «out of memory»): rilancia con `tools/build.sh --poche-risorse`.
 - **Build ferma con un errore:** copia le ultime righe del terminale e, se indicato, il
   file di log citato nell'errore (in `build/tmp/work/...`). Sono utili anche il sistema
   della macchina di build e l'output di `git log -1`.
