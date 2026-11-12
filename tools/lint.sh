@@ -76,7 +76,7 @@ run_check "BitBake (oelint-adv)" oelint-adv --quiet \
     --suppress oelint.var.suggestedvar.CVE_PRODUCT \
     --suppress oelint.var.bbclassextend \
     --suppress oelint.var.licenseremotefile \
-    $(tracked_files 'layers/*.bb' 'layers/*.bbappend')
+    $(tracked_files 'layers/*.bb' 'layers/*.bbappend' 'layers/*.bbclass')
 
 if [ -n "$(tracked_files 'Cargo.toml' '*/Cargo.toml')" ]; then
     require_tool cargo

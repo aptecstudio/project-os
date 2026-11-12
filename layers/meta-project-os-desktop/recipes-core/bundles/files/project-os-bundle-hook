@@ -1,0 +1,39 @@
+#!/bin/sh
+# project-os — hook of the update bundle (step 4c.3, D-047).
+#
+# RAUC runs it with "slot-post-install" right after writing the new system into the
+# inactive slot and before marking that slot bootable. It copies the dm-verity
+# parameters of the new system (root hash and hash tree, a GRUB environment block
+# carried by this bundle) to the EFI partition as slot-<bootname>.env, where GRUB reads
+# them. If it fails, RAUC stops the installation and the slot stays not bootable.
+set -eu
+
+[ "${1:-}" = "slot-post-install" ] || exit 0
+[ "${RAUC_SLOT_CLASS:-}" = "rootfs" ] || exit 0
+
+# Only the two slots GRUB knows; never the booted one, which RAUC does not install to
+bootname=${RAUC_SLOT_BOOTNAME:-}
+case "$bootname" in
+    A | B) ;;
+    *)
+        echo "project-os: unexpected slot boot name '$bootname'" >&2
+        exit 1
+        ;;
+esac
+
+# The parameters file sits next to this hook, in the mounted bundle
+bundle_dir=$(dirname "$0")
+set -- "$bundle_dir"/*.slot-verity.env
+if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+    echo "project-os: the bundle must hold exactly one *.slot-verity.env file" >&2
+    exit 1
+fi
+
+# Same directory as grubenv (RAUC's system.conf); a new file, then renamed over the old
+# one, so GRUB never reads a half-written one
+target=/efi/EFI/BOOT/slot-$bootname.env
+cp "$1" "$target.new"
+sync
+mv "$target.new" "$target"
+sync
+echo "project-os: dm-verity parameters of slot $bootname written to $target"

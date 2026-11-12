@@ -36,9 +36,11 @@ cleanup() {
 }
 trap cleanup EXIT
 # The booted slot without the overlay on top (a non-recursive bind mount of / does not
-# carry the /etc overlay), and the new slot, read-only
+# carry the /etc overlay), and the new slot, read-only. The new slot is mounted without
+# dm-verity: RAUC has just written it from the signed bundle, and its hash tree after
+# the erofs data does not get in the way (D-047).
 mount --bind / "$work/old" || exit 0
-mount -o ro "$new_dev" "$work/new" || exit 0
+mount -t erofs -o ro "$new_dev" "$work/new" || exit 0
 
 # Same content in the old and new system? Missing on both sides counts as the same.
 same() {
@@ -66,7 +68,8 @@ done
 mv "$REPORT.new" "$REPORT"
 
 if [ -s "$REPORT" ]; then
-    echo "project-os: $(wc -l < "$REPORT") file(s) in /etc changed locally are also changed by this update; the local version is kept:"
+    echo "project-os: $(wc -l < "$REPORT") file(s) in /etc changed locally are also" \
+        "changed by this update; the local version is kept:"
     cat "$REPORT"
 fi
 exit 0

@@ -844,6 +844,75 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Why:** the repository is public and must be understandable by any developer; tools
   make the rule checkable instead of a matter of taste.
 
+### D-047 — erofs system verified by dm-verity (step 4c.3) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+- **Slot image:** the system is an **erofs** image with the **dm-verity hash tree
+  appended** (`erofs.verity`), made by meta-oe's `image_types_verity` (no verity
+  superblock, salt fixed in the machine as `VERITY_SALT`: the same system always gives
+  the same root hash). wic copies that file into slot A (`rawcopy`), and the update
+  bundle writes the same file into the inactive slot (RAUC slot `type=raw`). Kernel:
+  `CONFIG_EROFS_FS=y`; GRUB: `erofs` module instead of `ext2`.
+- **Uncompressed erofs:** until step 4c.4 GRUB reads kernel and initramfs from inside
+  the slot, and the erofs driver of GRUB 2.14 refuses any image with compression
+  features (it accepts only `chunked_file`). The firmware is already compressed on
+  its own (zstd). Compression to be reconsidered in 4c.4, with the kernel on the EFI
+  partition.
+- **Where the root hash lives:** next to `grubenv` on the EFI partition, one file per
+  slot, `EFI/BOOT/slot-A.env` and `slot-B.env`: a GRUB environment block with
+  `roothash` and `verity_options` (the veritytab options: `superblock=false`,
+  `data-blocks`, `hash-offset`, `salt`…), generated at build time by
+  `project_os_slot_verity.bbclass` from the parameters of `image_types_verity`.
+  `grub.cfg` reads each file with `load_env --file … roothash verity_options`, so the
+  file can set no other variable, and never chooses a slot without its root hash.
+- **Kernel command line:** `root=/dev/mapper/root rootfstype=erofs roothash=…
+  systemd.verity_root_data=PARTLABEL=root_x systemd.verity_root_hash=PARTLABEL=root_x
+  systemd.verity_root_options=…`: systemd-veritysetup-generator in the initramfs
+  (already there with systemd's `cryptsetup` feature) opens the slot before mounting
+  it. Nothing added to the initramfs.
+- **Updates:** the bundle carries the image, its `*.slot-verity.env` and a hook
+  (`project-os-bundle-hook`, `slot-post-install`) that copies the parameters to
+  `slot-<bootname>.env` (new file, then renamed). RAUC runs slot hooks after writing
+  the slot and **before** marking it bootable, while the system post-install handler
+  runs only after the marking (checked in RAUC 1.15.2's source): if the hook fails,
+  the slot stays not bootable. The `/etc` conflict handler mounts the new slot with
+  `-t erofs`, without dm-verity (just written from the signed bundle).
+- **Corrupted block:** dm-verity's default answer, a read error. A system file that
+  does not match the tree is not run; the boot stops and, at the next reboot, GRUB
+  moves to the other slot (attempt still recorded).
+- **Discarded alternatives:** ext4 with dm-verity (it works only if ext4 never tries
+  to write, e.g. no journal replay; erofs is read-only by design and has no unused
+  free space in the image); separate hash partitions per slot (a different
+  partition layout and a tree over the whole partition, not just over the image);
+  root hash in `grubenv` (it would mix RAUC's state with the slot's data, and GRUB
+  rewrites `grubenv` at every boot); writing the parameters from the system
+  post-install handler (it runs after RAUC has already marked the slot bootable);
+  `panic-on-corruption` / `restart-on-corruption` (with a corrupted block read only
+  later, after `rauc-mark-good`, the PC would restart over and over).
+- **Not covered yet:** kernel and initramfs are still read by GRUB without
+  verification (step 4c.4: UKI, then signed with Secure Boot in Phase 8). The root
+  hash on the EFI partition is protected only by root-only access, like `grubenv` and
+  `grub.cfg`: the chain is trusted only from Secure Boot on. A development disk with
+  ext4 slots cannot update to this layout (RAUC does not update `grub.cfg` on the EFI
+  partition): it must be recreated (`tools/run-qemu.sh --reset`); there are no
+  installed systems yet.
+- **Open point, for the user:** after a corrupted block stops the boot, systemd
+  freezes (`Freezing execution`) and the PC waits for a manual reset before GRUB
+  moves to the other slot. `systemd.crash_action=reboot` on the command line would
+  restart it by itself (and so roll back automatically); it changes what happens on
+  every crash of PID 1, so it is left to the user's choice.
+- **Checks done (QEMU, new disk, 2026-11-12):** host check of the tree
+  (`veritysetup verify`) and of the erofs features (none incompatible). Boot of slot
+  A: GRUB chooses it by itself, `/dev/mapper/root` *verified* on `nvme0n1p3`, `/`
+  erofs read-only, data partition, `/etc` overlay and `/efi` mounted, system
+  `running`, no failed units, about 74 MB of memory in use (81 MB before). A/B
+  update: signature verified, hook writes `slot-B.env`, conflict handler runs, B
+  boots verified on `nvme0n1p4` and is confirmed (`B_TRY=0`), local `/etc` changes
+  kept. Interrupted boot of B → GRUB back to A. **One corrupted block** in B (block
+  155383, inside `/usr/lib/systemd/systemd`) and B re-armed: the kernel reports
+  `data block 155383 is corrupted`, `/sbin/init` fails with an I/O error and the boot
+  stops; after a reset GRUB goes back to A. A new installation of the bundle repairs
+  B (block back to its original digest, `slot-B.env` replaced) and B boots again.
+  Slot: 688 MB (683 MB erofs + 5.4 MB tree; 665 MB with ext4); bundle 523 MB.
+
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
   global **`system`** object, with one sub-object per area, like `chrome.*` in

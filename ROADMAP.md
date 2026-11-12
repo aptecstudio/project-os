@@ -29,10 +29,10 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4c.3 (erofs system verified by dm-verity) on the
-`build/verified-boot` branch; then 4c.4, 4d, 4e, 5b, and the real hardware test session (step 6) with
-all the hardware checks together. One step at a time, with the user's confirmation. One step
-at a time, with the user's confirmation.
+**Next step:** step 4c.4 (UKI per slot on the EFI partition) on the
+`build/verified-boot` branch, after the user's review of step 4c.3 (D-047); then 4d,
+4e, 5b, and the real hardware test session (step 6) with all the hardware checks
+together. One step at a time, with the user's confirmation.
 
 ---
 
@@ -124,7 +124,9 @@ with boot menu, A/B partitions and full hardware support.
           D-043)
     - [x] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
           reported (D-044)
-    - [ ] 4c.3 erofs system verified by dm-verity
+    - [x] 4c.3 erofs system verified by dm-verity: root hash per slot on the EFI
+          partition, written by the bundle hook; a corrupted block stops the boot
+          (D-047)
     - [ ] 4c.4 UKI per slot on the EFI partition, plus separate kernel + initramfs for
           BIOS boot
   - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
@@ -178,6 +180,9 @@ with boot menu, A/B partitions and full hardware support.
       current image and removal of the superfluous packages (2026-11-12, D-038); to be
       kept up to date at every new package
 - [x] Check of the EFI partition at every boot (`fsck.vfat`, D-038)
+- [ ] Decide whether the PC restarts by itself (`systemd.crash_action=reboot`) when a
+      corrupted system block stops the boot, so the rollback needs no manual reset
+      (open point of D-047)
 - [ ] Understand the `dbus-daemon` "Failed to drop supplementary groups" message seen
       at every boot (D-038)
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
@@ -365,3 +370,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 0 | Code style rule written into `AGENTS.md` §7 at the user's request; `tools/lint.sh` with ShellCheck, ruff, oelint-adv; all existing code reviewed, bbappends limited to our distribution/machine (D-046) |
 | 2026-11-12 | 5 | New requirement: `systemui` developer guide in `docs/systemui/`, indexed Markdown pages by component (R-36, D-045) |
 | 2026-11-12 | 4 | Developer guide extended to all system APIs, `docs/api/` by namespace (R-36, the user's choice) |
+| 2026-11-12 | 1 | Step 4c.3: erofs slots verified by dm-verity, root hash per slot on the EFI partition written by the bundle hook before activation; tested in QEMU with boot, A/B update, rollback and a corrupted block that stops the boot (D-047) |
