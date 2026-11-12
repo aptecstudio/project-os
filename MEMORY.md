@@ -844,7 +844,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Why:** the repository is public and must be understandable by any developer; tools
   make the rule checkable instead of a matter of taste.
 
-### D-047 — erofs system verified by dm-verity (step 4c.3) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+### D-047 — erofs system verified by dm-verity (step 4c.3) · `confirmed` (2026-11-12, on the `build/verified-boot` branch)
 - **Slot image:** the system is an **erofs** image with the **dm-verity hash tree
   appended** (`erofs.verity`), made by meta-oe's `image_types_verity` (no verity
   superblock, salt fixed in the machine as `VERITY_SALT`: the same system always gives
@@ -894,11 +894,18 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   ext4 slots cannot update to this layout (RAUC does not update `grub.cfg` on the EFI
   partition): it must be recreated (`tools/run-qemu.sh --reset`); there are no
   installed systems yet.
-- **Open point, for the user:** after a corrupted block stops the boot, systemd
-  freezes (`Freezing execution`) and the PC waits for a manual reset before GRUB
-  moves to the other slot. `systemd.crash_action=reboot` on the command line would
-  restart it by itself (and so roll back automatically); it changes what happens on
-  every crash of PID 1, so it is left to the user's choice.
+- **Automatic restart (the user's choice, 2026-11-12):** at first, after a corrupted
+  block stopped the boot, systemd froze (`Freezing execution`) and the PC waited for
+  a manual reset before GRUB moved to the other slot. Now `grub.cfg` adds
+  `systemd.crash_action=reboot`: when PID 1 cannot go on (a corrupted `/sbin/init`, or
+  any crash of PID 1) the PC restarts after 10 s, and GRUB moves to the other slot
+  because the attempt is still recorded. Discarded: staying frozen with the message
+  on screen (a PC far from its user would wait forever).
+- **Boot menu tracked by the build:** `grub.cfg` reaches wic only through the
+  `bootloader --configfile` line, which bitbake does not track: a change to the menu
+  alone did not rebuild the disk image (found while adding the option above). The
+  machine adds the file to `do_image_wic[file-checksums]`, through
+  `PROJECT_OS_DESKTOP_LAYERDIR` set in `layer.conf`.
 - **Checks done (QEMU, new disk, 2026-11-12):** host check of the tree
   (`veritysetup verify`) and of the erofs features (none incompatible). Boot of slot
   A: GRUB chooses it by itself, `/dev/mapper/root` *verified* on `nvme0n1p3`, `/`
@@ -912,6 +919,12 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   stops; after a reset GRUB goes back to A. A new installation of the bundle repairs
   B (block back to its original digest, `slot-B.env` replaced) and B boots again.
   Slot: 688 MB (683 MB erofs + 5.4 MB tree; 665 MB with ext4); bundle 523 MB.
+- **Checks of the automatic restart (QEMU, new disk, 2026-11-12):** the option is on
+  the command line; boot of A, A/B update, boot of B confirmed, interrupted boot of B
+  → A. Then the same corrupted block in B, B re-armed, one `reboot` and no other
+  action: the firmware starts twice by itself (B stops and restarts, then A), and A
+  is at the login 36 s after the command, verified and `running`, with `B_TRY=1`
+  left set.
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a

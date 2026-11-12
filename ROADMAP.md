@@ -30,7 +30,7 @@ Phases are carried out **one at a time**, in order (D-021).
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
 **Next step:** step 4c.4 (UKI per slot on the EFI partition) on the
-`build/verified-boot` branch, after the user's review of step 4c.3 (D-047); then 4d,
+`build/verified-boot` branch (step 4c.3 approved, D-047); then 4d,
 4e, 5b, and the real hardware test session (step 6) with all the hardware checks
 together. One step at a time, with the user's confirmation.
 
@@ -180,9 +180,9 @@ with boot menu, A/B partitions and full hardware support.
       current image and removal of the superfluous packages (2026-11-12, D-038); to be
       kept up to date at every new package
 - [x] Check of the EFI partition at every boot (`fsck.vfat`, D-038)
-- [ ] Decide whether the PC restarts by itself (`systemd.crash_action=reboot`) when a
-      corrupted system block stops the boot, so the rollback needs no manual reset
-      (open point of D-047)
+- [x] The PC restarts by itself (`systemd.crash_action=reboot`) when a corrupted
+      system block stops the boot, so the rollback needs no manual reset (the user's
+      choice, D-047; tested in QEMU 2026-11-12)
 - [ ] Understand the `dbus-daemon` "Failed to drop supplementary groups" message seen
       at every boot (D-038)
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
@@ -371,3 +371,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 5 | New requirement: `systemui` developer guide in `docs/systemui/`, indexed Markdown pages by component (R-36, D-045) |
 | 2026-11-12 | 4 | Developer guide extended to all system APIs, `docs/api/` by namespace (R-36, the user's choice) |
 | 2026-11-12 | 1 | Step 4c.3: erofs slots verified by dm-verity, root hash per slot on the EFI partition written by the bundle hook before activation; tested in QEMU with boot, A/B update, rollback and a corrupted block that stops the boot (D-047) |
+| 2026-11-12 | 1 | D-047 approved; automatic restart when PID 1 cannot go on (`systemd.crash_action=reboot`), so a corrupted slot rolls back without a manual reset; `grub.cfg` tracked by the disk image build; tested in QEMU |
