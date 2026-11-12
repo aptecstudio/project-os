@@ -29,7 +29,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** review and merge of the `build/sof-firmware` branch (step 3a, D-039);
+**Next step:** review and merge of the `build/sof-firmware` branch (step 3a, D-039; kernel
+configuration check, VM guests and laptop GPIO/I2C, D-041);
 then 3b with 4c, 4d, 4e, 5b, in roadmap order, and the real hardware test session
 (step 6) with all the hardware checks together. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
@@ -144,12 +145,13 @@ with boot menu, A/B partitions and full hardware support.
       | 6.11 | Wi‑Fi (Intel, Realtek, MediaTek, Atheros, Broadcom) and regulatory database | PCs/adapters available | D-025 |
       | 6.12 | Bluetooth: pairing a keyboard/mouse and headphones | PCs/adapters available | D-025 |
       | 6.13 | Wired network (Intel, Realtek, USB adapters) | PCs/adapters available | D-025 |
-      | 6.14 | Input: keyboard, I2C touchpad and touchscreen, USB devices, USB 4/Thunderbolt | laptop | D-025 |
+      | 6.14 | Input: keyboard, I2C touchpad and touchscreen (DesignWare I2C, GPIO interrupts), laptop buttons, USB devices, USB 4/Thunderbolt | Intel and AMD laptops | D-025, D-041 |
       | 6.15 | Laptop platform: battery, AC adapter, buttons, fans, temperatures, CPU frequency | laptop | D-025 |
       | 6.16 | Disks: NVMe, SATA, USB sticks, SD card reader, NTFS and exFAT partitions | PCs available | D-025 |
       | 6.17 | Early microcode loading (Intel and AMD) | Intel and AMD PCs | step 3b |
       | 6.18 | Baseline x86-64: boot on an old 64-bit processor (before 2008) | old PC, if available | D-027, R-28 |
       | 6.19 | Measurements: image size, idle memory, boot time | every PC tested | D-034 |
+      | 6.20 | Boot and display as a guest of VMware and Hyper‑V (Generation 2), and of VirtualBox | the three hypervisors | D-041 |
 
 **Next steps:**
 - [x] Guide and scripts for the build host and the emulator (`docs/development.md`,
@@ -171,6 +173,8 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
+- [ ] Size budget of the firmware: the NVIDIA firmware for nouveau (GSP) is 109 MB of
+      the 627 MB image; keep only the versions the kernel loads (D-041 review)
 - [ ] Measure image size and idle memory; record them in `MEMORY.md`
       *(QEMU: 610 MB, ~77 MB of RAM, D-038; on real hardware in step 6.19)*
 - [ ] Regenerate `branding/previews/grub-menu.png` with the English menu texts
@@ -323,3 +327,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | D-038 approved by the user; `build/phase1-cleanup` merged into `main` |
 | 2026-11-12 | 1 | Step 3a: `sof-bin` recipe for the Intel SOF audio firmware, compressed with zstd, without debug files and ARM topologies (D-039) |
 | 2026-11-12 | 1 | Real hardware checks gathered in one test session, step 6, with the full list (D-040, at the user's request) |
+| 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |

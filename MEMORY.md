@@ -271,6 +271,8 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Tool:** `tools/check-kernel-fragments.py` checks that each option exists in the
   kernel version and that the value is allowed by the type; it already found an error
   (`TG3` instead of `TIGON3`). The build checks the dependencies between options.
+  *Not enough: options dropped for a missing dependency went unnoticed; since D-041 the
+  build compares the fragments with the final configuration.*
 - **Checks done:** bitbake resolves the image dependency graph without errors;
   firmware, regdb and fragments enter the build. To check at the first build: kernel
   compilation and warnings about option dependencies. *First build (2026-11-11): the
@@ -624,6 +626,44 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   says so in its own entry; the step itself is closed when its QEMU checks pass.
 - **Why:** fewer sessions on physical machines, the same image tested on all of them,
   and a single place to see what is still unproven.
+
+### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `proposed` (2026-11-12, on the `build/sof-firmware` branch)
+- **Problem (found while reviewing the video drivers):** some options of our fragments
+  never reached the kernel, and no check noticed:
+  - `DRM_VMWGFX` (VMware) and `DRM_HYPERV` (Hyper‑V) depend on `HYPERVISOR_GUEST`,
+    which was off;
+  - `I2C_DESIGNWARE_PLATFORM`, the I2C controller of the touchpads and touchscreens of
+    most recent laptops, depends on `I2C_DESIGNWARE_CORE`, which was off; on top of
+    that `GPIOLIB` and every Intel/AMD pin-control driver were off, so touchpad
+    interrupts, buttons and sensors on GPIO lines could not work.
+  `do_kernel_configcheck` does not report options dropped for a missing dependency, and
+  `tools/check-kernel-fragments.py` checks only names and types (D-025).
+- **What:**
+  - new task `do_project_os_configcheck` in the kernel bbappend, after
+    `do_kernel_configcheck` and before `do_compile`: every `CONFIG_…` line (and every
+    "is not set") of our fragments must be in the final `.config` with the same
+    value, otherwise the build stops listing file, line, requested and actual value;
+  - new fragment `virt-guest.cfg`: `HYPERVISOR_GUEST`, paravirtualization and KVM guest
+    support; Hyper‑V core, VMBus and synthetic disk built in (`=y`: Generation 2 VMs
+    boot from it and there is no initramfs), network, integration services, balloon,
+    mouse and keyboard; VMware paravirtual SCSI built in, vmxnet3, VMCI, balloon;
+  - `input-platform.cfg`: DesignWare I2C core, platform and PCI front ends, Intel LPSS
+    (PCI and ACPI, plus the LPSS clocks of older Atom devices), `GPIOLIB` and the
+    pin-control drivers built in (`=y`, so GPIO interrupts exist when I2C-HID devices
+    are probed) for AMD and for consumer Intel platforms from Haswell/Bay Trail to
+    Meteor Lake and the generic platform driver of newer ones; server platforms left
+    out.
+- **Checks done:** `tools/check-kernel-fragments.py`: 200 options, 0 errors; the new
+  task finds all of them in the final configuration; `do_kernel_configcheck` reports
+  nothing. QEMU: system `running`, no failed units, "Hypervisor detected: KVM" and
+  kvm-clock in use, the new modules (`vmwgfx`, `hyperv_drm`, DesignWare I2C, Intel
+  LPSS) in the image; system 629 MB, idle memory about 76 MB after a normal boot
+  (104 MB right after the first boot, which creates and encrypts the data partition).
+  Touchpads, buttons and VMware/Hyper‑V are checked in the hardware test
+  session (ROADMAP step 6.14 and 6.20, D-040).
+- **Discarded alternatives:** raising `KCONF_AUDIT_LEVEL` of linux-yocto (it reports
+  many options of yocto-kernel-cache that are not ours, and only as warnings); a
+  separate script to run by hand (it would be forgotten, like the dependency check).
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
