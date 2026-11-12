@@ -58,8 +58,9 @@ BLUETOOTH = " \
 # Realtek wired network
 ETHERNET = "linux-firmware-rtl-nic"
 
-# Cirrus audio amplifiers of laptops. Intel SOF firmware: recipe still to be written.
-AUDIO = "linux-firmware-cirrus"
+# Cirrus audio amplifiers of laptops; Sound Open Firmware for the audio DSP of Intel
+# laptops (sof-bin, D-039)
+AUDIO = "linux-firmware-cirrus sof-bin"
 
 # AMD microcode. Intel microcode: recipe still to be written (not in OpenEmbedded-Core).
 CPU = "linux-firmware-microcode-amd"

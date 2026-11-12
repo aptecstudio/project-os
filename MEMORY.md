@@ -264,7 +264,8 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Firmware:** `packagegroup-project-os-desktop-hw`, 27 `linux-firmware` packages plus
   the Wi‑Fi frequency database; compressed with zstd.
 - **Missing, to be written as own recipes** (they are not in OpenEmbedded-Core): Intel
-  SOF audio firmware (Intel laptops from the 11th generation), Intel microcode. The
+  SOF audio firmware (Intel laptops from the 11th generation; *done in D-039*), Intel
+  microcode. The
   microcode has to be loaded at boot through an initramfs to be effective: to be
   decided with the boot layout (step 4).
 - **Tool:** `tools/check-kernel-fragments.py` checks that each option exists in the
@@ -576,6 +577,53 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   until it is confirmed); the kernel warns that the GPT backup header is not at the end
   of the disk on the first boot in QEMU (the emulator disk is enlarged after the image
   is written).
+
+### D-039 — Intel SOF audio firmware from sof-bin · `proposed` (2026-11-12, on the `build/sof-firmware` branch)
+- **What:** own recipe `sof-bin` (`layers/meta-project-os-desktop/recipes-bsp/sof-bin/`),
+  version 2026.09.2, from the official releases of the SOF project
+  (`github.com/thesofproject/sof-bin`), added to `packagegroup-project-os-desktop-hw`.
+  The tarball is pinned by SHA-256, the same digest GitHub publishes for the release
+  asset. Installed in `/lib/firmware/intel` with the upstream layout (`sof`,
+  `sof-ipc4`, `sof-ipc4-lib`, `sof-ipc4-tplg`, `sof-tplg`, `sof-ace-tplg` link).
+- **Why:** R-04. Internal speakers and microphones of most Intel laptops from the 11th
+  generation on go through the audio DSP, which needs this firmware; the kernel drivers
+  were already enabled (D-025). linux-firmware 20260410 contains only the older `avs`
+  firmware, not SOF.
+- **Left out (R-02):** the debugging tools (`tools/`: sof-logger and others), the
+  debug-log dictionaries (`*.ldc`, read only by sof-logger), the topologies for NXP
+  i.MX and MediaTek ARM DSPs and the AMD topologies (the AMD driver looks in `amd/`, and
+  sof-bin has no AMD firmware). Only the Intel licence remains (BSD-3-Clause with
+  Intel's patent grant); the NXP licence covered only the i.MX files.
+- **Compression:** every file compressed with zstd like the rest of the firmware
+  (D-025); symbolic links re-pointed to the `.zst` names, repeating until nothing
+  changes because some links point to other links (e.g. `arl` → `mtl`); the build
+  stops if a broken link remains. Result: 570 files and 70 links, 17 MB installed
+  (about 57 MB uncompressed), 12.7 MB package.
+- **AMD:** the kernel also enables SOF for recent AMD laptops (Rembrandt, ACP 6.3/7.0),
+  but neither linux-firmware 20260410 nor sof-bin ships AMD SOF firmware. Most AMD
+  laptops use the ACP drivers without SOF; to be checked on real hardware.
+- **Updates:** a new sof-bin release is a new recipe version with its new digest; the
+  release notes of the SOF project are part of vulnerability monitoring (D-012).
+- **Discarded alternatives:** using upstream `install.sh` (it installs the tools and
+  needs rsync); installing only the platforms enabled in the kernel (saves little and
+  is easy to get wrong when new platforms are enabled).
+- **Checks done:** package contents (all files compressed and valid zstd, no broken
+  links, no `.ldc` or ARM files); image boots in QEMU (`running`, no failed units) with
+  the firmware in `/lib/firmware/intel`; system 627 MB in the slot (610 MB before),
+  idle memory unchanged (about 76 MB). Real
+  check on an Intel laptop in the hardware test session (ROADMAP step 6.8, D-040; QEMU
+  has no audio DSP).
+
+### D-040 — Real hardware checks in one test session · `requirement` (2026-11-12)
+- **What (user's request):** the checks that need real PCs (QEMU cannot do them: audio
+  DSP, Wi‑Fi, Bluetooth, GPUs, laptop platform, BIOS and Windows dual boot, TPM…) are
+  not done step by step: they are gathered in a list, step 6 of Phase 1 in
+  `ROADMAP.md`, and done all together in one session, after steps 3b–5b.
+- **How to apply:** every step that leaves something to check on real hardware adds a
+  row to the step 6 table (check, hardware needed, originating step or decision) and
+  says so in its own entry; the step itself is closed when its QEMU checks pass.
+- **Why:** fewer sessions on physical machines, the same image tested on all of them,
+  and a single place to see what is still unproven.
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
