@@ -8,120 +8,121 @@
 <h1 align="center">project-os</h1>
 
 <p align="center">
-  Un sistema operativo costruito da zero sul kernel Linux, con un'interfaccia
-  interamente web. Lo stesso sistema per PC e smartphone.
+  An operating system built from scratch on the Linux kernel, with an entirely web-based
+  interface. The same system for PCs and smartphones.
 </p>
 
 <p align="center">
-  <strong>In sviluppo, non ancora utilizzabile.</strong> Oggi non c'è un'immagine da
-  scaricare e installare: questa pagina descrive dove sta andando il progetto.
+  <strong>In development, not usable yet.</strong> There is no image to download and
+  install today: this page describes where the project is going.
 </p>
 
 ---
 
-## Cos'è
+## What it is
 
-project-os è un sistema operativo per **PC Intel e AMD** e per **smartphone e tablet**.
-Tutto quello che vedi sullo schermo (pannelli, finestre, impostazioni, finestre di
-dialogo, perfino l'installazione) è fatto con **HTML, CSS e JavaScript** e disegnato dal
-motore web **WebKit**. Sotto c'è un sistema Linux essenziale, costruito pezzo per pezzo
-dai sorgenti, senza partire da una distribuzione esistente.
+project-os is an operating system for **Intel and AMD PCs** and for **smartphones and
+tablets**. Everything you see on screen (panels, windows, settings, dialogs, even the
+installer) is made with **HTML, CSS and JavaScript** and drawn by the **WebKit** web
+engine. Underneath there is an essential Linux system, built piece by piece from
+source, without starting from an existing distribution.
 
-## Cosa avrai
+## What you will get
 
-- **Un'interfaccia sola, ovunque.** Su PC e telefono giri lo stesso sistema e le stesse
-  app; cambia solo il modo in cui si adattano allo schermo e al tocco.
-- **I tuoi dispositivi che lavorano insieme.** PC e telefono con project-os si
-  riconoscono e collaborano, come in un ecosistema:
-  - file e link mandati da un dispositivo all'altro;
-  - appunti condivisi;
-  - notifiche, chiamate e SMS del telefono sul PC;
-  - riprendere sul PC ciò che stavi facendo sul telefono, e viceversa.
+- **One interface, everywhere.** PC and phone run the same system and the same apps;
+  only the way they adapt to the screen and to touch changes.
+- **Your devices working together.** PCs and phones with project-os recognize each
+  other and cooperate, as an ecosystem:
+  - files and links sent from one device to another;
+  - shared clipboard;
+  - the phone's notifications, calls and text messages on the PC;
+  - picking up on the PC what you were doing on the phone, and vice versa.
 
-  Tutto cifrato da un dispositivo all'altro, senza un cloud obbligatorio.
-- **App che chiedono solo ciò che serve.** Ogni app dichiara in anticipo cosa vuole
-  usare (file, fotocamera, rete…) e ottiene solo quello che approvi. Le app girano
-  isolate l'una dall'altra; quando una chiede privilegi di amministratore, il sistema
-  te lo chiede con una finestra chiara e se lo annota.
-- **Un sistema che non si rompe.** Il sistema è in sola lettura e verificato a ogni
-  avvio. Gli aggiornamenti sono firmati e si installano su una seconda copia: se
-  qualcosa va storto, al riavvio torni da solo alla versione precedente. I tuoi dati
-  stanno su una partizione cifrata.
-- **Anche su PC non recenti.** L'obiettivo è funzionare su PC a 64 bit anche datati,
-  con avvio UEFI o BIOS e cifratura che non richiede il chip TPM.
-- **Accanto a Windows.** Il menu di avvio rileva Windows e gli altri sistemi già
-  installati, per scegliere ogni volta quale avviare.
+  All encrypted from one device to the other, with no mandatory cloud.
+- **Apps that ask only for what they need.** Each app declares in advance what it wants
+  to use (files, camera, network…) and gets only what you approve. Apps run isolated
+  from one another; when one asks for administrator privileges, the system asks you
+  with a clear dialog and logs it.
+- **A system that does not break.** The system is read-only and verified at every boot.
+  Updates are signed and installed onto a second copy: if something goes wrong, on
+  reboot you are back to the previous version automatically. Your data lives on an
+  encrypted partition.
+- **On older PCs too.** The goal is to run on 64-bit PCs, older ones included, with UEFI
+  or BIOS boot and encryption that does not require a TPM chip.
+- **Next to Windows.** The boot menu detects Windows and the other systems already
+  installed, so you can choose which one to start each time.
 
 <p align="center">
-  <img src="branding/previews/grub-menu.png" alt="Anteprima del menu di avvio" width="720">
+  <img src="branding/previews/grub-menu.png" alt="Boot menu preview" width="720">
   <br>
-  <sub>Anteprima del menu di avvio, con il logo segnaposto.</sub>
+  <sub>Boot menu preview, with the placeholder logo.</sub>
 </p>
 
-## Su cosa girerà
+## What it will run on
 
-| Dispositivo | Come si installa |
+| Device | How it is installed |
 |---|---|
-| PC desktop e portatili Intel/AMD a 64 bit | Da chiavetta USB, con una procedura guidata: lingua, tastiera, disco (anche accanto a Windows), cifratura, utente |
-| Google Pixel (primo telefono supportato) | Dalla recovery del telefono; al primo avvio una procedura guidata chiede rete, utente e codice di sblocco |
-| Vecchi modelli Oppo e Samsung | In seguito, modello per modello |
+| 64-bit Intel/AMD desktop PCs and laptops | From a USB stick, with a guided setup: language, keyboard, disk (next to Windows too), encryption, user |
+| Google Pixel (first supported phone) | From the phone's recovery; on first boot a guided setup asks for network, user and unlock code |
+| Older Oppo and Samsung models | Later, model by model |
 
-Sui telefoni serve un bootloader sbloccabile: dipende dal modello e, a volte,
-dall'operatore.
+Phones need an unlockable bootloader: it depends on the model and sometimes on the
+carrier.
 
-## A che punto siamo
+## Where we are
 
-Lo sviluppo procede dal basso verso l'alto, una fase alla volta: prima il sistema di
-base, poi la grafica, poi le app.
+Development goes from the bottom up, one phase at a time: first the base system, then
+graphics, then apps.
 
-| Fase | | Stato |
+| Phase | | Status |
 |---|---|---|
-| 0 | Fondamenta e decisioni | quasi completata |
-| 1 | Sistema base: kernel, avvio, partizioni | in corso |
-| 2 | Grafica: WebKit e compositore | da fare |
-| 3 | Permessi e isolamento delle app | da fare |
-| 4 | Runtime delle app | da fare |
-| 5 | Interfaccia e stile grafico | da fare |
-| 6 | App di sistema: impostazioni, file, terminale | da fare |
-| 7 | Smartphone e tablet | da fare |
-| 8 | Installazione e aggiornamenti | da fare |
-| 9 | Ecosistema tra dispositivi | da fare |
+| 0 | Foundations and decisions | almost complete |
+| 1 | Base system: kernel, boot, partitions | in progress |
+| 2 | Graphics: WebKit and compositor | to do |
+| 3 | App permissions and isolation | to do |
+| 4 | App runtime | to do |
+| 5 | Interface and visual style | to do |
+| 6 | System apps: settings, files, terminal | to do |
+| 7 | Smartphones and tablets | to do |
+| 8 | Installation and updates | to do |
+| 9 | Device ecosystem | to do |
 
-Il dettaglio di ogni passo è in [`ROADMAP.md`](ROADMAP.md).
+The details of each step are in [`ROADMAP.md`](ROADMAP.md).
 
-## Per chi vuole costruirlo
+## Building it yourself
 
-Oggi si può solo costruire da sorgenti il sistema di base, per sviluppo. Serve una
-macchina Linux robusta (indicativamente 16 GB di RAM e 250 GB di disco); la prima build
-richiede diverse ore.
+Today you can only build the base system from source and boot it in the QEMU emulator,
+up to a text terminal, signed A/B updates included. You need a Linux machine (Ubuntu
+24.04/26.04 or Debian 13); the first build takes several hours.
 
 ```sh
 git clone https://github.com/aptecstudio/project-os.git
 cd project-os
-kas build kas/desktop-amd64.yml:kas/dev.yml
+tools/setup-host.sh   # prepares the machine
+tools/build.sh        # builds the image (PC with few resources: --low-resources)
+tools/run-qemu.sh     # boots it in the emulator
 ```
 
-La configurazione `kas/dev.yml` permette l'accesso root senza password: serve solo per
-le prove. Una guida completa, con gli script per preparare la macchina e provare il
-sistema nell'emulatore QEMU, arriva con la Fase 1.
+Requirements, current limitations and troubleshooting:
+[`docs/development.md`](docs/development.md).
 
-## Come è fatto
+## How it is made
 
-| Componente | Scelta |
+| Component | Choice |
 |---|---|
-| Costruzione del sistema | Yocto Project 6.0 (LTS), con kas |
-| Kernel | Linux 6.18 LTS; sui telefoni, kernel e driver del produttore |
-| Avvio | GRUB, con menu a tema e dual boot |
-| Aggiornamenti | Due copie del sistema (A/B), pacchetti firmati |
-| Motore web | WebKitGTK, da un [fork mantenuto dal progetto](https://github.com/aptecstudio/WebKit) |
-| Componenti nativi | Rust |
-| Grafica e input | Wayland |
+| System build | Yocto Project 6.0 (LTS), with kas |
+| Kernel | Linux 6.18 LTS; on phones, the vendor's kernel and drivers |
+| Boot | GRUB, with themed menu and dual boot |
+| Updates | Two copies of the system (A/B), signed bundles |
+| Web engine | WebKitGTK, from a [fork maintained by the project](https://github.com/aptecstudio/WebKit) |
+| Native components | Rust |
+| Graphics and input | Wayland |
 
-Le scelte e il loro perché sono in [`MEMORY.md`](MEMORY.md); le regole di lavoro per
-chi contribuisce, persone o agenti AI, in [`AGENTS.md`](AGENTS.md).
+The choices and their reasons are in [`MEMORY.md`](MEMORY.md); the working rules for
+contributors, people or AI agents, in [`AGENTS.md`](AGENTS.md).
 
-## Licenza
+## License
 
-Il codice di project-os è rilasciato con licenza [GNU GPL v3](LICENSE). Il fork di
-WebKit mantiene le licenze originali di WebKit. Il font Inter, usato nel menu di avvio,
-è distribuito con licenza SIL Open Font License 1.1.
+The project-os code is released under the [GNU GPL v3](LICENSE) license. The WebKit
+fork keeps WebKit's original licenses. The Inter font, used in the boot menu, is
+distributed under the SIL Open Font License 1.1.

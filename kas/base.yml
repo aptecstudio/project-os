@@ -1,8 +1,8 @@
-# project-os — configurazione di build comune (kas, D-024)
+# project-os — common build configuration (kas, D-024)
 #
-# Fissa le versioni esatte di bitbake e OpenEmbedded-Core (Yocto 6.0 «Wrynose», LTS) e
-# attiva il layer dello spazio utente comune. Non si usa da sola: si include da un file
-# di piattaforma, per esempio kas/desktop-amd64.yml.
+# Pins the exact versions of bitbake and OpenEmbedded-Core (Yocto 6.0 "Wrynose", LTS)
+# and enables the common user-space layer. Not used on its own: it is included from a
+# platform file, for example kas/desktop-amd64.yml.
 
 header:
   version: 14
@@ -11,7 +11,7 @@ distro: project-os
 target: project-os-image-base
 
 repos:
-  # Questo repository: i nostri layer
+  # This repository: our layers
   project-os:
     layers:
       layers/meta-project-os:
@@ -24,7 +24,23 @@ repos:
     layers:
       meta:
 
-  # Accanto a openembedded-core: oe-init-build-env lo trova in ../bitbake
+  # meta-oe: cryptsetup (encryption and dm-verity), lvm2 (D-026)
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    branch: wrynose
+    commit: c0fcd7cca3760ef24e087ac4a31b8f357cb204da
+    path: sources/meta-openembedded
+    layers:
+      meta-oe:
+
+  # RAUC: signed A/B updates (D-018, D-026)
+  meta-rauc:
+    url: https://github.com/rauc/meta-rauc
+    branch: wrynose
+    commit: 38da0e5866a953e664001ba90b5edad68d68cd5d
+    path: sources/meta-rauc
+
+  # Next to openembedded-core: oe-init-build-env finds it in ../bitbake
   bitbake:
     url: https://git.openembedded.org/bitbake
     branch: "2.18"
@@ -33,6 +49,22 @@ repos:
     layers:
       .: disabled
 
+# Keys to sign and verify updates (D-026). They stay OUTSIDE the repository
+# (AGENTS.md §4). For development, generate them with tools/gen-dev-keys.sh:
+#   export PROJECT_OS_KEYS=~/.config/project-os/keys
+# The directory holds: ca.cert.pem (verification, goes into the image), signing.key.pem
+# and signing.cert.pem (signing of update bundles).
+env:
+  PROJECT_OS_KEYS: null
+
 local_conf_header:
   base: |
     CONF_VERSION = "2"
+    # git repositories on git.yoctoproject.org (linux-yocto kernel, kernel-cache…) are
+    # fetched first from the archives of the official Yocto HTTP mirror: the git server
+    # serves clones at a few KB/s (the kernel would take days). The commit is still the
+    # one pinned in the recipe; if the archive is older, bitbake fetches only the
+    # missing commits from the git server (D-035).
+    PREMIRRORS:prepend = "git://git.yoctoproject.org/.* https://downloads.yoctoproject.org/mirror/sources/ "
+    RAUC_KEY_FILE = "${PROJECT_OS_KEYS}/signing.key.pem"
+    RAUC_CERT_FILE = "${PROJECT_OS_KEYS}/signing.cert.pem"

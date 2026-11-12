@@ -1,8 +1,8 @@
-# project-os — build per desktop amd64 (Intel/AMD)
+# project-os — build for desktop amd64 (Intel/AMD)
 #
-# Uso:  kas build kas/desktop-amd64.yml
-# Sviluppo, con accesso root senza password e prova in QEMU:
-#       kas build kas/desktop-amd64.yml:kas/dev.yml
+# Usage: kas build kas/desktop-amd64.yml
+# Development, with passwordless root login and testing in QEMU:
+#        kas build kas/desktop-amd64.yml:kas/dev.yml
 
 header:
   version: 14

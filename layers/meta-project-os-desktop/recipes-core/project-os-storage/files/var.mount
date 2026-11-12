@@ -1,0 +1,15 @@
+[Unit]
+Description=project-os data (/var)
+Documentation=https://github.com/aptecstudio/project-os
+Requires=systemd-cryptsetup@data.service
+After=systemd-cryptsetup@data.service
+Before=local-fs.target
+
+[Mount]
+What=/dev/mapper/data
+Where=/var
+Type=ext4
+Options=nodev,nosuid
+
+[Install]
+RequiredBy=local-fs.target

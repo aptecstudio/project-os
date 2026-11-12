@@ -1,7 +1,7 @@
-SUMMARY = "project-os desktop — firmware dell'hardware moderno"
-DESCRIPTION = "Firmware per schede grafiche, Wi-Fi, Bluetooth, rete e processori dei \
-PC Intel/AMD (R-04, D-025). I driver sono nel kernel; qui ci sono solo i file che i \
-driver caricano all'avvio dei dispositivi."
+SUMMARY = "project-os desktop — firmware for modern hardware"
+DESCRIPTION = "Firmware for graphics cards, Wi-Fi, Bluetooth, network and processors \
+of Intel/AMD PCs (R-04, D-025). The drivers are in the kernel; here are only the files \
+the drivers load when the devices start."
 LICENSE = "GPL-3.0-only"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -16,7 +16,7 @@ RDEPENDS:${PN} = " \
     ${CPU} \
 "
 
-# Grafica: Intel (i915, xe), AMD (amdgpu, radeon), NVIDIA (nouveau)
+# Graphics: Intel (i915, xe), AMD (amdgpu, radeon), NVIDIA (nouveau)
 GRAPHICS = " \
     linux-firmware-i915 \
     linux-firmware-xe \
@@ -26,8 +26,8 @@ GRAPHICS = " \
     linux-firmware-nvidia-gpu \
 "
 
-# Wi-Fi: Intel, Qualcomm Atheros, Realtek, MediaTek, Broadcom; database delle
-# frequenze ammesse per paese (obbligatorio per cfg80211)
+# Wi-Fi: Intel, Qualcomm Atheros, Realtek, MediaTek, Broadcom; database of the
+# frequencies allowed per country (mandatory for cfg80211)
 WIFI = " \
     linux-firmware-iwlwifi \
     linux-firmware-iwlwifi-misc \
@@ -46,8 +46,8 @@ WIFI = " \
     wireless-regdb-static \
 "
 
-# Bluetooth: Intel, Qualcomm, Realtek (gli altri Realtek e MediaTek sono già nei
-# pacchetti Wi-Fi qui sopra)
+# Bluetooth: Intel, Qualcomm, Realtek (the other Realtek and MediaTek ones are already
+# in the Wi-Fi packages above)
 BLUETOOTH = " \
     linux-firmware-ibt \
     linux-firmware-ibt-misc \
@@ -55,11 +55,11 @@ BLUETOOTH = " \
     linux-firmware-rtl8761 \
 "
 
-# Rete cablata Realtek
+# Realtek wired network
 ETHERNET = "linux-firmware-rtl-nic"
 
-# Amplificatori audio Cirrus dei portatili. Firmware Intel SOF: ricetta da scrivere.
+# Cirrus audio amplifiers of laptops. Intel SOF firmware: recipe still to be written.
 AUDIO = "linux-firmware-cirrus"
 
-# Microcode AMD. Microcode Intel: ricetta da scrivere (non è in OpenEmbedded-Core).
+# AMD microcode. Intel microcode: recipe still to be written (not in OpenEmbedded-Core).
 CPU = "linux-firmware-microcode-amd"
