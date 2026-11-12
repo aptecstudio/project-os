@@ -1,15 +1,15 @@
-# short-description: project-os desktop — partizioni A/B (D-026)
-# File .wks.in: bitbake sostituisce le variabili (${EFI_PROVIDER}) prima di passarlo a wic.
-# long-description: GPT avviabile da UEFI e (dal passo 4e) da BIOS.
-#   1 bios_grub   1 MiB   spazio per GRUB quando il PC avvia da BIOS (R-26)
-#   2 esp         512 MiB partizione EFI: GRUB, menu, tema, stato degli slot
-#   3 root_a      4 GiB   sistema, copia A (sola lettura)
-#   4 root_b      4 GiB   sistema, copia B: vuota, la scrive il primo aggiornamento
-#   5 data        resto   creata al primo avvio da systemd-repart, cifrata (LUKS2)
-# Lo slot di sistema diventerà erofs + dm-verity al passo 4c.
-# L'ESP non ha punto di montaggio qui: wic scriverebbe la riga di fstab solo nel disco di
-# prima installazione, non negli slot degli aggiornamenti. La monta efi.mount
-# (project-os-storage), per etichetta GPT.
+# short-description: project-os desktop — A/B partitions (D-026)
+# .wks.in file: bitbake substitutes the variables (${EFI_PROVIDER}) before passing it to wic.
+# long-description: GPT bootable from UEFI and (from step 4e) from BIOS.
+#   1 bios_grub   1 MiB   room for GRUB when the PC boots from BIOS (R-26)
+#   2 esp         512 MiB EFI partition: GRUB, menu, theme, slot state
+#   3 root_a      4 GiB   system, copy A (read-only)
+#   4 root_b      4 GiB   system, copy B: empty, written by the first update
+#   5 data        rest    created on first boot by systemd-repart, encrypted (LUKS2)
+# The system slot will become erofs + dm-verity in step 4c.
+# The ESP has no mount point here: wic would write the fstab line only on the
+# first-installation disk, not in the slots written by updates. efi.mount
+# (project-os-storage) mounts it, by GPT label.
 
 part --source empty --size 1M --part-name bios_grub --part-type 21686148-6449-6E6F-744E-656564454649 --align 1024
 part --source bootimg_efi --sourceparams="loader=${EFI_PROVIDER}" --fstype=vfat --label ESP --part-name esp --part-type C12A7328-F81F-11D2-BA4B-00A0C93EC93B --fsoptions="umask=0077" --active --align 1024 --fixed-size 512M

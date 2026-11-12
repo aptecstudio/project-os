@@ -1,6 +1,6 @@
-SUMMARY = "project-os desktop — pacchetto di aggiornamento del sistema"
-DESCRIPTION = "Bundle RAUC firmato con l'immagine di sistema: si installa nello slot non \
-in uso e diventa attivo al riavvio successivo (D-018, D-026)."
+SUMMARY = "project-os desktop — system update bundle"
+DESCRIPTION = "Signed RAUC bundle with the system image: it is installed into the \
+unused slot and becomes active on the next reboot (D-018, D-026)."
 LICENSE = "GPL-3.0-only"
 
 inherit bundle
@@ -8,7 +8,7 @@ inherit bundle
 RAUC_BUNDLE_COMPATIBLE = "project-os-amd64"
 RAUC_BUNDLE_VERSION = "${DISTRO_VERSION}"
 RAUC_BUNDLE_DESCRIPTION = "${DISTRO_NAME} ${DISTRO_VERSION}"
-# Formato verity: il bundle è verificato blocco per blocco mentre si installa
+# verity format: the bundle is verified block by block while it is installed
 RAUC_BUNDLE_FORMAT = "verity"
 BUNDLE_ARGS += '--mksquashfs-args="-comp zstd"'
 

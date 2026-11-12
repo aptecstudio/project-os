@@ -1,15 +1,15 @@
 #!/bin/sh
-# Avvia l'immagine desktop di project-os nell'emulatore QEMU, con firmware UEFI.
+# Boots the project-os desktop image in the QEMU emulator, with UEFI firmware.
 #
-# Uso:  tools/run-qemu.sh [--reset] [--testo]
-#   --reset   riparte da un disco nuovo, copiato dall'ultima build (perde i dati)
-#   --testo   niente finestra grafica: tutto nel terminale (console seriale)
+# Usage: tools/run-qemu.sh [--reset] [--text]
+#   --reset   start again from a new disk, copied from the latest build (loses data)
+#   --text    no graphical window: everything in the terminal (serial console)
 #
-# Il disco dell'emulatore è una copia dell'immagine in build/qemu/disk.img, con 16 GB
-# di spazio libero in più: al primo avvio systemd-repart ci crea la partizione dati.
-# Per uscire in modalità --testo: Ctrl-a poi x.
+# The emulator disk is a copy of the image in build/qemu/disk.img, with 16 GB of extra
+# free space: on first boot systemd-repart creates the data partition there.
+# To quit in --text mode: Ctrl-a then x.
 #
-# Avvio da BIOS: non ancora disponibile (ROADMAP, passo 4e).
+# BIOS boot: not available yet (ROADMAP, step 4e).
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -19,8 +19,8 @@ TEXT=0
 for arg in "$@"; do
     case "$arg" in
         --reset) RESET=1 ;;
-        --testo) TEXT=1 ;;
-        *) echo "Opzione sconosciuta: $arg" >&2; exit 2 ;;
+        --text) TEXT=1 ;;
+        *) echo "Unknown option: $arg" >&2; exit 2 ;;
     esac
 done
 
@@ -31,45 +31,45 @@ DISK="$WORK/disk.img"
 VARS="$WORK/OVMF_VARS.fd"
 
 if [ ! -f "$IMAGE" ]; then
-    echo "Immagine non trovata: $IMAGE" >&2
-    echo "Esegui prima tools/build.sh" >&2
+    echo "Image not found: $IMAGE" >&2
+    echo "Run tools/build.sh first" >&2
     exit 1
 fi
 
-# Firmware UEFI OVMF: percorsi di Debian/Ubuntu e di Fedora
+# OVMF UEFI firmware: Debian/Ubuntu and Fedora paths
 CODE=""
 for c in /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/OVMF/OVMF_CODE.fd \
          /usr/share/edk2/ovmf/OVMF_CODE.fd; do
     [ -f "$c" ] && { CODE="$c"; break; }
 done
 if [ -z "$CODE" ]; then
-    echo "Firmware OVMF non trovato: installa il pacchetto ovmf." >&2
+    echo "OVMF firmware not found: install the ovmf package." >&2
     exit 1
 fi
 VARS_TEMPLATE="$(dirname "$CODE")/$(basename "$CODE" | sed 's/CODE/VARS/')"
 
 mkdir -p "$WORK"
 if [ "$RESET" -eq 1 ] || [ ! -f "$DISK" ]; then
-    echo "Preparo un disco nuovo dall'ultima build..."
+    echo "Preparing a new disk from the latest build..."
     cp --sparse=always "$IMAGE" "$DISK"
     truncate -s +16G "$DISK"
     cp "$VARS_TEMPLATE" "$VARS"
 elif [ "$IMAGE" -nt "$DISK" ]; then
-    echo "Nota: c'è una build più recente del disco in uso. Usa --reset per ripartire da quella."
+    echo "Note: there is a build newer than the disk in use. Use --reset to start from it."
 fi
 
 if [ -w /dev/kvm ]; then
     ACCEL=kvm
     CPU=host
 else
-    echo "KVM non disponibile: l'emulazione sarà lenta."
+    echo "KVM not available: emulation will be slow."
     ACCEL=tcg
-    # Processore x86-64 di base, come il sistema (D-027)
+    # Baseline x86-64 processor, like the system (D-027)
     CPU=qemu64
 fi
 
-# Lanciato da un'app snap (es. VS Code): le sue variabili GTK/GIO fanno caricare a
-# QEMU librerie dello snap incompatibili e la finestra non si apre.
+# Started from a snap app (e.g. VS Code): its GTK/GIO variables make QEMU load
+# incompatible libraries from the snap and the window does not open.
 if [ -n "${SNAP:-}" ]; then
     unset GTK_PATH GTK_EXE_PREFIX GTK_MODULES GTK_IM_MODULE_FILE GIO_MODULE_DIR \
           GDK_PIXBUF_MODULE_FILE GDK_PIXBUF_MODULEDIR GSETTINGS_SCHEMA_DIR LOCPATH

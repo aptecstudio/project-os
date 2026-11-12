@@ -1,26 +1,26 @@
-# project-os — impostazioni per macchine di build con poche risorse (DA-11, D-034)
+# project-os — settings for build hosts with few resources (DA-11, D-034)
 #
-# Seconda scelta, da attivare esplicitamente (D-036):
-#   tools/build.sh --poche-risorse
-# oppure, senza lo script:
+# Second choice, to be enabled explicitly (D-036):
+#   tools/build.sh --low-resources
+# or, without the script:
 #   kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml
 #
-# Pensata per un portatile con circa 8 GB di RAM, 4 core e 40-50 GB di disco liberi.
-# Basta per l'immagine della Fase 1; non per WebKitGTK (Fase 2), che richiede la
-# macchina di build completa.
+# Meant for a laptop with about 8 GB of RAM, 4 cores and 40-50 GB of free disk space.
+# Enough for the Phase 1 image; not for WebKitGTK (Phase 2), which needs the full build
+# host.
 
 header:
   version: 14
 
 local_conf_header:
   low-resources: |
-    # Pochi processi di compilazione in parallelo, per non esaurire la RAM
-    # (2 compiti bitbake x 3 processi make = 6 compilazioni al massimo)
+    # Few compilation processes in parallel, so RAM does not run out
+    # (2 bitbake tasks x 3 make processes = at most 6 compilations)
     BB_NUMBER_THREADS = "2"
     PARALLEL_MAKE = "-j 3"
-    # Cancella i file di lavoro di ogni ricetta finita: risparmia decine di GB
+    # Delete the work files of each finished recipe: saves tens of GB
     INHERIT += "rm_work"
-    # Ferma la build in modo pulito sotto 5 GB liberi, invece di romperla a disco pieno
+    # Stop the build cleanly below 5 GB free, instead of breaking it on a full disk
     BB_DISKMON_DIRS = "\
         STOPTASKS,${TMPDIR},5G,100K \
         STOPTASKS,${DL_DIR},5G,100K \

@@ -1,19 +1,19 @@
 #!/bin/sh
-# Genera le chiavi di SVILUPPO per firmare e verificare gli aggiornamenti RAUC (D-026).
+# Generates the DEVELOPMENT keys to sign and verify RAUC updates (D-026).
 #
-# Uso:  tools/gen-dev-keys.sh [cartella]
-#       (predefinita: ~/.config/project-os/keys)
-# Poi:  export PROJECT_OS_KEYS=<cartella>
+# Usage: tools/gen-dev-keys.sh [directory]
+#        (default: ~/.config/project-os/keys)
+# Then:  export PROJECT_OS_KEYS=<directory>
 #
-# Le chiavi restano fuori dal repository (AGENTS.md §4) e non vanno mai usate per
-# immagini rilasciate: quelle avranno una CA e chiavi di firma proprie, custodite a parte.
+# The keys stay outside the repository (AGENTS.md §4) and must never be used for
+# released images: those will have their own CA and signing keys, kept separately.
 set -eu
 
 DIR="${1:-$HOME/.config/project-os/keys}"
 DAYS=3650
 
 if [ -e "$DIR/ca.cert.pem" ]; then
-    echo "Esistono già chiavi in $DIR: non le sovrascrivo." >&2
+    echo "Keys already exist in $DIR: not overwriting them." >&2
     exit 1
 fi
 
@@ -21,12 +21,12 @@ mkdir -p "$DIR"
 chmod 700 "$DIR"
 cd "$DIR"
 
-# Autorità di certificazione: il suo certificato va nell'immagine e verifica i bundle
+# Certificate authority: its certificate goes into the image and verifies the bundles
 openssl req -x509 -newkey rsa:4096 -nodes -days "$DAYS" \
     -keyout ca.key.pem -out ca.cert.pem \
     -subj "/O=project-os/CN=project-os development CA"
 
-# Chiave di firma dei bundle, certificata dalla CA
+# Bundle signing key, certified by the CA
 openssl req -newkey rsa:4096 -nodes \
     -keyout signing.key.pem -out signing.csr.pem \
     -subj "/O=project-os/CN=project-os development signing"
@@ -37,5 +37,5 @@ openssl x509 -req -in signing.csr.pem -days "$DAYS" \
 rm -f signing.csr.pem signing.ext
 chmod 600 ./*.key.pem
 
-echo "Chiavi di sviluppo create in $DIR"
-echo "Prima di ogni build:  export PROJECT_OS_KEYS=$DIR"
+echo "Development keys created in $DIR"
+echo "Before each build:  export PROJECT_OS_KEYS=$DIR"

@@ -1,28 +1,28 @@
 #!/bin/sh
-# Prepara la macchina di build di project-os (DA-11).
+# Prepares the project-os build host (DA-11).
 #
-# Uso:  tools/setup-host.sh
-# Sistema consigliato: Ubuntu Server 24.04 o 26.04 LTS (anche Debian 13), in una VM o
-# su un PC dedicato. Requisiti: almeno 16 GB di RAM, 250 GB di disco, molti core.
+# Usage: tools/setup-host.sh
+# Recommended system: Ubuntu Server 24.04 or 26.04 LTS (Debian 13 works too), in a VM
+# or on a dedicated PC. Requirements: at least 16 GB of RAM, 250 GB of disk, many cores.
 #
-# Installa:
-#   - i programmi richiesti da Yocto 6.0 «Wrynose»;
-#   - kas (strumento di build, D-024), tramite pipx;
-#   - QEMU e il firmware UEFI OVMF, per provare le immagini nell'emulatore;
-#   - le chiavi di sviluppo per firmare gli aggiornamenti (fuori dal repository).
-# Chiede conferma prima di cambiare impostazioni di sistema.
+# Installs:
+#   - the programs required by Yocto 6.0 "Wrynose";
+#   - kas (build tool, D-024), through pipx;
+#   - QEMU and the OVMF UEFI firmware, to test images in the emulator;
+#   - the development keys to sign updates (outside the repository).
+# Asks for confirmation before changing system settings.
 set -eu
 
 say() { printf '\n==> %s\n' "$*"; }
 ask() {
-    printf '%s [s/N] ' "$1"
+    printf '%s [y/N] ' "$1"
     read -r answer
-    case "$answer" in s|S|si|SI|sì|Sì) return 0 ;; *) return 1 ;; esac
+    case "$answer" in y|Y|yes|Yes|YES) return 0 ;; *) return 1 ;; esac
 }
 
 if [ "$(id -u)" -eq 0 ]; then
-    echo "Esegui lo script come utente normale (usa sudo da solo quando serve)." >&2
-    echo "Bitbake si rifiuta di funzionare come root." >&2
+    echo "Run the script as a normal user (it uses sudo by itself when needed)." >&2
+    echo "Bitbake refuses to run as root." >&2
     exit 1
 fi
 
@@ -30,12 +30,12 @@ fi
 case "${ID:-}:${VERSION_ID:-}" in
     ubuntu:24.04|ubuntu:26.04|debian:13) ;;
     *)
-        echo "Attenzione: $PRETTY_NAME non è tra i sistemi provati (Ubuntu 24.04/26.04, Debian 13)."
-        ask "Continuare lo stesso?" || exit 1
+        echo "Warning: $PRETTY_NAME is not among the tested systems (Ubuntu 24.04/26.04, Debian 13)."
+        ask "Continue anyway?" || exit 1
         ;;
 esac
 
-say "Installo i programmi richiesti da Yocto, QEMU e OVMF"
+say "Installing the programs required by Yocto, QEMU and OVMF"
 sudo apt-get update
 sudo apt-get install -y \
     build-essential chrpath cpio debianutils diffstat file gawk gcc git \
@@ -45,13 +45,13 @@ sudo apt-get install -y \
     pipx openssl \
     qemu-system-x86 qemu-utils ovmf
 
-say "Attivo la lingua en_US.UTF-8 (bitbake la richiede)"
+say "Enabling the en_US.UTF-8 locale (bitbake requires it)"
 if ! locale -a | grep -qi '^en_US\.utf-\?8$'; then
     sudo sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen
     sudo locale-gen
 fi
 
-say "Installo kas"
+say "Installing kas"
 pipx ensurepath >/dev/null
 if pipx list 2>/dev/null | grep -q 'package kas '; then
     pipx upgrade kas
@@ -59,46 +59,46 @@ else
     pipx install kas
 fi
 
-# Ubuntu 24.04 e successivi limitano i namespace utente non privilegiati con AppArmor;
-# bitbake li usa per isolare dalla rete i passi di compilazione.
+# Ubuntu 24.04 and later restrict unprivileged user namespaces with AppArmor; bitbake
+# uses them to isolate compilation steps from the network.
 F=/proc/sys/kernel/apparmor_restrict_unprivileged_userns
 if [ -r "$F" ] && [ "$(cat "$F")" = "1" ]; then
-    say "Namespace utente limitati da AppArmor"
-    echo "Bitbake ha bisogno dei namespace utente per isolare la compilazione dalla rete."
-    echo "Posso consentirli in modo permanente su questa macchina"
-    echo "(/etc/sysctl.d/60-project-os-bitbake.conf). Riduce un po' l'isolamento delle app"
-    echo "sulla macchina di build: va bene su una VM dedicata, meno su un PC di uso quotidiano."
-    if ask "Consentire i namespace utente?"; then
+    say "User namespaces restricted by AppArmor"
+    echo "Bitbake needs user namespaces to isolate compilation from the network."
+    echo "I can allow them permanently on this machine"
+    echo "(/etc/sysctl.d/60-project-os-bitbake.conf). It slightly reduces app isolation on"
+    echo "the build host: fine on a dedicated VM, less so on an everyday PC."
+    if ask "Allow user namespaces?"; then
         echo "kernel.apparmor_restrict_unprivileged_userns = 0" |
             sudo tee /etc/sysctl.d/60-project-os-bitbake.conf >/dev/null
         sudo sysctl --system >/dev/null
     else
-        echo "Non modificato: la build potrebbe fermarsi con errori sui namespace."
+        echo "Not changed: the build may stop with namespace errors."
     fi
 fi
 
 KEYS="$HOME/.config/project-os/keys"
-say "Chiavi di sviluppo per gli aggiornamenti"
+say "Development keys for updates"
 if [ -f "$KEYS/ca.cert.pem" ]; then
-    echo "Già presenti in $KEYS"
+    echo "Already present in $KEYS"
 else
     "$(dirname "$0")/gen-dev-keys.sh" "$KEYS"
 fi
 
 if [ -e /dev/kvm ]; then
     if [ ! -w /dev/kvm ]; then
-        say "Accelerazione KVM"
-        echo "Aggiungo $USER al gruppo kvm (vale dal prossimo accesso)."
+        say "KVM acceleration"
+        echo "Adding $USER to the kvm group (takes effect from the next login)."
         sudo usermod -aG kvm "$USER"
     fi
 else
-    say "Accelerazione KVM non disponibile"
-    echo "QEMU funzionerà, ma molto più lento. In una VM, attiva la virtualizzazione"
-    echo "annidata nelle impostazioni del programma di virtualizzazione."
+    say "KVM acceleration not available"
+    echo "QEMU will work, but much slower. In a VM, enable nested virtualization in the"
+    echo "settings of the virtualization program."
 fi
 
-say "Fatto. Prossimi passi:"
-echo "  1. esci e rientra (o apri un nuovo terminale), per kas e il gruppo kvm"
-echo "  2. tools/build.sh            prima build: diverse ore"
-echo "     (PC con meno di 16 GB di RAM: tools/build.sh --poche-risorse)"
-echo "  3. tools/run-qemu.sh         avvia l'immagine nell'emulatore"
+say "Done. Next steps:"
+echo "  1. log out and back in (or open a new terminal), for kas and the kvm group"
+echo "  2. tools/build.sh            first build: several hours"
+echo "     (PC with less than 16 GB of RAM: tools/build.sh --low-resources)"
+echo "  3. tools/run-qemu.sh         boot the image in the emulator"

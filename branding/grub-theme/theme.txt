@@ -1,10 +1,10 @@
-# project-os — tema GRUB (D-009, D-023)
+# project-os — GRUB theme (D-009, D-023)
 #
-# Menu di avvio centrato con logo. I font .pf2 non sono nel repository: la ricetta
-# Yocto li genera con grub-mkfont dal font Inter (licenza OFL-1.1) e li installa
-# accanto a questo file:
+# Centered boot menu with logo. The .pf2 fonts are not in the repository: the Yocto
+# recipe generates them with grub-mkfont from the Inter font (OFL-1.1 license) and
+# installs them next to this file:
 #   Inter Regular 14, Inter Regular 18, Inter Medium 18, Inter SemiBold 28
-# Le immagini PNG si rigenerano con branding/tools/render.py.
+# The PNG images are regenerated with branding/tools/render.py.
 
 title-text: ""
 desktop-image: "background.png"
@@ -21,7 +21,7 @@ terminal-box: "terminal_box_*.png"
   file = "logo.png"
 }
 
-# Nome del sistema
+# System name
 + label {
   left = 0
   top = 20%+116
@@ -33,7 +33,7 @@ terminal-box: "terminal_box_*.png"
   text = "project-os"
 }
 
-# Voci di avvio (project-os, Windows e altri sistemi rilevati da os-prober)
+# Boot entries (project-os, Windows and other systems detected by os-prober)
 + boot_menu {
   left = 50%-260
   top = 20%+180
@@ -53,7 +53,7 @@ terminal-box: "terminal_box_*.png"
   scrollbar = false
 }
 
-# Conto alla rovescia dell'avvio automatico
+# Automatic boot countdown
 + label {
   id = "__timeout__"
   left = 0
@@ -63,10 +63,10 @@ terminal-box: "terminal_box_*.png"
   align = "center"
   font = "Inter Regular 14"
   color = "#7D8597"
-  text = "Avvio automatico tra %d secondi"
+  text = "Booting automatically in %d seconds"
 }
 
-# Aiuto tasti
+# Key help
 + label {
   left = 0
   top = 100%-64
@@ -75,5 +75,5 @@ terminal-box: "terminal_box_*.png"
   align = "center"
   font = "Inter Regular 14"
   color = "#596173"
-  text = "↑ ↓ per scegliere  ·  Invio per avviare  ·  E per modificare  ·  C per la riga di comando"
+  text = "↑ ↓ to select  ·  Enter to boot  ·  E to edit  ·  C for a command line"
 }

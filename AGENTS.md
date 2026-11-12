@@ -1,7 +1,8 @@
 # AGENTS.md — Guida per agenti AI e persone
 
-> **Stato:** v1.1 — creato il 2026-11-11; §1 aggiornato lo stesso giorno con
-> autorizzazione dell'utente (cambio di approccio da Debian a sistema da sorgenti).
+> **Stato:** v1.2 — creato il 2026-11-11; §1 aggiornato lo stesso giorno con
+> autorizzazione dell'utente (cambio di approccio da Debian a sistema da sorgenti);
+> §6 riscritto il 2026-11-12 con autorizzazione dell'utente (lingua, D-037).
 > **Questo file è bloccato.** Vedi §2 prima di proporre qualsiasi modifica.
 
 ## 1. Scopo
@@ -80,7 +81,15 @@ La sicurezza è un requisito di progetto, non una funzionalità aggiuntiva.
 6. **Nessuna scorciatoia.** Non disattivare verifiche (firme, TLS, sandbox, permessi) per
    far funzionare qualcosa; se serve, si chiede.
 
-## 6. Lingua
+## 6. Language (fixed rule)
 
-Documentazione, commenti di alto livello e messaggi di commit in **italiano**.
-Identificatori nel codice (nomi di variabili, funzioni, API) in **inglese**.
+1. **Everything in the repository is written in English:** identifiers, comments,
+   script options and messages, recipes, configuration files, systemd units, boot menu
+   and theme texts, file and directory names, documentation (`*.md`, including
+   `docs/`, `MEMORY.md` and `ROADMAP.md`) and commit messages.
+2. **Italian only where it is needed for the user's language:** translation files
+   (language packs) and locale lists. No Italian aliases or fallbacks in code.
+3. **Communication with the user** (chat messages, questions and multiple-choice
+   prompts) is in **Italian**, the user's language.
+4. Text that exists in the repository in another language is translated when it is
+   touched; new text is always in English.

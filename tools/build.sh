@@ -1,27 +1,27 @@
 #!/bin/sh
-# Costruisce project-os per desktop amd64, in configurazione di sviluppo.
+# Builds project-os for desktop amd64, in development configuration.
 #
-# Uso:  tools/build.sh [--poche-risorse] [immagine|aggiornamento|shell]
-#   immagine         (predefinito) immagine del disco, da provare con tools/run-qemu.sh
-#   aggiornamento    pacchetto di aggiornamento RAUC firmato (project-os-bundle)
-#   shell            terminale con l'ambiente bitbake, per comandi manuali
-#   --poche-risorse  per PC con poca RAM o poco disco, per esempio un portatile
-#                    (kas/low-resources.yml): build più lenta, ma sta in circa 8 GB di
-#                    RAM e 45 GB di disco. Basta per la Fase 1, non per WebKitGTK.
-#   --help           mostra questo aiuto
+# Usage: tools/build.sh [--low-resources] [image|update|shell]
+#   image            (default) disk image, to be tested with tools/run-qemu.sh
+#   update           signed RAUC update bundle (project-os-bundle)
+#   shell            terminal with the bitbake environment, for manual commands
+#   --low-resources  for PCs with little RAM or disk space, for example a laptop
+#                    (kas/low-resources.yml): slower build, but it fits in about 8 GB
+#                    of RAM and 45 GB of disk. Enough for Phase 1, not for WebKitGTK.
+#   --help           show this help
 #
-# Modalità predefinita: piene prestazioni, per la macchina di build consigliata
-# (docs/sviluppo.md: almeno 16 GB di RAM e 250 GB di disco). bitbake usa tutti i core e
-# tiene i file di lavoro delle ricette, così le build successive sono più rapide.
-# Se la macchina sembra troppo piccola, lo script avvisa e suggerisce --poche-risorse.
+# Default mode: full performance, for the recommended build host (docs/development.md:
+# at least 16 GB of RAM and 250 GB of disk). bitbake uses all cores and keeps the work
+# files of the recipes, so later builds are faster.
+# If the machine looks too small, the script warns and suggests --low-resources.
 #
-# Equivalenti con kas, senza questo script:
+# Equivalent kas commands, without this script:
 #   kas build kas/desktop-amd64.yml:kas/dev.yml
 #   kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml
 #
-# PROJECT_OS_LOW_RESOURCES=1 equivale a --poche-risorse (=0 o assente: predefinita).
-# La configurazione di sviluppo (kas/dev.yml) permette l'accesso root senza password:
-# mai per immagini da distribuire (AGENTS.md §5.6).
+# PROJECT_OS_LOW_RESOURCES=1 is the same as --low-resources (=0 or unset: default).
+# The development configuration (kas/dev.yml) allows passwordless root login: never use
+# it for images to be distributed (AGENTS.md §5.6).
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -31,14 +31,14 @@ usage() {
 }
 
 low="${PROJECT_OS_LOW_RESOURCES:-0}"
-target=immagine
+target=image
 for arg in "$@"; do
     case "$arg" in
-        --poche-risorse) low=1 ;;
+        --low-resources) low=1 ;;
         --help|-h) usage; exit 0 ;;
-        immagine|aggiornamento|shell) target="$arg" ;;
+        image|update|shell) target="$arg" ;;
         *)
-            echo "Opzione sconosciuta: $arg" >&2
+            echo "Unknown option: $arg" >&2
             usage >&2
             exit 2
             ;;
@@ -46,69 +46,69 @@ for arg in "$@"; do
 done
 
 if ! command -v kas >/dev/null 2>&1; then
-    echo "kas non trovato. Prepara la macchina con tools/setup-host.sh" >&2
-    echo "(poi apri un nuovo terminale)." >&2
+    echo "kas not found. Prepare the machine with tools/setup-host.sh" >&2
+    echo "(then open a new terminal)." >&2
     exit 1
 fi
 
 : "${PROJECT_OS_KEYS:=$HOME/.config/project-os/keys}"
 export PROJECT_OS_KEYS
 if [ ! -f "$PROJECT_OS_KEYS/ca.cert.pem" ]; then
-    echo "Chiavi non trovate in $PROJECT_OS_KEYS." >&2
-    echo "Creale con tools/gen-dev-keys.sh (o tools/setup-host.sh)." >&2
+    echo "Keys not found in $PROJECT_OS_KEYS." >&2
+    echo "Create them with tools/gen-dev-keys.sh (or tools/setup-host.sh)." >&2
     exit 1
 fi
 
 CONFIG="kas/desktop-amd64.yml:kas/dev.yml"
 
-# Risorse della macchina: RAM totale e spazio libero dove va la build
+# Machine resources: total RAM and free space where the build goes
 mem_gb=$(awk '/^MemTotal:/ { printf "%d", $2 / 1048576 + 0.5 }' /proc/meminfo)
 free_gb=$(df -Pk . | awk 'NR == 2 { printf "%d", $4 / 1048576 }')
 cores=$(nproc)
 
-# Spazio richiesto solo alla prima build: le successive riusano build/ e sources/
+# Space is required only by the first build: later ones reuse build/ and sources/
 first_build=0
 [ -d build/tmp ] || first_build=1
 
 warn=""
 if [ "$low" = 1 ]; then
     CONFIG="$CONFIG:kas/low-resources.yml"
-    echo "Modalità poche risorse (kas/low-resources.yml): build più lenta, meno RAM e disco."
+    echo "Low-resources mode (kas/low-resources.yml): slower build, less RAM and disk."
     if [ "$first_build" = 1 ] && [ "$free_gb" -lt 45 ]; then
-        warn="Spazio libero: $free_gb GB; anche con --poche-risorse ne servono circa 45."
+        warn="Free space: $free_gb GB; even with --low-resources about 45 are needed."
     fi
 else
-    echo "Modalità predefinita: piene prestazioni ($cores core, $mem_gb GB di RAM)."
-    # 15 e non 16: un PC da 16 GB ne mostra un po' meno al sistema
+    echo "Default mode: full performance ($cores cores, $mem_gb GB of RAM)."
+    # 15 rather than 16: a 16 GB PC shows a bit less to the system
     if [ "$mem_gb" -lt 15 ]; then
-        warn="RAM: $mem_gb GB, sotto i 16 GB consigliati: la build può esaurire la memoria."
+        warn="RAM: $mem_gb GB, below the recommended 16 GB: the build may run out of memory."
     fi
     if [ "$first_build" = 1 ] && [ "$free_gb" -lt 100 ]; then
         warn="${warn:+$warn
-}Spazio libero: $free_gb GB; la prima build ne occupa circa 100 (250 dalla Fase 2)."
+}Free space: $free_gb GB; the first build takes about 100 (250 from Phase 2)."
     fi
     [ -n "$warn" ] && warn="$warn
-Su un PC con poche risorse usa: tools/build.sh --poche-risorse"
+On a PC with few resources use: tools/build.sh --low-resources"
 fi
 
 if [ -n "$warn" ]; then
     echo >&2
-    echo "Attenzione:" >&2
+    echo "Warning:" >&2
     echo "$warn" | sed 's/^/  /' >&2
     echo >&2
-    # Da terminale si chiede conferma; da script (CI, automazioni) si avvisa e basta
+    # From a terminal, ask for confirmation; from scripts (CI, automation), just warn
     if [ -t 0 ]; then
-        printf "Continuare comunque? [s/N] " >&2
+        printf "Continue anyway? [y/N] " >&2
         read -r answer
         case "$answer" in
-            s|S|si|sì|Si|Sì) ;;
-            *) echo "Build annullata." >&2; exit 1 ;;
+            y|Y|yes|Yes|YES) ;;
+            *) echo "Build cancelled." >&2; exit 1 ;;
         esac
     fi
 fi
 
 case "$target" in
-    immagine)      exec kas build "$CONFIG" ;;
-    aggiornamento) exec kas build --target project-os-bundle "$CONFIG" ;;
-    shell)         exec kas shell "$CONFIG" ;;
+    image)  exec kas build "$CONFIG" ;;
+    update) exec kas build --target project-os-bundle "$CONFIG" ;;
+    shell)  exec kas shell "$CONFIG" ;;
 esac

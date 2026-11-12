@@ -1,31 +1,31 @@
-SUMMARY = "project-os — immagine base"
-DESCRIPTION = "Sistema minimo: kernel, glibc, systemd. Si avvia fino a un terminale \
-testuale. Gli strati successivi (grafica, broker, shell) si aggiungono nelle fasi \
-seguenti della roadmap."
+SUMMARY = "project-os — base image"
+DESCRIPTION = "Minimal system: kernel, glibc, systemd. Boots to a text terminal. \
+The next layers (graphics, broker, shell) are added in the following phases of the \
+roadmap."
 LICENSE = "GPL-3.0-only"
 
 inherit core-image
 
-# Solo ciò che serve ad avviarsi (AGENTS.md §5.5), più ciò che la macchina dichiara
-# per il proprio hardware (moduli del kernel, firmware: MACHINE_EXTRA_RRECOMMENDS).
-# packagegroup-core-boot non li include da solo.
+# Only what is needed to boot (AGENTS.md §5.5), plus what the machine declares for its
+# own hardware (kernel modules, firmware: MACHINE_EXTRA_RRECOMMENDS).
+# packagegroup-core-boot does not include them by itself.
 IMAGE_INSTALL = "packagegroup-core-boot ${MACHINE_EXTRA_RRECOMMENDS} ${CORE_IMAGE_EXTRA_INSTALL}"
 
-# Kernel dentro lo slot di sistema: GRUB lo carica dallo slot scelto (D-026)
+# Kernel inside the system slot: GRUB loads it from the chosen slot (D-026)
 IMAGE_INSTALL += "kernel-image"
 
-# Aggiornamenti A/B firmati (D-018, D-026)
+# Signed A/B updates (D-018, D-026)
 IMAGE_INSTALL += "rauc"
-# squashfs-tools non serve: i bundle si montano con il driver del kernel
+# squashfs-tools is not needed: bundles are mounted with the kernel driver
 BAD_RECOMMENDATIONS += "squashfs-tools"
 
-# Sistema in sola lettura (D-018); i dati vivono sulla partizione cifrata montata su /var
+# Read-only system (D-018); data lives on the encrypted partition mounted on /var
 IMAGE_FEATURES += "read-only-rootfs"
 
-# Nessun gestore di pacchetti nell'immagine (D-018)
+# No package manager in the image (D-018)
 IMAGE_FEATURES:remove = "package-management"
 
-# /home sta sulla partizione dati: nell'immagine diventa un collegamento a /var/home
+# /home lives on the data partition: in the image it becomes a link to /var/home
 ROOTFS_POSTPROCESS_COMMAND += "project_os_home_on_data"
 project_os_home_on_data() {
     rm -rf ${IMAGE_ROOTFS}/home
@@ -34,8 +34,8 @@ project_os_home_on_data() {
     echo "d /var/home 0755 root root -" > ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d/project-os-home.conf
 }
 
-# Punto di montaggio della partizione EFI (fstab): con il sistema in sola lettura
-# systemd non può crearlo all'avvio. Accesso solo root, come l'ESP montata (umask=0077).
+# Mount point of the EFI partition (efi.mount): on the read-only system systemd cannot
+# create it at boot. Root-only access, like the mounted ESP (umask=0077).
 ROOTFS_POSTPROCESS_COMMAND += "project_os_efi_mountpoint"
 project_os_efi_mountpoint() {
     install -d -m 0700 ${IMAGE_ROOTFS}/efi

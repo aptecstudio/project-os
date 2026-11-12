@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Verifica i frammenti di configurazione del kernel contro i Kconfig di un sorgente Linux.
+"""Checks kernel configuration fragments against the Kconfig files of a Linux source tree.
 
-Uso:
-  tools/check-kernel-fragments.py <sorgenti-linux> <frammento.cfg> [...]
+Usage:
+  tools/check-kernel-fragments.py <linux-source> <fragment.cfg> [...]
 
-Per ogni riga CONFIG_X=valore controlla che:
-  - il simbolo X esista nei Kconfig della versione del kernel indicata;
-  - il valore sia ammesso dal tipo: "m" solo per i simboli tristate, "y"/"n" per bool
-    e tristate.
-Non verifica le dipendenze ("depends on"): quelle le controlla la build del kernel,
-che segnala le opzioni richieste e non attivate.
+For each CONFIG_X=value line it checks that:
+  - the symbol X exists in the Kconfig files of the given kernel version;
+  - the value is allowed by the type: "m" only for tristate symbols, "y"/"n" for bool
+    and tristate.
+It does not check dependencies ("depends on"): the kernel build does that, reporting
+the options that are required but not enabled.
 
-Basta un sorgente con i soli file Kconfig, per esempio:
+A source tree with only the Kconfig files is enough, for example:
   git clone --depth=1 --filter=blob:none --no-checkout -b v6.18 \\
       https://github.com/torvalds/linux linux
   git -C linux sparse-checkout set --no-cone '/**/Kconfig*' '/Kconfig'
@@ -31,7 +31,7 @@ UNSET = re.compile(r"^#\s*CONFIG_([A-Za-z0-9_]+) is not set")
 
 
 def load_kconfig(root: Path) -> dict[str, set[str]]:
-    """Restituisce simbolo -> insieme dei tipi con cui è dichiarato."""
+    """Returns symbol -> set of the types it is declared with."""
     types: dict[str, set[str]] = {}
     for path in root.rglob("Kconfig*"):
         if not path.is_file():
@@ -65,14 +65,14 @@ def check(fragment: Path, types: dict[str, set[str]]) -> list[str]:
         value = m.group(2) if m.re is ASSIGN else "n"
         where = f"{fragment}:{n}: CONFIG_{sym}"
         if sym not in types:
-            errors.append(f"{where}: simbolo inesistente in questa versione del kernel")
+            errors.append(f"{where}: symbol does not exist in this kernel version")
             continue
         kinds = types[sym]
         if value == "m" and "tristate" not in kinds:
-            errors.append(f"{where}=m: il simbolo è {'/'.join(sorted(kinds)) or '?'}, "
-                          "non può essere un modulo")
+            errors.append(f"{where}=m: the symbol is {'/'.join(sorted(kinds)) or '?'}, "
+                          "it cannot be a module")
         elif value in ("y", "n") and kinds and not kinds & {"bool", "tristate"}:
-            errors.append(f"{where}={value}: il simbolo è {'/'.join(sorted(kinds))}")
+            errors.append(f"{where}={value}: the symbol is {'/'.join(sorted(kinds))}")
     return errors
 
 
@@ -89,7 +89,7 @@ def main() -> int:
         errors += check(frag, types)
     for e in errors:
         print(e)
-    print(f"{count} opzioni controllate, {len(errors)} errori")
+    print(f"{count} options checked, {len(errors)} errors")
     return 1 if errors else 0
 
 

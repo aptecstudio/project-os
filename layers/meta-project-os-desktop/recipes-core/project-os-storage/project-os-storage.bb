@@ -1,6 +1,7 @@
-SUMMARY = "project-os desktop — partizione dati cifrata e partizione EFI"
-DESCRIPTION = "Creazione al primo avvio (systemd-repart), sblocco (crypttab) e montaggio \
-su /var della partizione dati cifrata; montaggio su /efi della partizione EFI (D-026)."
+SUMMARY = "project-os desktop — encrypted data partition and EFI partition"
+DESCRIPTION = "Creation on first boot (systemd-repart), unlocking (crypttab) and \
+mounting on /var of the encrypted data partition; mounting on /efi of the EFI \
+partition (D-026)."
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec6d293b95dea7b07891"
 
@@ -32,6 +33,6 @@ do_install() {
 SYSTEMD_SERVICE:${PN} = "var.mount efi.mount"
 
 FILES:${PN} += "${nonarch_libdir}/repart.d ${systemd_system_unitdir}"
-# e2fsprogs-mke2fs: mkfs.ext4, con cui systemd-repart formatta la partizione dati
+# e2fsprogs-mke2fs: mkfs.ext4, which systemd-repart uses to format the data partition
 RDEPENDS:${PN} = "systemd cryptsetup e2fsprogs-mke2fs"
 REQUIRED_DISTRO_FEATURES = "systemd"

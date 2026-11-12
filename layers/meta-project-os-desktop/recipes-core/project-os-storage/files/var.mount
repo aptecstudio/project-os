@@ -1,5 +1,5 @@
 [Unit]
-Description=Dati di project-os (/var)
+Description=project-os data (/var)
 Documentation=https://github.com/aptecstudio/project-os
 Requires=systemd-cryptsetup@data.service
 After=systemd-cryptsetup@data.service

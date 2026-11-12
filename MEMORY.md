@@ -1,690 +1,737 @@
-# MEMORY.md — Scelte, stile e convenzioni
+# MEMORY.md — Choices, style and conventions
 
-Registro delle decisioni di progetto e del loro perché, dello stile grafico, della struttura
-del codice e delle convenzioni sintattiche. Regole di aggiornamento in `AGENTS.md` §3.
+Record of the project decisions and their reasons, of the visual style, of the code
+structure and of the syntax conventions. Update rules in `AGENTS.md` §3.
 
-**Stati di una decisione:** `requisito` (fissato dall'utente) · `confermata` (approvata) ·
-`proposta` (in attesa di approvazione) · `superata` (sostituita, vedi voce indicata).
+**Decision states:** `requirement` (set by the user) · `confirmed` (approved) ·
+`proposed` (awaiting approval) · `superseded` (replaced, see the entry indicated).
+
+*Translated from Italian to English on 2026-11-12, at the user's request (D-037). The
+content, including superseded choices, is unchanged; state names are translated
+(`requisito` → `requirement`, `confermata` → `confirmed`, `proposta` → `proposed`,
+`superata` → `superseded`).*
 
 ---
 
-## 1. Requisiti di base
+## 1. Basic requirements
 
-Fissati dall'utente il 2026-11-11.
+Set by the user on 2026-11-11.
 
-| ID | Requisito |
+| ID | Requirement |
 |---|---|
-| ~~R-01~~ | ~~Il sistema deriva da una versione stabile di Debian.~~ *Superato da R-20.* |
-| R-02 | Sistema ridotto all'essenziale: nessun pacchetto superfluo, pulito e leggero. *(Riformulato senza Debian dopo R-20.)* |
-| R-03 | **Wayland** per video e dispositivi di input. |
-| R-04 | Mantenere il supporto all'hardware moderno principale (audio, Bluetooth, Wi‑Fi, GPU, ecc.) nel kernel e nei firmware. |
-| R-05 | Architetture: **ARM mobile** (smartphone, tablet) e **desktop Intel/AMD**. |
-| R-06 | Interfaccia grafica realizzata con la versione stabile di **WebKitGTK**. |
-| R-07 | Ogni applicazione (incluse shell e pannelli) ha uno **script JavaScript principale** che può aprire finestre associate al proprio processo, in stile Electron ma basato su WebKitGTK. |
-| R-08 | Rendering e animazioni gestiti interamente dal motore WebKit. |
-| R-09 | Ogni applicazione è un processo che può avere sottoprocessi. |
-| R-10 | Tutte le modali di sistema sono sostituite da modali HTML + JS + CSS predefinite. |
-| R-11 | Ogni applicazione dichiara nel proprio `package.json` nome, metadati e API native richieste, anche come livello di sicurezza aggiuntivo. |
-| R-12 | Ogni applicazione dispone di API di sistema di base: filesystem, dispositivi, finestre, servizi di sistema. |
-| R-13 | Un'applicazione può richiedere l'accesso root dal `package.json` e/o tramite API dedicate. |
-| R-14 | Il sistema deve essere **sicuro**. |
-| R-15 | Branch principale del repository: `main`. |
-| R-16 | **Mobile:** installazione tramite la recovery del dispositivo; il setup prosegue al primo avvio con interfaccia HTML. |
-| R-17 | **Desktop:** installazione con un'applicazione wizard in stile Windows/Debian, con rendering HTML come tutte le altre app. |
-| R-18 | **Desktop:** menu di avvio con voci centrate e logo del sistema (inizialmente un logo generico), che consenta il dual boot con Windows o altri sistemi. |
-| R-19 | Nessuna modalità live per ora. |
+| ~~R-01~~ | ~~The system derives from a stable Debian release.~~ *Superseded by R-20.* |
+| R-02 | System reduced to the essentials: no superfluous packages, clean and light. *(Reworded without Debian after R-20.)* |
+| R-03 | **Wayland** for video and input devices. |
+| R-04 | Keep support for the main modern hardware (audio, Bluetooth, Wi‑Fi, GPU, etc.) in the kernel and firmware. |
+| R-05 | Architectures: **mobile ARM** (smartphones, tablets) and **Intel/AMD desktop**. |
+| R-06 | Graphical interface made with the stable release of **WebKitGTK**. |
+| R-07 | Each application (shell and panels included) has a **main JavaScript script** that can open windows bound to its own process, Electron style but based on WebKitGTK. |
+| R-08 | Rendering and animations handled entirely by the WebKit engine. |
+| R-09 | Each application is a process that can have subprocesses. |
+| R-10 | All system dialogs are replaced by predefined HTML + JS + CSS dialogs. |
+| R-11 | Each application declares in its `package.json` name, metadata and the native APIs it requires, also as an extra security layer. |
+| R-12 | Each application has basic system APIs: filesystem, devices, windows, system services. |
+| R-13 | An application can request root access from its `package.json` and/or through dedicated APIs. |
+| R-14 | The system must be **secure**. |
+| R-15 | Main branch of the repository: `main`. |
+| R-16 | **Mobile:** installation through the device recovery; the setup continues on first boot with an HTML interface. |
+| R-17 | **Desktop:** installation with a wizard application in Windows/Debian style, with HTML rendering like all the other apps. |
+| R-18 | **Desktop:** boot menu with centered entries and the system logo (a generic logo at first), allowing dual boot with Windows or other systems. |
+| R-19 | No live mode for now. |
 
-| R-20 | **Niente distribuzione di partenza:** si parte da Linux (kernel) e si costruisce sopra ogni pacchetto. |
-| R-21 | **Un solo sistema, due basi:** con poche modifiche si ottengono la versione mobile su base Android (kernel e driver del produttore) e quella desktop; entrambe su Linux. |
-| R-22 | Componenti nativi in **Rust**. |
-| R-23 | Primo dispositivo mobile: **Google Pixel** dell'utente. Da non trascurare: vecchi modelli **Oppo** e **Samsung** in suo possesso. |
-| R-24 | **Setup differenziato:** su desktop comprende formattazione del disco, layout tastiera e configurazione di base; su mobile chiede altri dati o parte da step successivi (il sistema è già installato dalla recovery). |
+| R-20 | **No starting distribution:** start from Linux (the kernel) and build every package on top. |
+| R-21 | **One system, two bases:** with few changes, the Android-based mobile version (vendor kernel and drivers) and the desktop one; both on Linux. |
+| R-22 | Native components in **Rust**. |
+| R-23 | First mobile device: the user's **Google Pixel**. Not to be neglected: older **Oppo** and **Samsung** models the user owns. |
+| R-24 | **Differentiated setup:** on desktop it includes disk formatting, keyboard layout and basic configuration; on mobile it asks for other data or starts from later steps (the system is already installed from the recovery). |
 
-| R-25 | **Retrocompatibilità a tutti i livelli e in tutti i contesti del progetto**: hardware, avvio, formati, API, dati, aggiornamenti. |
-| R-26 | **Desktop:** avvio sia da UEFI sia da BIOS tradizionale, con la stessa immagine. |
-| R-27 | **Cifratura senza TPM:** la partizione dati deve funzionare anche sui PC più datati senza chip TPM. |
-| R-28 | **Processori desktop:** tutti i processori x86 a 64 bit (istruzioni x86-64 di base). |
-| R-29 | **API delle app come oggetti nel contesto dello script**, come le API `chrome.*` delle estensioni: le app le raggiungono da un oggetto globale, senza importarle. |
-| R-30 | **Caricamento dinamico degli script con `include("url")`** e la controparte **`includeAsync("url")`**, non con moduli CommonJS o ES. Ogni script incluso ha un oggetto `exports` con i simboli che espone a chi lo include; gli script inclusi sono messi in cache; l'importazione ciclica è impedita. |
-| R-31 | **Cartella radice isolata per ogni app:** script, immagini e altre risorse si caricano solo da lì, con un protocollo dedicato (`app://`), e solo l'app stessa può accedere alle proprie risorse. File esterni solo tramite le API di sistema del filesystem. |
-| R-32 | **Design:** ibrido tra Windows 11, macOS Big Sur e Xiaomi MIUI. |
-| R-33 | **Interoperabilità tra dispositivi:** i dispositivi su cui è installato project-os, desktop e mobile, collaborano tra loro come un unico ecosistema, sul modello di quello Apple. |
+| R-25 | **Backward compatibility at every level and in every context of the project**: hardware, boot, formats, APIs, data, updates. |
+| R-26 | **Desktop:** boot from both UEFI and legacy BIOS, with the same image. |
+| R-27 | **Encryption without TPM:** the data partition must work on older PCs without a TPM chip too. |
+| R-28 | **Desktop processors:** all 64-bit x86 processors (baseline x86-64 instructions). |
+| R-29 | **App APIs as objects in the script context**, like the `chrome.*` APIs of extensions: apps reach them from a global object, without importing them. |
+| R-30 | **Dynamic script loading with `include("url")`** and its counterpart **`includeAsync("url")`**, not with CommonJS or ES modules. Each included script has an `exports` object with the symbols it exposes to the includer; included scripts are cached; cyclic imports are prevented. |
+| R-31 | **Isolated root folder for each app:** scripts, images and other resources are loaded only from there, with a dedicated protocol (`app://`), and only the app itself can access its own resources. External files only through the filesystem system APIs. |
+| R-32 | **Design:** a hybrid of Windows 11, macOS Big Sur and Xiaomi MIUI. |
+| R-33 | **Interoperability between devices:** the devices running project-os, desktop and mobile, cooperate as a single ecosystem, on the model of Apple's. |
 
-*R-16…R-19 aggiunti dall'utente il 2026-11-11. R-20…R-24 aggiunti lo stesso giorno: cambio
-di approccio, da Debian a sistema costruito da zero. R-25…R-28 aggiunti lo stesso giorno. R-29…R-32 aggiunti lo stesso giorno (sera). R-33 aggiunto lo stesso giorno, dal
-portatile.*
+*R-16…R-19 added by the user on 2026-11-11. R-20…R-24 added the same day: change of
+approach, from Debian to a system built from scratch. R-25…R-28 added the same day.
+R-29…R-32 added the same day (evening). R-33 added the same day, from the laptop.*
 
 ---
 
-## 2. Registro delle decisioni
+## 2. Decision log
 
-### D-001 — Debian 13 «Trixie» come base · `superata` da D-012 (R-20)
-- **Cosa:** partire dalla stable corrente, Debian 13, sui rami `main`, `contrib`,
-  `non-free-firmware`, più `trixie-security` e `trixie-updates`.
-- **Perché:** è la stable supportata più a lungo (sicurezza fino al 2028, LTS oltre) e
-  include WebKitGTK per GTK 4 (API `webkitgtk-6.0`), che riceve aggiornamenti di sicurezza.
-- **Alternative scartate:** testing/unstable (contraddice R-01).
+### D-001 — Debian 13 "Trixie" as the base · `superseded` by D-012 (R-20)
+- **What:** start from the current stable, Debian 13, on the `main`, `contrib`,
+  `non-free-firmware` components, plus `trixie-security` and `trixie-updates`.
+- **Why:** it is the stable release supported the longest (security until 2028, LTS
+  beyond) and includes WebKitGTK for GTK 4 (`webkitgtk-6.0` API), which receives
+  security updates.
+- **Discarded alternatives:** testing/unstable (contradicts R-01).
 
-### D-002 — Costruire per aggiunta, non per sottrazione · `superata` da D-012 (il principio resta: ogni componente entra solo se motivato)
-- **Cosa:** generare il sistema con `mmdebstrap --variant=minbase` (o `debos` per le
-  immagini) e aggiungere un elenco esplicito di pacchetti, invece di installare Debian
-  completa e poi rimuovere.
-- **Perché:** è riproducibile, ogni pacchetto ha una motivazione (AGENTS.md §5.5) e non
-  restano dipendenze orfane. `--no-install-recommends` attivo per default.
-- **Alternative scartate:** installazione standard + rimozione (fragile, lascia residui).
+### D-002 — Build by addition, not by subtraction · `superseded` by D-012 (the principle stays: every component enters only with a reason)
+- **What:** generate the system with `mmdebstrap --variant=minbase` (or `debos` for the
+  images) and add an explicit list of packages, instead of installing full Debian and
+  then removing.
+- **Why:** it is reproducible, each package has a reason (AGENTS.md §5.5) and no orphan
+  dependencies remain. `--no-install-recommends` enabled by default.
+- **Discarded alternatives:** standard installation + removal (fragile, leaves leftovers).
 
-### D-003 — Kernel e firmware Debian completi · `superata` da D-014 (resta valido l'obiettivo R-04)
-- **Cosa:** usare `linux-image-amd64` / `linux-image-arm64` con tutti i moduli, più
-  `firmware-linux-free`, `firmware-misc-nonfree`, `firmware-sof-signed` (audio Intel),
+### D-003 — Full Debian kernel and firmware · `superseded` by D-014 (the R-04 goal remains valid)
+- **What:** use `linux-image-amd64` / `linux-image-arm64` with all modules, plus
+  `firmware-linux-free`, `firmware-misc-nonfree`, `firmware-sof-signed` (Intel audio),
   `firmware-iwlwifi`, `firmware-realtek`, `firmware-atheros`, `firmware-brcm80211`,
-  `firmware-amd-graphics`, `intel-microcode`, `amd64-microcode`; stack audio
-  PipeWire + WirePlumber; Bluetooth BlueZ.
-- **Perché:** R-04. Ridurre i pacchetti utente non deve ridurre il supporto hardware; i
-  moduli kernel non caricati non costano a runtime.
-- **Da verificare:** elenco firmware definitivo per i dispositivi ARM scelti.
+  `firmware-amd-graphics`, `intel-microcode`, `amd64-microcode`; PipeWire + WirePlumber
+  audio stack; BlueZ Bluetooth.
+- **Why:** R-04. Reducing the user packages must not reduce hardware support; kernel
+  modules that are not loaded cost nothing at runtime.
+- **To check:** final firmware list for the chosen ARM devices.
 
-### D-004 — Due livelli di supporto ARM · `superata` da D-014 (i vincoli sotto restano validi)
-- **Cosa:** ARM64 generico (UEFI/device tree, es. SBC, macchine virtuali) col kernel
-  Debian; smartphone e tablet solo su un elenco di modelli supportati esplicitamente.
-- **Obiettivo dell'utente (2026-11-11):** gli smartphone più diffusi sul mercato —
-  Google Pixel, Samsung, Xiaomi, Oppo.
-- **Vincoli noti:**
-  - la maggior parte di questi telefoni non avvia un kernel Debian standard: serve un
-    kernel per dispositivo, oppure il kernel Android del produttore tramite
-    Halium/libhybris (approccio di Droidian, anch'esso basato su Debian);
-  - con Halium la GPU passa dai driver Android: WebKitGTK va verificato su quel percorso;
-  - lo sblocco del bootloader varia: in genere possibile sui Pixel non vincolati
-    all'operatore, limitato o assente su vari modelli Samsung, Xiaomi e Oppo.
-- **Perché:** promettere «tutti gli ARM» non è realistico; si sceglie modello per modello.
+### D-004 — Two levels of ARM support · `superseded` by D-014 (the constraints below remain valid)
+- **What:** generic ARM64 (UEFI/device tree, e.g. SBCs, virtual machines) with the
+  Debian kernel; smartphones and tablets only on an explicitly supported model list.
+- **User's goal (2026-11-11):** the most popular smartphones on the market — Google
+  Pixel, Samsung, Xiaomi, Oppo.
+- **Known constraints:**
+  - most of these phones do not boot a standard Debian kernel: either a per-device
+    kernel is needed, or the vendor's Android kernel through Halium/libhybris (the
+    approach of Droidian, also Debian-based);
+  - with Halium the GPU goes through the Android drivers: WebKitGTK has to be checked
+    on that path;
+  - bootloader unlocking varies: generally possible on Pixels not tied to a carrier,
+    limited or absent on several Samsung, Xiaomi and Oppo models.
+- **Why:** promising "all ARM devices" is not realistic; models are chosen one by one.
 
-### D-005 — Sicurezza: broker dei permessi e sandbox per app · `confermata` (2026-11-11)
-- **Cosa:**
-  - un demone di sistema (*broker*) è l'unico a esporre API native; le app comunicano con
-    esso tramite IPC autenticato (socket Unix, identità del processo verificata con
+### D-005 — Security: permission broker and per-app sandbox · `confirmed` (2026-11-11)
+- **What:**
+  - a system daemon (*broker*) is the only one exposing native APIs; apps talk to it
+    through authenticated IPC (Unix socket, process identity checked with
     `SO_PEERCRED`);
-  - ogni app gira in una sandbox (`bubblewrap` + filtro `seccomp`), con filesystem,
-    rete e dispositivi negati per default;
-  - i permessi dichiarati in `package.json` sono un **tetto massimo**: il broker li
-    concede solo dopo installazione/approvazione dell'utente;
-  - il root (R-13) non concede mai una shell root all'app: il broker esegue operazioni
-    privilegiate specifiche per suo conto, dopo conferma con modale di sistema, e le
-    registra nel log di audit.
-- **Perché:** R-13 e R-14 sono in tensione; un'app con root pieno annullerebbe ogni altra
-  protezione. La mediazione mantiene la funzionalità con un rischio controllato.
+  - each app runs in a sandbox (`bubblewrap` + `seccomp` filter), with filesystem,
+    network and devices denied by default;
+  - the permissions declared in `package.json` are an **upper bound**: the broker
+    grants them only after installation/approval by the user;
+  - root (R-13) never gives the app a root shell: the broker performs specific
+    privileged operations on its behalf, after confirmation with a system dialog, and
+    records them in the audit log.
+- **Why:** R-13 and R-14 are in tension; an app with full root would cancel every other
+  protection. Mediation keeps the functionality with a controlled risk.
 
-### D-006 — Modali di sistema tramite portali · `confermata` (2026-11-11)
-- **Cosa:** implementare un backend `xdg-desktop-portal` e un agente polkit propri che
-  mostrano le richieste (selezione file, permessi, password, autenticazione) come modali
-  HTML della shell.
-- **Perché:** R-10. È il punto in cui GTK e i servizi di sistema chiedono già
-  un'interazione; sostituirlo lì copre anche il software non scritto per project-os.
+### D-006 — System dialogs through portals · `confirmed` (2026-11-11)
+- **What:** implement our own `xdg-desktop-portal` backend and polkit agent that show
+  the requests (file selection, permissions, password, authentication) as HTML dialogs
+  of the shell.
+- **Why:** R-10. It is the point where GTK and the system services already ask for an
+  interaction; replacing it there also covers software not written for project-os.
 
-### D-007 — Compositore Wayland proprio · `confermata` (2026-11-11)
-- **Cosa:** compositore minimale scritto per project-os (base wlroots o Smithay, vedi
-  DA-07). Ogni finestra di app è una superficie Wayland separata; la shell web disegna
-  pannelli e decorazioni via *layer-shell* e decide disposizione e animazioni delle
-  finestre tramite un protocollo privato compositore ↔ shell.
-- **Perché:** R-08 e R-14: animazioni sotto il controllo della shell web e finestre
-  isolate per processo.
-- **Alternative scartate:** kiosk con WebView interne (isolamento debole), compositore
-  esistente (poco controllo sulle animazioni).
+### D-007 — Own Wayland compositor · `confirmed` (2026-11-11)
+- **What:** a minimal compositor written for project-os (wlroots or Smithay based, see
+  DA-07). Each app window is a separate Wayland surface; the web shell draws panels and
+  decorations through *layer-shell* and decides window layout and animations through a
+  private compositor ↔ shell protocol.
+- **Why:** R-08 and R-14: animations under the control of the web shell and windows
+  isolated per process.
+- **Discarded alternatives:** kiosk with internal WebViews (weak isolation), existing
+  compositor (little control over animations).
 
-### D-008 — Script principale eseguito su JavaScriptCore · `confermata` (2026-11-11)
-- **Cosa:** lo script principale di ogni app gira in un contesto JavaScriptCore (il
-  motore JS di WebKit, API GLib `libjavascriptcoregtk-6.0`) ospitato da un processo
-  nativo di project-os, che espone solo le API di sistema concesse e crea le finestre
-  WebKitGTK dell'app.
-- **Perché:** stesso motore JS in script principale e finestre; nessuna API esposta per
-  default (al contrario di Node.js o GJS, che danno accesso a file e processi), quindi il
-  modello permessi parte da zero.
-- **Conseguenza:** niente moduli Node/npm nativi; le librerie JS pure restano utilizzabili
-  tramite bundling.
-- **Alternative scartate:** GJS, Node.js.
+### D-008 — Main script run on JavaScriptCore · `confirmed` (2026-11-11)
+- **What:** the main script of each app runs in a JavaScriptCore context (WebKit's JS
+  engine, GLib API `libjavascriptcoregtk-6.0`) hosted by a native project-os process,
+  which exposes only the granted system APIs and creates the app's WebKitGTK windows.
+- **Why:** same JS engine in main script and windows; no API exposed by default (unlike
+  Node.js or GJS, which give access to files and processes), so the permission model
+  starts from zero.
+- **Consequence:** no native Node/npm modules; pure JS libraries remain usable through
+  bundling.
+- **Discarded alternatives:** GJS, Node.js.
 
-### D-009 — Menu di avvio desktop: GRUB 2 con tema proprio · `confermata` (2026-11-11)
-- **Cosa:** GRUB 2 (UEFI) con un tema project-os: menu centrato, logo in alto, sfondo e
-  font propri. Rilevamento di Windows e altri sistemi con `os-prober` (da riattivare con
-  `GRUB_DISABLE_OS_PROBER=false`).
-- **Secure Boot (rivisto dopo R-20):** senza Debian non c'è più uno `shim` già firmato da
-  Microsoft. Fase iniziale: chiavi project-os registrate dall'utente (MOK) durante
-  l'installazione; ottenere uno shim firmato da Microsoft è un obiettivo a lungo termine.
-- **Logo:** segnaposto generico in SVG, esportato in PNG per il tema, finché non si
-  definisce il marchio.
-- **Perché:** R-18. GRUB supporta temi grafici, multiboot e Secure Boot.
-- **Alternative scartate:** systemd-boot (nessun tema grafico); rEFInd (da rivalutare se
-  GRUB risulta scomodo da integrare senza Debian).
+### D-009 — Desktop boot menu: GRUB 2 with own theme · `confirmed` (2026-11-11)
+- **What:** GRUB 2 (UEFI) with a project-os theme: centered menu, logo at the top, own
+  background and fonts. Detection of Windows and other systems with `os-prober` (to be
+  re-enabled with `GRUB_DISABLE_OS_PROBER=false`).
+- **Secure Boot (revised after R-20):** without Debian there is no longer a `shim`
+  already signed by Microsoft. Initial phase: project-os keys enrolled by the user
+  (MOK) during installation; getting a shim signed by Microsoft is a long-term goal.
+- **Logo:** generic SVG placeholder, exported to PNG for the theme, until the brand is
+  defined.
+- **Why:** R-18. GRUB supports graphical themes, multiboot and Secure Boot.
+- **Discarded alternatives:** systemd-boot (no graphical theme); rEFInd (to be
+  re-evaluated if GRUB turns out awkward to integrate without Debian).
 
-### D-010 — Supporto di installazione desktop · `confermata` (2026-11-11)
-- **Cosa:** un'immagine USB di installazione che avvia solo il minimo indispensabile
-  (kernel, compositore, runtime, broker) e apre direttamente il wizard di installazione;
-  nessuna sessione utente né app.
-- **Perché:** R-17 e R-19. Il wizard HTML ha bisogno del motore di rendering già in
-  esecuzione, quindi l'ambiente di installazione deve avviarsi; resta però un ambiente
-  chiuso dedicato all'installazione, non un sistema live usabile.
-- **Il wizard gestisce:** lingua, tastiera, disco e partizioni (anche accanto a Windows
-  esistente, senza toccarne l'avvio), cifratura del disco, utente, installazione di GRUB.
+### D-010 — Desktop installation medium · `confirmed` (2026-11-11)
+- **What:** a USB installation image that starts only the bare minimum (kernel,
+  compositor, runtime, broker) and opens the installation wizard directly; no user
+  session or apps.
+- **Why:** R-17 and R-19. The HTML wizard needs the rendering engine already running,
+  so the installation environment has to boot; it remains however a closed environment
+  dedicated to installation, not a usable live system.
+- **The wizard handles:** language, keyboard, disk and partitions (next to an existing
+  Windows too, without touching its boot), disk encryption, user, GRUB installation.
 
-### D-011 — Installazione mobile da recovery · `confermata` (2026-11-11)
-- **Cosa:** per ogni modello supportato, un pacchetto installabile dalla recovery
-  (es. zip flashabile da recovery custom), più le immagini fastboot dove servono.
-  Al primo avvio parte l'app di setup HTML (vedi D-017 per i passi).
-- **Perché:** R-16. È il metodo standard sui telefoni Android con bootloader sbloccato.
+### D-011 — Mobile installation from recovery · `confirmed` (2026-11-11)
+- **What:** for each supported model, a package installable from the recovery (e.g. a
+  zip flashable from a custom recovery), plus the fastboot images where needed. On
+  first boot the HTML setup app starts (see D-017 for the steps).
+- **Why:** R-16. It is the standard method on Android phones with an unlocked
+  bootloader.
 
-### D-012 — Sistema costruito da sorgenti con Yocto/OpenEmbedded · `confermata` (2026-11-11)
-- **Cosa:** ogni componente (toolchain, libc, librerie, WebKitGTK, kernel) è compilato da
-  sorgenti con Yocto/OpenEmbedded, sul ramo LTS corrente. Il nostro codice sta in layer
-  propri: `meta-project-os` (spazio utente comune, uguale per tutte le piattaforme),
-  `meta-project-os-desktop` e `meta-project-os-mobile` (strato hardware, D-014), più un
-  layer per ogni dispositivo mobile.
-- **Alternative scartate:** Buildroot (fatica con WebKitGTK e con molti dispositivi),
-  strumento proprio in Rust (tutto da scrivere e mantenere).
-- **Perché:** R-20. Controllo completo su cosa entra nel sistema e build riproducibili.
-- **Conseguenza importante:** la **sicurezza degli aggiornamenti** diventa responsabilità
-  del progetto. Senza una distribuzione a monte, ogni falla nota (WebKit in particolare,
-  che ne ha molte ogni anno) va seguita e corretta da noi. Serve un processo di
-  monitoraggio delle vulnerabilità fin dalla Fase 1. Per WebKitGTK vedi D-019.
+### D-012 — System built from source with Yocto/OpenEmbedded · `confirmed` (2026-11-11)
+- **What:** every component (toolchain, libc, libraries, WebKitGTK, kernel) is compiled
+  from source with Yocto/OpenEmbedded, on the current LTS branch. Our code lives in own
+  layers: `meta-project-os` (common user space, the same on all platforms),
+  `meta-project-os-desktop` and `meta-project-os-mobile` (hardware layer, D-014), plus
+  one layer for each mobile device.
+- **Discarded alternatives:** Buildroot (struggles with WebKitGTK and with many
+  devices), own tool in Rust (all to be written and maintained).
+- **Why:** R-20. Full control over what goes into the system and reproducible builds.
+- **Important consequence:** **update security** becomes the project's responsibility.
+  Without an upstream distribution, every known flaw (WebKit in particular, which has
+  many every year) has to be tracked and fixed by us. A vulnerability monitoring
+  process is needed from Phase 1. For WebKitGTK see D-019.
 
-### D-018 — Sistema immutabile con aggiornamenti A/B · `confermata` (2026-11-11)
-- **Cosa:** partizione di sistema in sola lettura, verificata con dm-verity e firmata;
-  due slot (A/B): l'aggiornamento si scrive sullo slot inattivo e, se l'avvio fallisce,
-  si torna automaticamente al precedente. Dati utente e app su partizione separata
-  (cifrata). Le app si installano come pacchetti firmati (DA-05), fuori dall'immagine.
-  Strumento candidato: RAUC (integrato in Yocto).
-- **Perché:** R-14 (il sistema non è alterabile a runtime) e aggiornamenti atomici uguali
-  su desktop e mobile, come Android e ChromeOS. Anche il «root» mediato (D-005) non può
-  modificare la partizione di sistema.
-- **Alternative scartate:** gestore di pacchetti tradizionale (meno sicuro e prevedibile).
+### D-018 — Immutable system with A/B updates · `confirmed` (2026-11-11)
+- **What:** read-only system partition, verified with dm-verity and signed; two slots
+  (A/B): the update is written to the inactive slot and, if the boot fails, the system
+  automatically goes back to the previous one. User data and apps on a separate
+  (encrypted) partition. Apps are installed as signed packages (DA-05), outside the
+  image. Candidate tool: RAUC (integrated in Yocto).
+- **Why:** R-14 (the system cannot be altered at runtime) and atomic updates, the same
+  on desktop and mobile, like Android and ChromeOS. Even the mediated "root" (D-005)
+  cannot modify the system partition.
+- **Discarded alternatives:** traditional package manager (less secure and predictable).
 
-### D-019 — Fork di WebKitGTK mantenuto dal progetto · `confermata` (2026-11-11)
-- **Cosa (deciso dall'utente):** WebKitGTK si compila da un fork del progetto, su cui
-  correggiamo noi le vulnerabilità.
-- **Modalità (proposta):** fork *allineato*, non divergente:
-  - il fork segue il ramo stabile ufficiale di WebKitGTK (`webkitglib/<versione>`) e
-    riceve ogni rilascio di sicurezza ufficiale appena esce (avvisi WSA);
-  - le nostre modifiche stanno in commit separati e documentati, riapplicati sopra ogni
-    nuova versione stabile;
-  - correzioni proprie: per vulnerabilità note senza correzione ufficiale, per
-    l'irrobustimento (funzioni disattivate che non servono, opzioni di compilazione più
-    restrittive) e per l'integrazione con il broker e il runtime JSC;
-  - ogni correzione nostra, quando è di interesse generale, va proposta a monte.
-- **Perché:** un fork che diverge perde le correzioni ufficiali, che sono la gran parte
-  di quelle disponibili (WebKit è un progetto da milioni di righe con un team di
-  sicurezza dedicato); allineato, aggiunge un livello nostro senza rinunciarvi.
-- **In Yocto:** la ricetta `webkitgtk` di `meta-project-os` punta al fork e al tag
-  rilasciato da noi.
-- **Repository:** `aptecstudio/WebKit`, fork di `WebKit/WebKit` con tutti i rami.
-  - `main`: copia dell'ufficiale, senza nostre modifiche;
-  - `project-os/<versione>`: nostro ramo di lavoro, creato dal ramo stabile
-    `webkitglib/<versione>`; a ogni nuova stabile si crea il ramo successivo e si
-    riapplicano le nostre patch;
-  - primo ramo: `project-os/2.54`, da `webkitglib/2.54` (commit `2b614de`, creato il
-    2026-11-11; ultimo rilascio ufficiale a quella data: 2.54.2).
+### D-019 — WebKitGTK fork maintained by the project · `confirmed` (2026-11-11)
+- **What (decided by the user):** WebKitGTK is compiled from a fork of the project, on
+  which we fix vulnerabilities ourselves.
+- **Approach (proposed):** an *aligned* fork, not a diverging one:
+  - the fork follows the official stable WebKitGTK branch (`webkitglib/<version>`) and
+    receives every official security release as soon as it comes out (WSA advisories);
+  - our changes are in separate, documented commits, re-applied on top of each new
+    stable version;
+  - our own fixes: for known vulnerabilities without an official fix, for hardening
+    (unneeded features disabled, more restrictive build options) and for the
+    integration with the broker and the JSC runtime;
+  - each fix of ours, when of general interest, is proposed upstream.
+- **Why:** a diverging fork loses the official fixes, which are the vast majority of
+  those available (WebKit is a project of millions of lines with a dedicated security
+  team); an aligned one adds a layer of ours without giving them up.
+- **In Yocto:** the `webkitgtk` recipe of `meta-project-os` points to the fork and to
+  the tag released by us.
+- **Repository:** `aptecstudio/WebKit`, fork of `WebKit/WebKit` with all branches.
+  - `main`: copy of the official one, without our changes;
+  - `project-os/<version>`: our work branch, created from the stable branch
+    `webkitglib/<version>`; at each new stable release the next branch is created and
+    our patches are re-applied;
+  - first branch: `project-os/2.54`, from `webkitglib/2.54` (commit `2b614de`, created
+    on 2026-11-11; latest official release at that date: 2.54.2).
 
-### D-024 — Configurazione della build Yocto · `confermata` (2026-11-11)
-- **Versioni fissate:** Yocto 6.0 «Wrynose» (LTS), OpenEmbedded-Core `2285da0`, bitbake
-  2.18 `6e260eb`. Si aggiornano solo con un commit dedicato.
-- **Strumento:** [kas](https://kas.readthedocs.io): file YAML in `kas/` che descrivono
-  repository, versioni, layer, macchina e distribuzione; la build si ricrea con un solo
-  comando (`kas build kas/desktop-amd64.yml`). `kas/dev.yml` aggiunge le impostazioni di
-  sviluppo (root senza password, prova in QEMU): **mai** per immagini rilasciate.
-  Alternativa scartata: `bitbake-setup` (nuovo in Yocto 6.0, ancora poco documentato).
-- **Sorgenti senza poky:** OpenEmbedded-Core e bitbake direttamente, con la nostra
-  distribuzione `project-os` (`layers/meta-project-os/conf/distro/project-os.conf`).
-- **Macchina `project-os-amd64`:** istruzioni x86-64-v2 (`corei7-64`), per funzionare
-  sui PC dal 2008 in poi; x86-64-v3 scartato perché escluderebbe i PC precedenti al 2013
-  circa. *Questa parte è superata da D-027 (x86-64 di base).* Kernel `linux-yocto` 6.18 LTS con la configurazione di riferimento per PC a
-  64 bit (`common-pc-64`), avvio UEFI con GRUB.
-- **Funzioni della distribuzione escluse** (motivi nel file della distribuzione): x11,
+### D-024 — Yocto build configuration · `confirmed` (2026-11-11)
+- **Pinned versions:** Yocto 6.0 "Wrynose" (LTS), OpenEmbedded-Core `2285da0`, bitbake
+  2.18 `6e260eb`. They are updated only with a dedicated commit.
+- **Tool:** [kas](https://kas.readthedocs.io): YAML files in `kas/` that describe
+  repositories, versions, layers, machine and distribution; the build is recreated with
+  a single command (`kas build kas/desktop-amd64.yml`). `kas/dev.yml` adds the
+  development settings (passwordless root, testing in QEMU): **never** for released
+  images. Discarded alternative: `bitbake-setup` (new in Yocto 6.0, still poorly
+  documented).
+- **Sources without poky:** OpenEmbedded-Core and bitbake directly, with our
+  `project-os` distribution (`layers/meta-project-os/conf/distro/project-os.conf`).
+- **`project-os-amd64` machine:** x86-64-v2 instructions (`corei7-64`), to work on PCs
+  from 2008 onwards; x86-64-v3 discarded because it would exclude PCs from before about
+  2013. *This part is superseded by D-027 (baseline x86-64).* `linux-yocto` 6.18 LTS
+  kernel with the reference configuration for 64-bit PCs (`common-pc-64`), UEFI boot
+  with GRUB.
+- **Excluded distribution features** (reasons in the distribution file): x11,
   pulseaudio, nfs, zeroconf, 3g, nfc, ptest, multiarch, debuginfod.
-- **Verifica fatta:** bitbake legge configurazione, immagine e kernel senza errori né
-  avvisi (controllo di sola lettura, nessuna compilazione). Da verificare alla prima
-  build: download, compilazione, schema di partizioni `wic`, sintassi dei file kas.
+- **Check done:** bitbake reads configuration, image and kernel without errors or
+  warnings (read-only check, no compilation). To check at the first build: download,
+  compilation, `wic` partition layout, syntax of the kas files.
 
-### D-025 — Kernel e firmware per l'hardware desktop · `confermata` (2026-11-11)
-- **Frammenti di configurazione** in
-  `layers/meta-project-os-desktop/recipes-kernel/linux/files/`, uno per area: dischi e
-  file system, grafica, audio, Bluetooth, Wi‑Fi, rete cablata, input e piattaforma.
-  147 opzioni, tutte verificate contro i Kconfig di Linux 6.18.
-- **Integrati (=y) solo i driver per l'avvio** (NVMe, SATA, ext4, FAT, framebuffer UEFI,
-  tastiera, USB 3): non c'è initramfs, quindi il disco di sistema deve essere leggibile
-  prima di caricare moduli. Tutto il resto è modulo, caricato solo se l'hardware c'è.
-- **Grafica:** Intel (i915, xe), AMD (amdgpu, anche le prime GCN, e radeon), NVIDIA solo
-  con il driver libero nouveau; driver per le macchine virtuali (QEMU, VirtualBox,
+### D-025 — Kernel and firmware for desktop hardware · `confirmed` (2026-11-11)
+- **Configuration fragments** in
+  `layers/meta-project-os-desktop/recipes-kernel/linux/files/`, one per area: disks and
+  file systems, graphics, audio, Bluetooth, Wi‑Fi, wired network, input and platform.
+  147 options, all checked against the Kconfig files of Linux 6.18.
+- **Built in (=y) only the boot drivers** (NVMe, SATA, ext4, FAT, UEFI framebuffer,
+  keyboard, USB 3): there is no initramfs, so the system disk must be readable before
+  loading modules. Everything else is a module, loaded only if the hardware is there.
+- **Graphics:** Intel (i915, xe), AMD (amdgpu, the first GCN too, and radeon), NVIDIA
+  only with the free nouveau driver; drivers for virtual machines (QEMU, VirtualBox,
   VMware, Hyper‑V).
-- **Firmware:** `packagegroup-project-os-desktop-hw`, 27 pacchetti di `linux-firmware`
-  più il database delle frequenze Wi‑Fi; compressi con zstd.
-- **Mancano, da scrivere come ricette proprie** (non sono in OpenEmbedded-Core):
-  firmware audio Intel SOF (portatili Intel dalla 11ª generazione), microcode Intel.
-  Il microcode va caricato all'avvio tramite initramfs per essere efficace: da decidere
-  con lo schema di avvio (passo 4).
-- **Strumento:** `tools/check-kernel-fragments.py` controlla che ogni opzione esista
-  nella versione del kernel e che il valore sia ammesso dal tipo; ha già trovato un
-  errore (`TG3` invece di `TIGON3`). Le dipendenze tra opzioni le verifica la build.
-- **Verifiche fatte:** bitbake risolve il grafo delle dipendenze dell'immagine senza
-  errori; firmware, regdb e frammenti entrano nella build. Da verificare alla prima
-  build: compilazione del kernel e avvisi sulle dipendenze delle opzioni.
-- **Correzione collegata:** l'immagine base ora include `MACHINE_EXTRA_RRECOMMENDS`;
-  prima moduli e firmware della macchina sarebbero rimasti fuori.
+- **Firmware:** `packagegroup-project-os-desktop-hw`, 27 `linux-firmware` packages plus
+  the Wi‑Fi frequency database; compressed with zstd.
+- **Missing, to be written as own recipes** (they are not in OpenEmbedded-Core): Intel
+  SOF audio firmware (Intel laptops from the 11th generation), Intel microcode. The
+  microcode has to be loaded at boot through an initramfs to be effective: to be
+  decided with the boot layout (step 4).
+- **Tool:** `tools/check-kernel-fragments.py` checks that each option exists in the
+  kernel version and that the value is allowed by the type; it already found an error
+  (`TG3` instead of `TIGON3`). The build checks the dependencies between options.
+- **Checks done:** bitbake resolves the image dependency graph without errors;
+  firmware, regdb and fragments enter the build. To check at the first build: kernel
+  compilation and warnings about option dependencies.
+- **Related fix:** the base image now includes `MACHINE_EXTRA_RRECOMMENDS`; before,
+  the machine's modules and firmware would have been left out.
 
-### D-027 — Processori: x86-64 di base · `confermata` (2026-11-11)
-- **Cosa:** `DEFAULTTUNE = "x86-64"`: tutti i processori a 64 bit (Athlon 64, Pentium 4
-  a 64 bit, Core 2 e successivi). Supera la parte di D-024 su x86-64-v2.
-- **Perché:** R-25, R-28. Costo accettato: prestazioni leggermente inferiori sui
-  processori moderni.
-- **Alternative scartate:** x86-64-v2 (esclude i PC prima del 2008 circa); 32 bit
-  (WebKit su 32 bit è sempre meno supportato, costo troppo alto).
+### D-027 — Processors: baseline x86-64 · `confirmed` (2026-11-11)
+- **What:** `DEFAULTTUNE = "x86-64"`: all 64-bit processors (Athlon 64, 64-bit Pentium
+  4, Core 2 and later). Supersedes the x86-64-v2 part of D-024.
+- **Why:** R-25, R-28. Accepted cost: slightly lower performance on modern processors.
+- **Discarded alternatives:** x86-64-v2 (excludes PCs from before about 2008); 32-bit
+  (WebKit on 32-bit is less and less supported, cost too high).
 
-### D-026 — Partizioni A/B, avvio e partizione dati · `proposta` (in revisione sul ramo `build/ab-partitions`)
-- **Schema del disco (GPT)**, in `files/wic/project-os-ab.wks.in` (estensione `.in`: bitbake vi sostituisce le variabili come `${EFI_PROVIDER}`):
-  | # | Nome | Dimensione | Contenuto |
+### D-026 — A/B partitions, boot and data partition · `proposed` (under review on the `build/ab-partitions` branch)
+- **Disk layout (GPT)**, in `files/wic/project-os-ab.wks.in` (`.in` extension: bitbake
+  substitutes variables such as `${EFI_PROVIDER}` in it):
+  | # | Name | Size | Contents |
   |---|---|---|---|
-  | 1 | `bios_grub` | 1 MiB | GRUB per l'avvio da BIOS (passo 4e) |
-  | 2 | `esp` | 512 MiB | partizione EFI: GRUB, menu, tema, stato degli slot (`grubenv`); montata su `/efi`, accesso solo root |
-  | 3 | `root_a` | 4 GiB | sistema, copia A, sola lettura, kernel incluso |
-  | 4 | `root_b` | 4 GiB | sistema, copia B, scritta dagli aggiornamenti |
-  | 5 | `data` | resto | dati, creata al primo avvio, cifrata, montata su `/var` (`/home` → `/var/home`) |
-- **Scelta dello slot:** GRUB (`files/wic/project-os-grub.cfg`) avvia il primo slot di
-  `ORDER` valido e senza tentativi in sospeso, e segna il tentativo; `rauc-mark-good`
-  lo conferma a sistema avviato. Se l'avvio fallisce, al riavvio passa all'altro slot.
-  Nel menu lo slot attivo si chiama «project-os», l'altro «versione precedente».
-- **Aggiornamenti:** RAUC (`recipes-core/rauc/files/system.conf`); bundle firmati in
-  formato *verity*, compressi zstd (`project-os-bundle`). Il certificato della CA va
-  nell'immagine; chiavi fuori dal repository (`PROJECT_OS_KEYS`, `tools/gen-dev-keys.sh`).
-- **Partizione dati:** creata da `systemd-repart` sullo spazio libero, LUKS2. Sblocco
-  con `crypttab`: funziona senza TPM (R-27). In questa fase la chiave è **vuota**
-  (segnaposto, dati non protetti): il setup registrerà password e chiave di recupero,
-  e il TPM come metodo in più dove c'è (passo 4d e Fase 8).
-- **Kernel:** dm-crypt, dm-verity, AES-XTS, SHA-256, loop e squashfs zstd integrati
+  | 1 | `bios_grub` | 1 MiB | GRUB for BIOS boot (step 4e) |
+  | 2 | `esp` | 512 MiB | EFI partition: GRUB, menu, theme, slot state (`grubenv`); mounted on `/efi`, root-only access |
+  | 3 | `root_a` | 4 GiB | system, copy A, read-only, kernel included |
+  | 4 | `root_b` | 4 GiB | system, copy B, written by updates |
+  | 5 | `data` | rest | data, created on first boot, encrypted, mounted on `/var` (`/home` → `/var/home`) |
+- **Slot selection:** GRUB (`files/wic/project-os-grub.cfg`) boots the first valid slot
+  of `ORDER` without pending attempts, and records the attempt; `rauc-mark-good`
+  confirms it once the system is up. If the boot fails, on reboot it switches to the
+  other slot. In the menu the active slot is called "project-os", the other one
+  "previous version" (Italian texts until D-037, now in English).
+- **Updates:** RAUC (`recipes-core/rauc/files/system.conf`); bundles signed in *verity*
+  format, zstd-compressed (`project-os-bundle`). The CA certificate goes into the
+  image; keys outside the repository (`PROJECT_OS_KEYS`, `tools/gen-dev-keys.sh`).
+- **Data partition:** created by `systemd-repart` on the free space, LUKS2. Unlocking
+  with `crypttab`: works without TPM (R-27). In this phase the key is **empty**
+  (placeholder, data not protected): the setup will enroll password and recovery key,
+  and the TPM as an extra method where present (step 4d and Phase 8).
+- **Kernel:** dm-crypt, dm-verity, AES-XTS, SHA-256, loop and zstd squashfs built in
   (`ab-crypt.cfg`).
-- **Decisioni collegate:** `systemd.gpt_auto=0` (le partizioni si montano solo come
-  descritto, mai per tipo); `/home` sulla partizione dati.
-- **Limiti noti, da risolvere nei sotto-passi:**
-  - kernel letto da GRUB dentro lo slot senza verifica: con erofs + dm-verity e
-    kernel unificato (UKI) firmato al passo 4c;
-  - `/etc` in sola lettura: macchina, rete e utenti non persistono fino al passo 4c
-    (sovrapposizione di `/etc` sulla partizione dati, dall'initramfs);
-  - avvio da BIOS: OpenEmbedded non installa GRUB per BIOS nelle immagini; lo
-    scriviamo al passo 4e;
-  - pacchetti che mettono file in `/var` al momento della build: coperti dalla
-    partizione dati montata sopra; da verificare alla prima build.
-- **Verifiche fatte:** bitbake risolve tutte le dipendenze di immagine e bundle senza
-  errori né avvisi; 159 opzioni del kernel verificate sul 6.18; lo script delle chiavi
-  produce una catena di certificati valida. Da verificare alla prima build: sintassi di
-  `grub.cfg`, moduli GRUB, creazione delle partizioni, avvio e aggiornamento A/B.
-- **Prima prova in QEMU (2026-11-12):** GRUB parte, legge `grubenv`, sceglie lo slot A e
-  avvia il kernel; systemd arriva in modalità di emergenza per due errori, corretti:
-  - systemd-repart crea e cifra la partizione dati ma non la formatta: nell'immagine
-    mancava `mkfs.ext4`. Aggiunto `e2fsprogs-mke2fs` alle dipendenze di
+- **Related decisions:** `systemd.gpt_auto=0` (partitions are mounted only as
+  described, never by type); `/home` on the data partition.
+- **Known limitations, to be solved in the sub-steps:**
+  - kernel read by GRUB inside the slot without verification: with erofs + dm-verity
+    and a signed unified kernel image (UKI) in step 4c;
+  - read-only `/etc`: machine, network and users do not persist until step 4c (overlay
+    of `/etc` on the data partition, from the initramfs);
+  - BIOS boot: OpenEmbedded does not install GRUB for BIOS in images; we write it in
+    step 4e;
+  - packages that put files in `/var` at build time: covered by the data partition
+    mounted on top; to check at the first build.
+- **Checks done:** bitbake resolves all image and bundle dependencies without errors or
+  warnings; 159 kernel options checked on 6.18; the key script produces a valid
+  certificate chain. To check at the first build: `grub.cfg` syntax, GRUB modules,
+  partition creation, boot and A/B update.
+- **First test in QEMU (2026-11-12):** GRUB starts, reads `grubenv`, chooses slot A and
+  boots the kernel; systemd ends up in emergency mode because of two errors, fixed:
+  - systemd-repart creates and encrypts the data partition but does not format it: the
+    image lacked `mkfs.ext4`. Added `e2fsprogs-mke2fs` to the dependencies of
     `project-os-storage`;
-  - wic scriveva in fstab l'ESP come `/dev/sda2`, che non esiste con dischi NVMe o
-    virtio. Primo tentativo, `--use-uuid` (riga `UUID=`): *superato* il giorno stesso,
-    vedi sotto (la riga di fstab di wic non arriva negli aggiornamenti);
-  - poi `/efi` non si montava: la cartella non esisteva e nel sistema in sola lettura
-    systemd non può crearla. L'immagine la crea alla build (`project_os_efi_mountpoint`,
-    permessi 0700).
-- **Esito dopo le correzioni (2026-11-12, QEMU con KVM):** si arriva al login; sistema
-  `running`, nessun servizio fallito; RAUC avviato da A, slot A *good* (`rauc-mark-good`
-  funziona), slot B *bad* perché ancora vuoto; `/` ext4 in sola lettura, `/efi` e
-  `/var` (LUKS2, 15,6 GB) montate. Dopo un riavvio i dati in `/var/home` restano e
-  systemd-repart non modifica nulla.
-- **Prova dell'aggiornamento A/B (2026-11-12, QEMU):** tre errori trovati e corretti:
-  - il bundle cercava l'immagine `.ext4` dello slot, che la build non produceva: la
-    macchina ora genera `wic wic.bmap ext4`;
-  - RAUC scrive in `grubenv` i valori `1`/`0`, mentre `grub.cfg` e il `grubenv`
-    iniziale usavano `true`/`false`: dopo il primo aggiornamento (e già dopo
-    `rauc-mark-good`) nessuno slot risultava avviabile e il menu restava fermo senza
-    conto alla rovescia. Ora tutto usa `1`/`0`, come lo schema di riferimento di RAUC;
-  - nello slot B `/efi` non si montava: la riga di fstab la scrive wic solo nel disco di
-    prima installazione, non nell'immagine dello slot. Ora la monta `efi.mount`
-    (`project-os-storage`) per etichetta GPT `esp`, come gli slot e la partizione dati;
-    tolto il punto di montaggio dallo schema `wks`. Scartato aggiungere la riga a fstab
-    nella ricetta: il numero di serie FAT cambia a ogni build.
-- **Esito:** installazione del bundle firmato da A (firma verificata) → riavvio → GRUB
-  sceglie B da solo → `rauc-mark-good` lo conferma (`B_TRY=0`). Avvio di B interrotto con
-  un reset subito dopo GRUB (`B_TRY=1` rimasto) → al riavvio GRUB torna da solo ad A,
-  che gira senza errori. Il ritorno automatico alla versione precedente funziona.
+  - wic wrote the ESP in fstab as `/dev/sda2`, which does not exist with NVMe or virtio
+    disks. First attempt, `--use-uuid` (`UUID=` line): *superseded* the same day, see
+    below (wic's fstab line does not reach updates);
+  - then `/efi` did not mount: the directory did not exist and on the read-only system
+    systemd cannot create it. The image creates it at build time
+    (`project_os_efi_mountpoint`, permissions 0700).
+- **Result after the fixes (2026-11-12, QEMU with KVM):** login reached; system
+  `running`, no failed service; RAUC booted from A, slot A *good* (`rauc-mark-good`
+  works), slot B *bad* because still empty; `/` ext4 read-only, `/efi` and `/var`
+  (LUKS2, 15.6 GB) mounted. After a reboot the data in `/var/home` is still there and
+  systemd-repart changes nothing.
+- **A/B update test (2026-11-12, QEMU):** three errors found and fixed:
+  - the bundle looked for the slot's `.ext4` image, which the build did not produce:
+    the machine now generates `wic wic.bmap ext4`;
+  - RAUC writes the values `1`/`0` in `grubenv`, while `grub.cfg` and the initial
+    `grubenv` used `true`/`false`: after the first update (and already after
+    `rauc-mark-good`) no slot was bootable and the menu stopped without a countdown.
+    Now everything uses `1`/`0`, like RAUC's reference layout;
+  - in slot B `/efi` did not mount: wic writes the fstab line only on the
+    first-installation disk, not in the slot image. Now `efi.mount`
+    (`project-os-storage`) mounts it by the GPT label `esp`, like the slots and the data
+    partition; the mount point was removed from the `wks` layout. Discarded: adding the
+    line to fstab in the recipe, because the FAT serial number changes at every build.
+- **Result:** installation of the signed bundle from A (signature verified) → reboot →
+  GRUB chooses B by itself → `rauc-mark-good` confirms it (`B_TRY=0`). Boot of B
+  interrupted with a reset right after GRUB (`B_TRY=1` left set) → on reboot GRUB goes
+  back to A by itself, which runs without errors. The automatic rollback to the
+  previous version works.
 
-### D-028 — Strumenti per la macchina di build e l'emulatore · `proposta` (sul ramo `build/ab-partitions`)
-- **Guida:** `docs/sviluppo.md`, per l'utente che lavora dal proprio PC.
-- **Script:** `tools/setup-host.sh` (programmi per Yocto, kas via pipx, QEMU, OVMF,
-  chiavi di sviluppo; chiede conferma prima di toccare AppArmor), `tools/build.sh`
-  (build di sviluppo, aggiornamento, shell bitbake), `tools/run-qemu.sh` (emulatore).
-- **Emulatore:** QEMU `q35` con firmware UEFI OVMF; disco **NVMe**, perché il driver è
-  integrato nel kernel e non c'è ancora initramfs (un disco virtio non verrebbe visto);
-  copia dell'immagine con 16 GB liberi per la partizione dati; KVM se disponibile,
-  altrimenti processore `qemu64` (x86-64 di base, D-027).
-- **Macchina di build consigliata:** Ubuntu Server 24.04/26.04 LTS. Su Ubuntu 24.04 e
-  successivi bitbake ha bisogno dei namespace utente, limitati da AppArmor: lo script
-  spiega la modifica e chiede conferma.
-- **Verifiche fatte:** sintassi degli script; percorso dell'immagine confrontato con
-  bitbake. Eseguiti sul portatile dell'utente il 2026-11-11 e 2026-11-12.
-- **Correzione (2026-11-12):** lanciato da un'app snap (VS Code installato come snap),
-  QEMU ereditava le variabili GTK/GIO dello snap e non apriva la finestra (errore di
-  `libpthread` di `core20`). `tools/run-qemu.sh` le toglie quando `SNAP` è impostata.
+### D-028 — Tools for the build host and the emulator · `proposed` (on the `build/ab-partitions` branch)
+- **Guide:** `docs/development.md` (until D-037 `docs/sviluppo.md`), for the user who
+  works from their own PC.
+- **Scripts:** `tools/setup-host.sh` (programs for Yocto, kas through pipx, QEMU, OVMF,
+  development keys; asks for confirmation before touching AppArmor), `tools/build.sh`
+  (development build, update, bitbake shell), `tools/run-qemu.sh` (emulator).
+- **Emulator:** QEMU `q35` with OVMF UEFI firmware; **NVMe** disk, because the driver
+  is built into the kernel and there is no initramfs yet (a virtio disk would not be
+  seen); copy of the image with 16 GB free for the data partition; KVM if available,
+  otherwise the `qemu64` processor (baseline x86-64, D-027).
+- **Recommended build host:** Ubuntu Server 24.04/26.04 LTS. On Ubuntu 24.04 and later
+  bitbake needs user namespaces, restricted by AppArmor: the script explains the change
+  and asks for confirmation.
+- **Checks done:** script syntax; image path compared with bitbake. Run on the user's
+  laptop on 2026-11-11 and 2026-11-12.
+- **Fix (2026-11-12):** started from a snap app (VS Code installed as a snap), QEMU
+  inherited the snap's GTK/GIO variables and did not open the window (`libpthread`
+  error from `core20`). `tools/run-qemu.sh` removes them when `SNAP` is set. Checked
+  also from a clean environment without snap variables: the window opens.
 
-### D-033 — Ecosistema di dispositivi project-os · `proposta` (2026-11-11)
-- **Cosa:** un servizio di sistema in Rust (*demone di continuità*) che collega i
-  dispositivi dello stesso utente. Funzioni previste, in ordine di priorità (da
-  confermare, DA-12):
-  1. **associazione** dei dispositivi con codice QR o codice numerico; una coppia di
-     chiavi per dispositivo; elenco dei dispositivi fidati nelle Impostazioni;
-  2. **invio di file e link** tra dispositivi vicini;
-  3. **appunti condivisi**;
-  4. **notifiche, chiamate e SMS** del telefono mostrati e gestiti sul desktop;
-  5. **continuità delle app** (*handoff*): un'app riprende sul desktop ciò che si stava
-     facendo sul telefono e viceversa, tramite un'API dell'oggetto `system` (D-029);
-  6. **sincronizzazione** di impostazioni, rubrica, calendario, password e reti Wi‑Fi;
-  7. **hotspot immediato** dal telefono e **sblocco** del desktop con il telefono vicino;
-  8. in seguito: tablet come secondo schermo, tastiera e mouse condivisi.
-- **Principi (dai vincoli di sicurezza, AGENTS.md §5):**
-  - cifratura end-to-end tra dispositivi, su un canale autenticato dalle chiavi
-    dell'associazione (protocollo candidato: Noise); nessun dato in chiaro fuori dal
-    dispositivo;
-  - **nessun cloud obbligatorio**: tutto funziona in rete locale e Bluetooth; un
-    servizio di inoltro per i dispositivi lontani è facoltativo (DA-12);
-  - le app raggiungono l'ecosistema **solo tramite il broker** e solo con il permesso
-    dichiarato nel `package.json` (es. `devices.handoff`, `devices.share`);
-  - ogni dispositivo si può revocare; la revoca ne invalida le chiavi su tutti gli altri;
-  - protocollo con numero di versione e negoziazione, perché dispositivi con versioni
-    diverse di project-os continuino a parlarsi (retrocompatibilità, R-25).
-- **Scoperta dei dispositivi:** Bluetooth LE per la prossimità, poi rete locale. La
-  distribuzione esclude oggi `zeroconf` (Avahi): va deciso se riattivare mDNS solo per
-  questo servizio o usare un annuncio proprio (DA-12).
-- **Perché:** R-33. Ha senso solo con desktop e mobile funzionanti, quindi la fase viene
-  dopo la Fase 7; le fasi precedenti devono però prevederlo: permessi del broker
-  (Fase 3), API del runtime (Fase 4), pannello «Dispositivi» nelle Impostazioni (Fase 6).
-- **Riferimenti da studiare:** KDE Connect / GSConnect (protocollo aperto con funzioni
-  simili), Apple Continuity, Google Quick Share.
+### D-033 — Ecosystem of project-os devices · `proposed` (2026-11-11)
+- **What:** a system service in Rust (*continuity daemon*) that connects the devices of
+  the same user. Planned features, in priority order (to be confirmed, DA-12):
+  1. **pairing** of devices with a QR code or a numeric code; a key pair per device;
+     list of trusted devices in Settings;
+  2. **sending files and links** between nearby devices;
+  3. **shared clipboard**;
+  4. the phone's **notifications, calls and text messages** shown and handled on the
+     desktop;
+  5. **app continuity** (*handoff*): an app picks up on the desktop what was being done
+     on the phone and vice versa, through an API of the `system` object (D-029);
+  6. **sync** of settings, contacts, calendar, passwords and Wi‑Fi networks;
+  7. **instant hotspot** from the phone and **unlocking** the desktop with the phone
+     nearby;
+  8. later: tablet as a second screen, shared keyboard and mouse.
+- **Principles (from the security constraints, AGENTS.md §5):**
+  - end-to-end encryption between devices, on a channel authenticated by the pairing
+    keys (candidate protocol: Noise); no data in the clear outside the device;
+  - **no mandatory cloud**: everything works on the local network and Bluetooth; a
+    relay service for distant devices is optional (DA-12);
+  - apps reach the ecosystem **only through the broker** and only with the permission
+    declared in `package.json` (e.g. `devices.handoff`, `devices.share`);
+  - every device can be revoked; revocation invalidates its keys on all the others;
+  - protocol with a version number and negotiation, so that devices with different
+    project-os versions keep talking to each other (backward compatibility, R-25).
+- **Device discovery:** Bluetooth LE for proximity, then local network. Today the
+  distribution excludes `zeroconf` (Avahi): to decide whether to re-enable mDNS only for
+  this service or to use an own announcement (DA-12).
+- **Why:** R-33. It makes sense only with working desktop and mobile, so the phase comes
+  after Phase 7; the earlier phases must however plan for it: broker permissions
+  (Phase 3), runtime APIs (Phase 4), "Devices" panel in Settings (Phase 6).
+- **References to study:** KDE Connect / GSConnect (open protocol with similar
+  features), Apple Continuity, Google Quick Share.
 
-### D-034 — Portatile come macchina di build provvisoria · `proposta` (sul ramo `build/ab-partitions`)
-- **Cosa:** finché non c'è la macchina di build completa (DA-11), la Fase 1 si può
-  costruire sul portatile dell'utente: Debian 13, 4 core, 7,4 GB di RAM, 42 GB liberi.
-  `kas/low-resources.yml` imposta 2 compiti bitbake e `make -j 3` (al massimo 6
-  compilazioni insieme, per non esaurire la RAM), `rm_work` (cancella i file di lavoro
-  di ogni ricetta finita) e l'arresto pulito della build sotto 5 GB liberi.
-  ~~`tools/build.sh` la aggiunge da solo sotto 16 GB di RAM
-  (`PROJECT_OS_LOW_RESOURCES=1|0` per forzarla o escluderla).~~ *Scelta automatica
-  superata da D-036: ora la modalità si sceglie con `--poche-risorse`.*
-- **Perché:** l'immagine della Fase 1 dovrebbe stare in circa 30-40 GB con `rm_work`
-  (stima, da misurare alla prima build); la prima build è lunga, le successive riusano
-  la cache `sstate`.
-- **Misurato alla prima build (2026-11-11):** circa 3 ore e 45 minuti di build effettiva,
-  `build/` 26 GB e `sources/` 0,4 GB; RAM mai sotto i 3 GB disponibili; immagine `wic`
-  da 8,6 GB nominali (slot A e B da 4 GB) e 695 MB realmente occupati.
-- **Misurato in QEMU (2026-11-12):** sistema 612 MB occupati nello slot; memoria in uso
-  a riposo circa 70 MB su 2 GB. Build incrementale dopo una correzione: 2-3 minuti.
-- **Limiti:** non basta per WebKitGTK (Fase 2), che vuole più di 2 GB di RAM per
-  processo di compilazione e molto più disco. DA-11 resta aperta.
-- **Alternativa scartata:** uno script di preparazione separato per il portatile:
-  `tools/setup-host.sh` copre già Debian 13.
+### D-034 — Laptop as temporary build host · `proposed` (on the `build/ab-partitions` branch)
+- **What:** until the full build host exists (DA-11), Phase 1 can be built on the
+  user's laptop: Debian 13, 4 cores, 7.4 GB of RAM, 42 GB free. `kas/low-resources.yml`
+  sets 2 bitbake tasks and `make -j 3` (at most 6 compilations together, so RAM does
+  not run out), `rm_work` (deletes the work files of each finished recipe) and a clean
+  stop of the build below 5 GB free.
+  ~~`tools/build.sh` adds it by itself below 16 GB of RAM
+  (`PROJECT_OS_LOW_RESOURCES=1|0` to force or exclude it).~~ *Automatic choice
+  superseded by D-036: the mode is now chosen with `--low-resources`.*
+- **Why:** the Phase 1 image should fit in about 30-40 GB with `rm_work` (estimate, to
+  be measured at the first build); the first build is long, later ones reuse the
+  `sstate` cache.
+- **Measured at the first build (2026-11-11):** about 3 hours and 45 minutes of actual
+  build, `build/` 26 GB and `sources/` 0.4 GB; RAM never below 3 GB available; `wic`
+  image of 8.6 GB nominal (4 GB slots A and B) and 695 MB actually used.
+- **Measured in QEMU (2026-11-12):** system 612 MB used in the slot; idle memory in use
+  about 70 MB out of 2 GB. Incremental build after a fix: 2-3 minutes.
+- **Limitations:** not enough for WebKitGTK (Phase 2), which wants more than 2 GB of
+  RAM per compilation process and much more disk. DA-11 stays open.
+- **Discarded alternative:** a separate preparation script for the laptop:
+  `tools/setup-host.sh` already covers Debian 13.
 
-### D-035 — Download dal mirror di Yocto, niente QEMU costruito da Yocto · `proposta` (sul ramo `build/ab-partitions`)
-- **Problema (prima build sul portatile, 2026-11-11):**
-  - il server git `git.yoctoproject.org` serve i cloni a circa 17 KB/s, anche quelli
-    ridotti all'ultimo commit: il kernel `linux-yocto` (vari GB) avrebbe richiesto
-    giorni. La connessione non c'entra: da kernel.org si scarica a 13 MB/s, dal mirror
-    HTTP di Yocto a circa 3 MB/s;
-  - la classe `qemuboot` (inclusa dalla macchina tramite `qemuboot-x86.inc` e da
-    `kas/dev.yml`) e la ricetta `ovmf` facevano costruire QEMU con la grafica, quindi
-    Mesa, LLVM e Clang: ore di compilazione e rischio di esaurire la RAM, per
-    strumenti che non usiamo.
-- **Cosa:**
-  - `kas/base.yml`: `PREMIRRORS` porta i repository di `git.yoctoproject.org` sugli
-    archivi del mirror ufficiale `downloads.yoctoproject.org/mirror/sources/`. Il
-    commit resta quello fissato nella ricetta, verificato da git; se l'archivio è più
-    vecchio, bitbake scarica solo i commit mancanti dal server git;
-  - macchina e `kas/dev.yml` senza `qemuboot` e senza `ovmf`: la prova usa
-    `tools/run-qemu.sh` con QEMU e OVMF della macchina di build. Via anche le
-    variabili `QB_*`, che servivano solo a `runqemu`.
-- **Effetto:** i compiti di compilazione passano da circa 838 a 682; restano
-  `qemu-native` (piccolo, serve agli script di installazione dei pacchetti) e
-  `qemuwrapper-cross`.
-- **Alternative scartate:** clone ridotto (`BB_GIT_SHALLOW`), che resta lento sullo
-  stesso server; lasciare `runqemu`, che non serve perché c'è `tools/run-qemu.sh`.
+### D-035 — Downloads from the Yocto mirror, no QEMU built by Yocto · `proposed` (on the `build/ab-partitions` branch)
+- **Problem (first build on the laptop, 2026-11-11):**
+  - the `git.yoctoproject.org` git server serves clones at about 17 KB/s, even those
+    reduced to the last commit: the `linux-yocto` kernel (several GB) would have taken
+    days. The connection is not the cause: from kernel.org downloads run at 13 MB/s,
+    from the Yocto HTTP mirror at about 3 MB/s;
+  - the `qemuboot` class (included by the machine through `qemuboot-x86.inc` and by
+    `kas/dev.yml`) and the `ovmf` recipe made bitbake build QEMU with graphics, hence
+    Mesa, LLVM and Clang: hours of compilation and a risk of running out of RAM, for
+    tools we do not use.
+- **What:**
+  - `kas/base.yml`: `PREMIRRORS` maps the `git.yoctoproject.org` repositories to the
+    archives of the official mirror `downloads.yoctoproject.org/mirror/sources/`. The
+    commit stays the one pinned in the recipe, verified by git; if the archive is older,
+    bitbake fetches only the missing commits from the git server;
+  - machine and `kas/dev.yml` without `qemuboot` and without `ovmf`: testing uses
+    `tools/run-qemu.sh` with the QEMU and OVMF of the build host. The `QB_*` variables,
+    which served only `runqemu`, are gone too.
+- **Effect:** compilation tasks go from about 838 to 682; `qemu-native` (small, needed
+  by the package installation scripts) and `qemuwrapper-cross` remain.
+- **Discarded alternatives:** shallow clone (`BB_GIT_SHALLOW`), which stays slow on the
+  same server; keeping `runqemu`, which is not needed because there is
+  `tools/run-qemu.sh`.
 
-### D-036 — Due modalità di build: predefinita a piene prestazioni, poche risorse su richiesta · `proposta` (2026-11-12, sul ramo `build/ab-partitions`)
-- **Cosa (richiesta dell'utente):** `tools/build.sh` costruisce per default a piene
-  prestazioni (`kas/desktop-amd64.yml:kas/dev.yml`, impostazioni di bitbake: tutti i
-  core, file di lavoro conservati). La modalità per poche risorse (`kas/low-resources.yml`,
-  D-034) resta come seconda scelta e si attiva solo esplicitamente con
-  `tools/build.sh --poche-risorse` (o `PROJECT_OS_LOW_RESOURCES=1`, compatibile con lo
-  script precedente, R-25).
-- **Controllo delle risorse:** lo script misura RAM e spazio libero. In modalità
-  predefinita avvisa sotto 15 GB di RAM (un PC da 16 GB ne mostra un po' meno) e, alla
-  prima build, sotto 100 GB liberi (stima: senza `rm_work`; da misurare sulla macchina
-  di build); con `--poche-risorse`, sotto 45 GB liberi (misurati circa 27 GB, D-034).
-  Da terminale chiede conferma, da script (CI) avvisa e prosegue.
-- **Perché:** il repository è pubblico e chiunque deve poter riprodurre la build senza
-  aiuto: la configurazione consigliata è quella predefinita, le scelte sono
-  esplicite e documentate (`docs/sviluppo.md` §3, con i comandi kas equivalenti), gli
-  errori dicono cosa fare. Un passaggio automatico nascosto rendeva meno prevedibile la
-  build e non rispecchiava la macchina di riferimento.
-- **Alternative scartate:** due script separati (duplicazione di controlli e chiavi);
-  file kas apposito per la modalità predefinita (non serve: sono le impostazioni di
-  bitbake); fermare la build sotto soglia (chi sa cosa fa deve poter proseguire).
-- **Verifiche fatte:** sintassi; con un `kas` finto, tutti i casi (aiuto, opzione
-  sconosciuta, predefinita, aggiornamento, shell, `--poche-risorse`, variabile, conferma
-  da terminale con risposta sì e no, avvisi su RAM e disco alla prima build).
+### D-036 — Two build modes: full-performance default, low resources on request · `proposed` (2026-11-12, on the `build/ab-partitions` branch)
+- **What (user's request):** `tools/build.sh` builds by default at full performance
+  (`kas/desktop-amd64.yml:kas/dev.yml`, bitbake settings: all cores, work files kept).
+  The low-resources mode (`kas/low-resources.yml`, D-034) stays as a second choice and
+  is enabled only explicitly with `tools/build.sh --low-resources` (named
+  `--poche-risorse` until D-037) or `PROJECT_OS_LOW_RESOURCES=1` (compatible with the
+  previous script, R-25).
+- **Resource check:** the script measures RAM and free space. In default mode it warns
+  below 15 GB of RAM (a 16 GB PC shows a bit less) and, at the first build, below
+  100 GB free (estimate: without `rm_work`; to be measured on the build host); with
+  `--low-resources`, below 45 GB free (about 27 GB measured, D-034). From a terminal it
+  asks for confirmation, from scripts (CI) it warns and continues.
+- **Why:** the repository is public and anyone must be able to reproduce the build
+  without help: the recommended configuration is the default, the choices are explicit
+  and documented (`docs/development.md` §3, with the equivalent kas commands), errors
+  say what to do. A hidden automatic switch made the build less predictable and did not
+  reflect the reference machine.
+- **Discarded alternatives:** two separate scripts (duplicated checks and keys); a
+  dedicated kas file for the default mode (not needed: they are bitbake's settings);
+  stopping the build below the threshold (whoever knows what they are doing must be
+  able to go on).
+- **Checks done:** syntax; with a fake `kas`, all cases (help, unknown option, default,
+  update, shell, `--low-resources`, variable, terminal confirmation answered yes and no,
+  RAM and disk warnings at the first build); real incremental build in low-resources
+  mode.
 
-### D-029 — API di sistema nell'oggetto globale `system` · `confermata` (nome e principio), dettagli `proposta`
-- **Cosa (R-29):** nel contesto dello script principale e delle finestre dell'app c'è un
-  oggetto globale **`system`**, con un sotto-oggetto per area, come `chrome.*` nelle
-  estensioni. Proposta iniziale degli spazi:
-  | Spazio | Contenuto |
+### D-037 — Repository in English · `requirement` (2026-11-12)
+- **What (user's request):** everything in the repository is written in **English**:
+  identifiers, comments, script options and messages, recipes, configurations, systemd
+  units, GRUB menu and theme texts, documentation (`README.md`, `docs/`, `MEMORY.md`,
+  `ROADMAP.md`) and commit messages. Italian only where it is needed for the user's
+  language, that is in translation files (language packs) and in the locale lists of
+  the distribution.
+- **Changes made:**
+  - script options: `--poche-risorse` → `--low-resources`, `--testo` → `--text`;
+    `tools/build.sh` commands `immagine|aggiornamento|shell` → `image|update|shell`; no
+    Italian aliases kept (decided by the user: the project has no releases yet);
+  - GRUB menu: "project-os (previous version)", "project-os (copy A/B)", "UEFI Firmware
+    Settings"; theme texts ("Booting automatically in %d seconds", key help);
+  - `DISTRO_CODENAME` `fase1` → `phase1` (shown in `/etc/os-release`);
+  - `docs/sviluppo.md` → `docs/development.md`;
+  - `MEMORY.md` and `ROADMAP.md` translated with unchanged content;
+  - `AGENTS.md` §6 rewritten as a fixed rule, with the user's explicit authorization
+    (v1.2): repository in English, communication with the user (chat, questions and
+    multiple-choice prompts) in Italian. The rest of `AGENTS.md` is still in Italian,
+    awaiting a separate authorization to translate it.
+- **Not regenerated:** the OS images (they will be rebuilt in the next steps, as the
+  user asked) and `branding/previews/grub-menu.png`, whose Italian texts are drawn in
+  the image: `branding/tools/render.py` already has the English texts, the preview is
+  regenerated when Pillow and `rsvg-convert` are available (ROADMAP, Phase 1).
+- **Why:** the repository is public and must be readable and reproducible by anyone.
+- **Supersedes:** the convention "documentation and commits in Italian" of §5 (until
+  2026-11-12, from `AGENTS.md` §6 v1.1).
+
+### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
+- **What (R-29):** in the context of the main script and of the app windows there is a
+  global **`system`** object, with one sub-object per area, like `chrome.*` in
+  extensions. Initial proposal of the namespaces:
+  | Namespace | Contents |
   |---|---|
-  | `system.runtime` | informazioni sull'app, messaggi tra script principale e finestre |
-  | `system.windows` | creare, chiudere, spostare finestre dell'app |
-  | `system.process` | sottoprocessi dell'app (R-09) |
-  | `system.fs` | file fuori dalla cartella dell'app, nei limiti concessi (R-31) |
-  | `system.storage` | dati privati dell'app, persistenti |
-  | `system.devices` | dispositivi (fotocamera, audio, USB, Bluetooth…) |
-  | `system.services` | servizi di sistema (rete, notifiche, energia…) |
-  | `system.dialogs` | finestre di dialogo di sistema in HTML (R-10) |
-  | `system.permissions` | permessi concessi, richiesta di nuovi permessi |
-  | `system.root` | operazioni privilegiate mediate dal broker (R-13, D-005) |
-- **Regola di sicurezza:** uno spazio esiste nell'oggetto `system` solo se l'app lo ha
-  dichiarato nel `package.json` e l'utente l'ha concesso; altrimenti è `undefined`,
-  come le API `chrome.*` non dichiarate nel manifest (AGENTS.md §5.1).
-- **Stile (proposta):** funzioni asincrone che restituiscono `Promise`; eventi con
-  `system.<spazio>.on<Evento>.addListener()`, come nelle estensioni; errori come
-  eccezioni con codice (`PermissionDenied`, `NotFound`…).
-- **Perché `system`:** scelta dell'utente; indipendente dal nome definitivo del sistema.
-- **Da definire nella Fase 4:** elenco completo delle funzioni, in `docs/api/`.
+  | `system.runtime` | information about the app, messages between main script and windows |
+  | `system.windows` | create, close, move the app's windows |
+  | `system.process` | the app's subprocesses (R-09) |
+  | `system.fs` | files outside the app folder, within the granted limits (R-31) |
+  | `system.storage` | private, persistent app data |
+  | `system.devices` | devices (camera, audio, USB, Bluetooth…) |
+  | `system.services` | system services (network, notifications, power…) |
+  | `system.dialogs` | system dialogs in HTML (R-10) |
+  | `system.permissions` | granted permissions, requesting new permissions |
+  | `system.root` | privileged operations mediated by the broker (R-13, D-005) |
+- **Security rule:** a namespace exists in the `system` object only if the app declared
+  it in `package.json` and the user granted it; otherwise it is `undefined`, like the
+  `chrome.*` APIs not declared in the manifest (AGENTS.md §5.1).
+- **Style (proposed):** asynchronous functions returning a `Promise`; events with
+  `system.<namespace>.on<Event>.addListener()`, as in extensions; errors as exceptions
+  with a code (`PermissionDenied`, `NotFound`…).
+- **Why `system`:** the user's choice; independent of the final name of the system.
+- **To be defined in Phase 4:** full list of functions, in `docs/api/`.
 
-### D-030 — `include()` e `includeAsync()` · `confermata` (principio), dettagli `proposta`
-- **Cosa (R-30):**
-  - `include(url)` carica ed esegue uno script e **restituisce il suo `exports`**;
-    `includeAsync(url)` fa lo stesso e restituisce una `Promise` dell'`exports`;
-  - lo script incluso gira in un proprio ambito (non sporca le variabili di chi lo
-    include) e vede le variabili `exports`, `include`, `includeAsync` e `system`;
-  - **cache:** ogni script è eseguito una sola volta per contesto; le inclusioni
-    successive dello stesso indirizzo restituiscono lo stesso `exports`;
-  - **cicli:** se uno script ne include un altro che è ancora in caricamento lungo la
-    stessa catena, l'inclusione fallisce con un errore `IncludeCycleError` che mostra
-    la catena (es. `app://a.js → app://b.js → app://a.js`). Vale anche per
-    `includeAsync`: si controlla la catena di chi ha richiesto il caricamento, così due
-    caricamenti asincroni non restano bloccati ad aspettarsi a vicenda (scelta
-    dell'utente: errore, non `exports` parziali come in Node.js).
-- **Indirizzi ammessi (proposta):** solo `app://`, cioè la cartella dell'app (R-31);
-  gli indirizzi relativi si risolvono rispetto allo script che include. Nessuno script
-  da rete: il codice remoto non deve poter raggiungere le API native (AGENTS.md §5.4).
-- **Dove (proposta):** nello script principale (JavaScriptCore, D-008) e nelle finestre.
-  Nello script principale `include` sincrono è naturale; nelle finestre WebKit va
-  verificato come realizzarlo senza bloccare l'interfaccia (punto tecnico della Fase 4).
+### D-030 — `include()` and `includeAsync()` · `confirmed` (principle), details `proposed`
+- **What (R-30):**
+  - `include(url)` loads and runs a script and **returns its `exports`**;
+    `includeAsync(url)` does the same and returns a `Promise` of the `exports`;
+  - the included script runs in its own scope (it does not pollute the includer's
+    variables) and sees the variables `exports`, `include`, `includeAsync` and `system`;
+  - **cache:** each script is run only once per context; later inclusions of the same
+    address return the same `exports`;
+  - **cycles:** if a script includes another one that is still loading along the same
+    chain, the inclusion fails with an `IncludeCycleError` that shows the chain (e.g.
+    `app://a.js → app://b.js → app://a.js`). This also applies to `includeAsync`: the
+    chain of whoever requested the load is checked, so two asynchronous loads do not
+    stay stuck waiting for each other (the user's choice: an error, not partial
+    `exports` as in Node.js).
+- **Allowed addresses (proposed):** only `app://`, i.e. the app folder (R-31); relative
+  addresses are resolved against the including script. No scripts from the network:
+  remote code must not be able to reach the native APIs (AGENTS.md §5.4).
+- **Where (proposed):** in the main script (JavaScriptCore, D-008) and in the windows.
+  In the main script a synchronous `include` is natural; in WebKit windows it has to be
+  checked how to do it without blocking the interface (a technical point of Phase 4).
 
-### D-031 — Cartella dell'app e protocollo `app://` · `confermata` (principio), dettagli `proposta`
-- **Cosa (R-31):** ogni app ha una cartella radice isolata; le sue risorse si
-  raggiungono con **`app://` seguito dal percorso dentro quella cartella**, per esempio
-  `app://img/logo.png` o `app://lib/utils.js`.
-- **Solo l'app accede alle proprie risorse (scelta dell'utente):** lo stesso indirizzo
-  in due app punta a due cartelle diverse; un'app non ha modo di indicare risorse di
-  un'altra. Proposta di realizzazione: ogni app ha un proprio contesto WebKit (processi,
-  sessione di rete, storage, cookie separati) e un proprio gestore del protocollo
-  `app://`, legato alla sua cartella.
-- **Regole di sicurezza (proposta):**
-  - percorsi normalizzati: niente `..` o collegamenti simbolici che escono dalla cartella;
-  - cartella dell'app in sola lettura (è il pacchetto installato); i dati scritti
-    dall'app stanno altrove, tramite `system.storage` o `system.fs`;
-  - nessun accesso a `file://`; file esterni solo tramite `system.fs`, nei limiti dei
-    permessi;
-  - `app://` registrato in WebKit come contesto sicuro, così le API web che lo
-    richiedono funzionano.
+### D-031 — App folder and `app://` protocol · `confirmed` (principle), details `proposed`
+- **What (R-31):** each app has an isolated root folder; its resources are reached with
+  **`app://` followed by the path inside that folder**, for example `app://img/logo.png`
+  or `app://lib/utils.js`.
+- **Only the app accesses its own resources (the user's choice):** the same address in
+  two apps points to two different folders; an app has no way to refer to another one's
+  resources. Proposed implementation: each app has its own WebKit context (processes,
+  network session, storage, cookies kept separate) and its own `app://` protocol
+  handler, bound to its folder.
+- **Security rules (proposed):**
+  - normalized paths: no `..` or symbolic links that leave the folder;
+  - app folder read-only (it is the installed package); the data the app writes lives
+    elsewhere, through `system.storage` or `system.fs`;
+  - no access to `file://`; external files only through `system.fs`, within the
+    permission limits;
+  - `app://` registered in WebKit as a secure context, so the web APIs that require it
+    work.
 
-### D-032 — Design ibrido Windows 11, macOS Big Sur, Xiaomi MIUI · `confermata` (requisito), dettagli Fase 5
-- **Cosa (R-32):** lo stile grafico combina i tre riferimenti; si definisce nella Fase 5
-  e si registra in §3.
-- **Ispirazione, non copia:** si riprendono linguaggio visivo e comportamenti, non
-  icone, loghi, sfondi o altri elementi grafici protetti dei tre sistemi.
+### D-032 — Windows 11, macOS Big Sur, Xiaomi MIUI hybrid design · `confirmed` (requirement), details in Phase 5
+- **What (R-32):** the visual style combines the three references; it is defined in
+  Phase 5 and recorded in §3.
+- **Inspiration, not copying:** visual language and behaviors are taken up, not icons,
+  logos, wallpapers or other protected graphic elements of the three systems.
 
-### D-013 — Componenti nativi in Rust · `confermata` (2026-11-11)
-- **Cosa:** compositore (su Smithay), host del runtime JavaScriptCore, broker, demoni di
-  sistema e strumenti di build propri in Rust. Le librerie C esterne (WebKitGTK, GTK,
-  Mesa) si usano tramite binding.
-- **Perché:** R-22; sicurezza della memoria nei componenti più esposti (R-14).
-- **Alternative scartate:** C con wlroots.
+### D-013 — Native components in Rust · `confirmed` (2026-11-11)
+- **What:** compositor (on Smithay), JavaScriptCore runtime host, broker, system daemons
+  and own build tools in Rust. External C libraries (WebKitGTK, GTK, Mesa) are used
+  through bindings.
+- **Why:** R-22; memory safety in the most exposed components (R-14).
+- **Discarded alternatives:** C with wlroots.
 
-### D-014 — Spazio utente unico, strato hardware per piattaforma · `confermata` (2026-11-11)
-- **Cosa:** tutto ciò che sta sopra il kernel (libc, compositore, runtime, shell, app) è
-  identico su desktop e mobile. Cambia solo lo **strato hardware**:
-  - **desktop (amd64):** kernel Linux mainline, Mesa per la GPU, firmware linux-firmware;
-  - **mobile (arm64, base Android):** kernel e firmware del produttore del telefono,
-    driver Android (GPU, modem, sensori, fotocamera) raggiunti tramite Halium/libhybris;
-    dove un modello ha buon supporto mainline, si può usare quello.
-- **Perché:** R-21. Le differenze restano confinate in una cartella per piattaforma e
-  dispositivo; il resto si compila due volte (amd64, arm64) senza modifiche.
-- **Vincoli:** libhybris richiede glibc (D-015); WebKitGTK deve funzionare con EGL via
-  libhybris (da verificare presto, è il rischio tecnico principale lato mobile); lo
-  sblocco del bootloader varia per modello (vedi D-004).
+### D-014 — Single user space, per-platform hardware layer · `confirmed` (2026-11-11)
+- **What:** everything above the kernel (libc, compositor, runtime, shell, apps) is
+  identical on desktop and mobile. Only the **hardware layer** changes:
+  - **desktop (amd64):** mainline Linux kernel, Mesa for the GPU, linux-firmware
+    firmware;
+  - **mobile (arm64, Android base):** the phone vendor's kernel and firmware, Android
+    drivers (GPU, modem, sensors, camera) reached through Halium/libhybris; where a model
+    has good mainline support, that can be used.
+- **Why:** R-21. The differences stay confined in one folder per platform and device;
+  the rest is compiled twice (amd64, arm64) without changes.
+- **Constraints:** libhybris requires glibc (D-015); WebKitGTK must work with EGL
+  through libhybris (to be checked early, it is the main technical risk on the mobile
+  side); bootloader unlocking varies by model (see D-004).
 
-### D-015 — Libreria C: glibc · `confermata` (2026-11-11)
-- **Perché:** necessaria per libhybris (driver Android, D-014) e la più collaudata con
-  WebKitGTK e GTK.
-- **Alternative scartate:** musl (incompatibile con libhybris, meno testata con WebKit).
+### D-015 — C library: glibc · `confirmed` (2026-11-11)
+- **Why:** needed for libhybris (Android drivers, D-014) and the best tested with
+  WebKitGTK and GTK.
+- **Discarded alternatives:** musl (incompatible with libhybris, less tested with WebKit).
 
-### D-016 — Init: systemd · `confermata` (2026-11-11)
-- **Cosa:** systemd come init, con udev, logind e journald.
-- **Perché:** gestione di sessioni e dispositivi (logind/udev) serve al compositore;
-  sandboxing dei servizi integrato; supporto Halium già esistente.
-- **Alternative:** init leggeri (s6, dinit) o init proprio in Rust: meno dipendenze, ma
-  udev/sessioni/seat da ricostruire.
+### D-016 — Init: systemd · `confirmed` (2026-11-11)
+- **What:** systemd as init, with udev, logind and journald.
+- **Why:** session and device management (logind/udev) is needed by the compositor;
+  built-in service sandboxing; existing Halium support.
+- **Alternatives:** lightweight inits (s6, dinit) or an own init in Rust: fewer
+  dependencies, but udev/sessions/seats to be rebuilt.
 
-### D-017 — Setup differenziato desktop / mobile · `confermata` (2026-11-11)
-- **Cosa:** un'unica app di setup HTML con passi attivati in base alla piattaforma (R-24).
-  - **Desktop (dall'immagine USB, D-010):** lingua → layout tastiera → fuso orario →
-    rete (facoltativa) → disco: partizionamento/formattazione, anche accanto a
-    Windows → cifratura disco → utente e password → riepilogo e installazione
-    (con GRUB e rilevamento altri sistemi) → riavvio → primo avvio: preferenze.
-  - **Mobile (primo avvio dopo la recovery):** lingua → rete Wi‑Fi/SIM (PIN) →
-    fuso orario automatico → utente e codice di sblocco (PIN/password, eventuale
-    impronta) → permessi di sistema (posizione, notifiche) → preferenze. Nessuno
-    step di disco o tastiera fisica.
-- **Perché:** su mobile il sistema è già scritto dalla recovery; su desktop il setup è
-  anche l'installazione.
-
----
-
-### D-020 — Licenza GPL-3.0 · `confermata` (2026-11-11)
-- **Cosa:** il codice di project-os è rilasciato con licenza GNU GPL v3 (file `LICENSE`).
-  Il fork di WebKit mantiene le licenze originali di WebKit (LGPL/BSD).
-- **Perché:** scelta dell'utente; chi modifica e distribuisce il sistema deve pubblicarne
-  il codice, evitando fork chiusi.
-
-### D-021 — Fasi in sequenza, non in parallelo · `confermata` (2026-11-11)
-- **Cosa:** si lavora su una fase alla volta, nell'ordine della roadmap.
-- **Perché:** richiesta dell'utente.
-
-### D-022 — Sviluppo dal basso verso l'alto · `confermata` (2026-11-11)
-- **Cosa:** ordine delle fasi: sistema base (Yocto, kernel, avvio) → stack grafico →
-  broker → runtime delle app → shell → app di sistema → mobile → installazione.
-- **Perché:** scelta dell'utente: ogni livello si costruisce e si prova sul sistema reale
-  sotto di esso.
-- **Costo accettato:** il modello applicativo (la parte più nuova) si verifica più tardi;
-  le build Yocto richiedono ore e una macchina di build robusta (DA-11).
-- **Alternativa scartata:** partire dal prototipo del runtime su una distribuzione
-  esistente.
-
-### D-023 — Logo segnaposto e tema GRUB · `confermata` (2026-11-11)
-- **Cosa:**
-  - logo generico in `branding/logo/project-os-logo.svg`, **monocromo bianco** (anello e
-    punto centrale) su fondo scuro, nello stile dell'avvio di elementary OS, come chiesto
-    dall'utente; resta un **segnaposto**, il marchio definitivo è da decidere;
-  - tema GRUB in `branding/grub-theme/`: logo e nome in alto, voci centrate larghe
-    520 px, voce scelta evidenziata da un riquadro chiaro semitrasparente, conto alla
-    rovescia e aiuto tasti in basso;
-  - tutte le immagini si rigenerano con `branding/tools/render.py` (SVG → PNG con
-    `rsvg-convert`, sfondo e riquadri con Pillow/NumPy); `branding/previews/` contiene
-    un'anteprima approssimata, che non va nell'immagine.
-- **Font:** Inter (licenza OFL‑1.1). I file `.pf2` per GRUB non stanno nel repository:
-  la ricetta Yocto scaricherà Inter dal progetto ufficiale e li genererà con
-  `grub-mkfont` (Regular 14 e 18, Medium 18, SemiBold 28).
-- **Sfondo:** retinatura ordinata al posto del rumore, per evitare le bande di colore con
-  un PNG leggero (224 KB contro 1,6 MB).
-- **Testi del menu:** in italiano per ora; la localizzazione del menu di avvio è da
-  decidere più avanti.
-- **Perché:** R-18; il tema vive in `branding/` come sorgente unico, e la ricetta lo
-  copierà nell'immagine.
+### D-017 — Differentiated desktop / mobile setup · `confirmed` (2026-11-11)
+- **What:** a single HTML setup app with steps enabled according to the platform (R-24).
+  - **Desktop (from the USB image, D-010):** language → keyboard layout → time zone →
+    network (optional) → disk: partitioning/formatting, next to Windows too → disk
+    encryption → user and password → summary and installation (with GRUB and
+    detection of other systems) → reboot → first boot: preferences.
+  - **Mobile (first boot after the recovery):** language → Wi‑Fi/SIM network (PIN) →
+    automatic time zone → user and unlock code (PIN/password, fingerprint if any) →
+    system permissions (location, notifications) → preferences. No disk or physical
+    keyboard step.
+- **Why:** on mobile the system is already written by the recovery; on desktop the
+  setup is also the installation.
 
 ---
 
-## 3. Stile grafico
+### D-020 — GPL-3.0 license · `confirmed` (2026-11-11)
+- **What:** the project-os code is released under the GNU GPL v3 license (`LICENSE`
+  file). The WebKit fork keeps WebKit's original licenses (LGPL/BSD).
+- **Why:** the user's choice; whoever modifies and distributes the system must publish
+  its code, avoiding closed forks.
 
-*Da definire nella Fase 5.* Annotare qui: palette, tipografia, spaziature, raggi,
-ombre, durate e curve delle animazioni, icone, comportamento chiaro/scuro e adattivo
-(desktop ↔ mobile).
+### D-021 — Phases in sequence, not in parallel · `confirmed` (2026-11-11)
+- **What:** work happens on one phase at a time, in roadmap order.
+- **Why:** the user's request.
 
-**Riferimenti (R-32, D-032):** ibrido tra Windows 11, macOS Big Sur e Xiaomi MIUI.
-Prima lettura dei tratti da combinare, da confermare nella Fase 5:
-- da **Windows 11**: materiali traslucidi e sfocati (tipo Mica/Acrylic), angoli
-  arrotondati, menu e pannelli fluttuanti, layout delle finestre agganciabili;
-- da **macOS Big Sur**: forte traslucenza («vibrancy») di barre e pannelli laterali,
-  angoli molto arrotondati, icone e controlli morbidi, animazioni fluide;
-- da **MIUI**: su mobile, centro di controllo a riquadri grandi, schede arrotondate,
-  tipografia grande e marcata, gesti.
+### D-022 — Bottom-up development · `confirmed` (2026-11-11)
+- **What:** phase order: base system (Yocto, kernel, boot) → graphics stack → broker →
+  app runtime → shell → system apps → mobile → installation.
+- **Why:** the user's choice: each level is built and tested on the real system below
+  it.
+- **Accepted cost:** the application model (the newest part) is checked later; Yocto
+  builds take hours and a robust build host (DA-11).
+- **Discarded alternative:** starting from the runtime prototype on an existing
+  distribution.
 
-**Punto di partenza (dal tema di avvio, D-023; provvisorio):**
-- Fondo `#0B0D12`, alone `#2A2F6B`. Logo e marchio: **monocromo bianco** `#FFFFFF`.
-- Testo principale `#F2F4F8`, secondario `#9AA3B2`, attenuato `#7D8597`, minimo `#596173`.
-- Font: Inter. Raggio degli elementi selezionabili: 10 px.
+### D-023 — Placeholder logo and GRUB theme · `confirmed` (2026-11-11)
+- **What:**
+  - generic logo in `branding/logo/project-os-logo.svg`, **monochrome white** (ring and
+    central dot) on a dark background, in the style of the elementary OS boot screen,
+    as asked by the user; it stays a **placeholder**, the final brand is to be decided;
+  - GRUB theme in `branding/grub-theme/`: logo and name at the top, centered entries
+    520 px wide, selected entry highlighted by a light semi-transparent box, countdown
+    and key help at the bottom;
+  - all images are regenerated with `branding/tools/render.py` (SVG → PNG with
+    `rsvg-convert`, background and boxes with Pillow/NumPy); `branding/previews/`
+    holds an approximate preview, which does not go into the image.
+- **Font:** Inter (OFL‑1.1 license). The `.pf2` files for GRUB are not in the
+  repository: the Yocto recipe will download Inter from the official project and
+  generate them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28).
+- **Background:** ordered dithering instead of noise, to avoid color banding with a
+  light PNG (224 KB against 1.6 MB).
+- **Menu texts:** Italian for now; the localization of the boot menu is to be decided
+  later. *(Texts in English since D-037; localization still to be decided.)*
+- **Why:** R-18; the theme lives in `branding/` as the single source, and the recipe
+  will copy it into the image.
 
 ---
 
-## 4. Struttura del codice (proposta)
+## 3. Visual style
+
+*To be defined in Phase 5.* Record here: palette, typography, spacing, radii, shadows,
+animation durations and curves, icons, light/dark and adaptive behavior (desktop ↔
+mobile).
+
+**References (R-32, D-032):** a hybrid of Windows 11, macOS Big Sur and Xiaomi MIUI.
+First reading of the traits to combine, to be confirmed in Phase 5:
+- from **Windows 11**: translucent and blurred materials (Mica/Acrylic style), rounded
+  corners, floating menus and panels, snappable window layouts;
+- from **macOS Big Sur**: strong translucency ("vibrancy") of bars and sidebars, very
+  rounded corners, soft icons and controls, fluid animations;
+- from **MIUI**: on mobile, control center with large tiles, rounded cards, large and
+  bold typography, gestures.
+
+**Starting point (from the boot theme, D-023; provisional):**
+- Background `#0B0D12`, glow `#2A2F6B`. Logo and brand: **monochrome white** `#FFFFFF`.
+- Main text `#F2F4F8`, secondary `#9AA3B2`, dimmed `#7D8597`, minimal `#596173`.
+- Font: Inter. Radius of selectable elements: 10 px.
+
+---
+
+## 4. Code structure (proposed)
 
 ```
 project-os/
 ├── AGENTS.md  MEMORY.md  ROADMAP.md
-├── README.md     # presentazione del progetto (richiesta dall'utente il 2026-11-11)
-├── layers/       # layer Yocto (D-012)
-│   ├── meta-project-os/          # spazio utente comune: ricette, immagini, tema GRUB
-│   ├── meta-project-os-desktop/  # strato hardware amd64: kernel mainline, Mesa, firmware
-│   ├── meta-project-os-mobile/   # strato hardware arm64 comune: Halium/libhybris
-│   └── meta-device-<nome>/       # un layer per telefono: kernel, firmware, pacchetto
-│                                 # recovery (pixel-…, samsung-…, oppo-…)
-├── kas/          # configurazione della build Yocto (D-024): versioni, layer, macchina
-├── tools/        # strumenti di sviluppo (es. verifica dei frammenti del kernel)
-├── build/        # uscite della build (non versionate)
-├── sources/      # repository esterni scaricati da kas (non versionati)
-├── branding/     # logo (segnaposto), tema GRUB, script di generazione, anteprime
-├── runtime/      # runtime delle app: avvio script principale, finestre WebKitGTK
-├── broker/       # demone dei permessi e API native
-├── portal/       # backend xdg-desktop-portal e agente polkit (modali HTML)
-├── shell/        # shell di sistema: pannelli, launcher, notifiche, modali
-├── apps/         # applicazioni di sistema (impostazioni, file, terminale,
-│                 # installer desktop, setup al primo avvio…)
-├── sdk/          # tipi e libreria JS delle API di sistema (oggetto `system`)
-└── docs/         # specifiche (formato package.json, API, modello permessi)
+├── README.md     # project presentation (requested by the user on 2026-11-11)
+├── layers/       # Yocto layers (D-012)
+│   ├── meta-project-os/          # common user space: recipes, images, GRUB theme
+│   ├── meta-project-os-desktop/  # amd64 hardware layer: mainline kernel, Mesa, firmware
+│   ├── meta-project-os-mobile/   # common arm64 hardware layer: Halium/libhybris
+│   └── meta-device-<name>/       # one layer per phone: kernel, firmware, recovery
+│                                 # package (pixel-…, samsung-…, oppo-…)
+├── kas/          # Yocto build configuration (D-024): versions, layers, machine
+├── tools/        # development tools (e.g. checking kernel fragments)
+├── build/        # build output (not versioned)
+├── sources/      # external repositories fetched by kas (not versioned)
+├── branding/     # logo (placeholder), GRUB theme, generation script, previews
+├── runtime/      # app runtime: main script startup, WebKitGTK windows
+├── broker/       # permission daemon and native APIs
+├── portal/       # xdg-desktop-portal backend and polkit agent (HTML dialogs)
+├── shell/        # system shell: panels, launcher, notifications, dialogs
+├── apps/         # system applications (settings, files, terminal,
+│                 # desktop installer, first-boot setup…)
+├── sdk/          # types and JS library of the system APIs (`system` object)
+└── docs/         # specifications (package.json format, APIs, permission model)
 ```
 
 ---
 
-## 5. Convenzioni sintattiche
+## 5. Syntax conventions
 
-*Da completare quando si scelgono linguaggi e strumenti.* Già fissate (AGENTS.md):
-documentazione e commit in italiano, identificatori in inglese, Conventional Commits.
+*To be completed when languages and tools are chosen.* Already fixed (AGENTS.md §6,
+D-037): **everything in English** — identifiers, comments, script options and messages,
+documentation and commits; Italian only in translation files. Conventional Commits.
+*(Until 2026-11-12: documentation and commits in Italian, identifiers in English —
+superseded by D-037.)*
 
-**Branch di lavoro (preferenza dell'utente, 2026-11-11):** si lavora su **un solo
-branch alla volta**, quello aperto in revisione (oggi `build/ab-partitions`). I nuovi
-passi e gli aggiornamenti di `MEMORY.md` e `ROADMAP.md` vanno lì come commit successivi;
-non si aprono branch paralleli. Si apre un nuovo branch solo dopo l'unione in `main`.
-Prima di iniziare, `git fetch` e ripartire dal branch remoto aggiornato: si lavora da
-più dispositivi.
+**Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
+a time**, the one open for review (today `build/ab-partitions`). New steps and updates
+to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
+are opened. A new branch is opened only after the merge into `main`. Before starting,
+`git fetch` and start again from the updated remote branch: work happens from several
+devices.

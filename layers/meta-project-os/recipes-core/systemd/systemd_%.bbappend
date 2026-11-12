@@ -1,5 +1,5 @@
-# Funzioni di systemd per la partizione dati cifrata (D-026):
-#   repart       crea la partizione dati al primo avvio
-#   cryptsetup   sblocca i volumi LUKS2 (crypttab) e dm-verity (passo 4c)
-#   openssl      richiesto da repart
+# systemd features for the encrypted data partition (D-026):
+#   repart       creates the data partition on first boot
+#   cryptsetup   unlocks LUKS2 volumes (crypttab) and dm-verity (step 4c)
+#   openssl      required by repart
 PACKAGECONFIG:append = " repart cryptsetup openssl"
