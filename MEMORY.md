@@ -282,7 +282,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Discarded alternatives:** x86-64-v2 (excludes PCs from before about 2008); 32-bit
   (WebKit on 32-bit is less and less supported, cost too high).
 
-### D-026 — A/B partitions, boot and data partition · `proposed` (under review on the `build/ab-partitions` branch)
+### D-026 — A/B partitions, boot and data partition · `confirmed` (2026-11-12, merged into `main`)
 - **Disk layout (GPT)**, in `files/wic/project-os-ab.wks.in` (`.in` extension: bitbake
   substitutes variables such as `${EFI_PROVIDER}` in it):
   | # | Name | Size | Contents |
@@ -355,7 +355,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   back to A by itself, which runs without errors. The automatic rollback to the
   previous version works.
 
-### D-028 — Tools for the build host and the emulator · `proposed` (on the `build/ab-partitions` branch)
+### D-028 — Tools for the build host and the emulator · `confirmed` (2026-11-12, merged into `main`)
 - **Guide:** `docs/development.md` (until D-037 `docs/sviluppo.md`), for the user who
   works from their own PC.
 - **Scripts:** `tools/setup-host.sh` (programs for Yocto, kas through pipx, QEMU, OVMF,
@@ -409,7 +409,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **References to study:** KDE Connect / GSConnect (open protocol with similar
   features), Apple Continuity, Google Quick Share.
 
-### D-034 — Laptop as temporary build host · `proposed` (on the `build/ab-partitions` branch)
+### D-034 — Laptop as temporary build host · `confirmed` (2026-11-12, merged into `main`)
 - **What:** until the full build host exists (DA-11), Phase 1 can be built on the
   user's laptop: Debian 13, 4 cores, 7.4 GB of RAM, 42 GB free. `kas/low-resources.yml`
   sets 2 bitbake tasks and `make -j 3` (at most 6 compilations together, so RAM does
@@ -431,7 +431,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Discarded alternative:** a separate preparation script for the laptop:
   `tools/setup-host.sh` already covers Debian 13.
 
-### D-035 — Downloads from the Yocto mirror, no QEMU built by Yocto · `proposed` (on the `build/ab-partitions` branch)
+### D-035 — Downloads from the Yocto mirror, no QEMU built by Yocto · `confirmed` (2026-11-12, merged into `main`)
 - **Problem (first build on the laptop, 2026-11-11):**
   - the `git.yoctoproject.org` git server serves clones at about 17 KB/s, even those
     reduced to the last commit: the `linux-yocto` kernel (several GB) would have taken
@@ -455,7 +455,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   same server; keeping `runqemu`, which is not needed because there is
   `tools/run-qemu.sh`.
 
-### D-036 — Two build modes: full-performance default, low resources on request · `proposed` (2026-11-12, on the `build/ab-partitions` branch)
+### D-036 — Two build modes: full-performance default, low resources on request · `confirmed` (2026-11-12, merged into `main`)
 - **What (user's request):** `tools/build.sh` builds by default at full performance
   (`kas/desktop-amd64.yml:kas/dev.yml`, bitbake settings: all cores, work files kept).
   The low-resources mode (`kas/low-resources.yml`, D-034) stays as a second choice and

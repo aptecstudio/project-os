@@ -29,8 +29,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** image, A/B update and automatic rollback tested in QEMU (2026-11-12).
-Review and merge of the `build/ab-partitions` branch into `main`, then step 4c. One step
+**Next step:** the `build/ab-partitions` branch is merged into `main` (2026-11-12).
+Review of the incomplete steps, then the next Phase 1 steps in roadmap order. One step
 at a time, with the user's confirmation.
 
 ---
@@ -61,7 +61,7 @@ move to `MEMORY.md` as a `confirmed` entry.
   Yocto must run on a machine of the user's (VM or physical): at least 16 GB of RAM,
   250 GB of disk, many cores. Ubuntu Server 24.04/26.04 LTS recommended. Guide and
   scripts ready (`docs/development.md`, `tools/setup-host.sh`); the machine is missing.
-  *Temporary solution (D-034, proposed):* the user's laptop, Debian 13 (4 cores, 7.4 GB
+  *Temporary solution (D-034, confirmed):* the user's laptop, Debian 13 (4 cores, 7.4 GB
   of RAM, 42 GB free), with `tools/build.sh --low-resources` (D-036); enough for Phase 1,
   not for WebKitGTK (Phase 2).
 - [ ] **DA-12 — Ecosystem between devices** *(blocks Phase 9; affects Phases 3, 4, 6)*
@@ -284,3 +284,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | A/B test in QEMU: bundle installed, automatic boot of slot B and rollback to A after an interrupted boot; fixed `ext4` image for the bundle, `1`/`0` values in `grubenv`, mounting of `/efi` with `efi.mount` |
 | 2026-11-12 | 1 | `tools/build.sh`: full-performance default mode, low resources on request; RAM and disk check with warnings; guide updated for those who reproduce the build without help (D-036) |
 | 2026-11-12 | 0 | Repository in English: comments, options and messages of the scripts (`--low-resources`, `--text`, `image`/`update`/`shell`), recipes, GRUB menu, documentation, `MEMORY.md` and `ROADMAP.md`; `docs/sviluppo.md` → `docs/development.md`; `AGENTS.md` §6 rewritten as a fixed rule and the whole file translated, with authorization (v1.3, D-037) |
+| 2026-11-12 | 1 | User's review: D-026, D-028, D-034, D-035, D-036 confirmed; `build/ab-partitions` merged into `main` |
