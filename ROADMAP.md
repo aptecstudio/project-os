@@ -29,9 +29,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** cleanup of the incomplete Phase 1 items on the `build/phase1-cleanup`
-branch (D-038), to be reviewed and merged; then the next Phase 1 steps in roadmap order
-(3a, 3b with 4c, 4d, 4e, 5b). One step
+**Next step:** step 3a (Intel SOF audio firmware), then 3b with 4c, 4d, 4e, 5b, in
+roadmap order. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
 
 ---
@@ -295,3 +294,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 0 | Repository in English: comments, options and messages of the scripts (`--low-resources`, `--text`, `image`/`update`/`shell`), recipes, GRUB menu, documentation, `MEMORY.md` and `ROADMAP.md`; `docs/sviluppo.md` → `docs/development.md`; `AGENTS.md` §6 rewritten as a fixed rule and the whole file translated, with authorization (v1.3, D-037) |
 | 2026-11-12 | 1 | User's review: D-026, D-028, D-034, D-035, D-036 confirmed; `build/ab-partitions` merged into `main` |
 | 2026-11-12 | 1 | Phase 1 cleanup (D-038): package inventory with reasons, removed syslog, udhcpc, Pine64 keymaps, libssh/libgcrypt and the volatile tmpfs layout; EFI partition checked at every boot; kernel configcheck clean; full QEMU test including A/B update and rollback |
+| 2026-11-12 | 1 | D-038 approved by the user; `build/phase1-cleanup` merged into `main` |

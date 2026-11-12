@@ -517,7 +517,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Supersedes:** the convention "documentation and commits in Italian" of §5 (until
   2026-11-12, from `AGENTS.md` §6 v1.1).
 
-### D-038 — Phase 1 cleanup: package inventory, trimming, EFI partition check · `proposed` (2026-11-12, on the `build/phase1-cleanup` branch)
+### D-038 — Phase 1 cleanup: package inventory, trimming, EFI partition check · `confirmed` (2026-11-12, merged into `main`)
 - **Why:** AGENTS.md §5.5 requires a recorded reason for every package in the image;
   until now only kernel modules and firmware (D-025) had one. The review also closed
   the checks left open "for the first build" (D-024, D-025, D-026).
