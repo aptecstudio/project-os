@@ -29,8 +29,9 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** the `build/ab-partitions` branch is merged into `main` (2026-11-12).
-Review of the incomplete steps, then the next Phase 1 steps in roadmap order. One step
+**Next step:** cleanup of the incomplete Phase 1 items on the `build/phase1-cleanup`
+branch (D-038), to be reviewed and merged; then the next Phase 1 steps in roadmap order
+(3a, 3b with 4c, 4d, 4e, 5b). One step
 at a time, with the user's confirmation.
 
 ---
@@ -99,7 +100,8 @@ with boot menu, A/B partitions and full hardware support.
 **First steps (to be approved):**
 - [x] 1. Configure Yocto 6.0 "Wrynose" (LTS) with kas and create the
       `meta-project-os` and `meta-project-os-desktop` layers (D-012, D-024); bitbake
-      reads the configuration without errors. To be confirmed at the first full build.
+      reads the configuration without errors. Confirmed by the first full build
+      (2026-11-11).
 - [x] 2. Minimal image: Linux 6.18 LTS kernel, glibc, systemd; boot in QEMU/UEFI up to a
       text terminal (D-015, D-016)
   - [x] 2a. Image recipe, machine and partition layout written
@@ -133,7 +135,14 @@ with boot menu, A/B partitions and full hardware support.
       the previous version (2026-11-12)
 - [ ] Dual boot test in QEMU with Windows installed
 - [ ] Basic services: network, audio (PipeWire + WirePlumber), Bluetooth (BlueZ)
-- [ ] Every component with its reason recorded (AGENTS.md §5.5)
+- [x] Every component with its reason recorded (AGENTS.md §5.5): inventory of the
+      current image and removal of the superfluous packages (2026-11-12, D-038); to be
+      kept up to date at every new package
+- [x] Check of the EFI partition at every boot (`fsck.vfat`, D-038)
+- [ ] Understand the `dbus-daemon` "Failed to drop supplementary groups" message seen
+      at every boot (D-038)
+- [ ] Decide on swap (zram or swap file) with the memory budget; today only the
+      tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
 - [ ] Test on real Intel and AMD hardware (audio, Bluetooth, Wi‑Fi, GPU)
 - [ ] Measure image size and idle memory; record them in `MEMORY.md`
@@ -285,3 +294,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | `tools/build.sh`: full-performance default mode, low resources on request; RAM and disk check with warnings; guide updated for those who reproduce the build without help (D-036) |
 | 2026-11-12 | 0 | Repository in English: comments, options and messages of the scripts (`--low-resources`, `--text`, `image`/`update`/`shell`), recipes, GRUB menu, documentation, `MEMORY.md` and `ROADMAP.md`; `docs/sviluppo.md` → `docs/development.md`; `AGENTS.md` §6 rewritten as a fixed rule and the whole file translated, with authorization (v1.3, D-037) |
 | 2026-11-12 | 1 | User's review: D-026, D-028, D-034, D-035, D-036 confirmed; `build/ab-partitions` merged into `main` |
+| 2026-11-12 | 1 | Phase 1 cleanup (D-038): package inventory with reasons, removed syslog, udhcpc, Pine64 keymaps, libssh/libgcrypt and the volatile tmpfs layout; EFI partition checked at every boot; kernel configcheck clean; full QEMU test including A/B update and rollback |

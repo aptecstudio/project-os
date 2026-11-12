@@ -16,8 +16,11 @@ IMAGE_INSTALL += "kernel-image"
 
 # Signed A/B updates (D-018, D-026)
 IMAGE_INSTALL += "rauc"
-# squashfs-tools is not needed: bundles are mounted with the kernel driver
-BAD_RECOMMENDATIONS += "squashfs-tools"
+# Recommended packages we do not want (R-02):
+#   squashfs-tools     bundles are mounted with the kernel driver
+#   busybox-udhcpc     second DHCP client: systemd-networkd already does DHCP
+#   kbd-keymaps-pine   keyboard layouts for Pine64 devices only
+BAD_RECOMMENDATIONS += "squashfs-tools busybox-udhcpc kbd-keymaps-pine"
 
 # Read-only system (D-018); data lives on the encrypted partition mounted on /var
 IMAGE_FEATURES += "read-only-rootfs"

@@ -247,7 +247,8 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   pulseaudio, nfs, zeroconf, 3g, nfc, ptest, multiarch, debuginfod.
 - **Check done:** bitbake reads configuration, image and kernel without errors or
   warnings (read-only check, no compilation). To check at the first build: download,
-  compilation, `wic` partition layout, syntax of the kas files.
+  compilation, `wic` partition layout, syntax of the kas files. *All confirmed by the
+  first full build (2026-11-11) and the QEMU tests (2026-11-12, D-026).*
 
 ### D-025 — Kernel and firmware for desktop hardware · `confirmed` (2026-11-11)
 - **Configuration fragments** in
@@ -271,7 +272,10 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   (`TG3` instead of `TIGON3`). The build checks the dependencies between options.
 - **Checks done:** bitbake resolves the image dependency graph without errors;
   firmware, regdb and fragments enter the build. To check at the first build: kernel
-  compilation and warnings about option dependencies.
+  compilation and warnings about option dependencies. *First build (2026-11-11): the
+  kernel compiles; `do_kernel_configcheck` reported only `MMC_SDHCI_ACPI` and
+  `MMC_SDHCI_PLTFM`, set to `y` by yocto-kernel-cache but necessarily `m` with our
+  `MMC=m`; now declared `=m` in `storage.cfg` (D-038).*
 - **Related fix:** the base image now includes `MACHINE_EXTRA_RRECOMMENDS`; before,
   the machine's modules and firmware would have been left out.
 
@@ -316,7 +320,9 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   - BIOS boot: OpenEmbedded does not install GRUB for BIOS in images; we write it in
     step 4e;
   - packages that put files in `/var` at build time: covered by the data partition
-    mounted on top; to check at the first build.
+    mounted on top; to check at the first build. *Checked (2026-11-12, D-038): the slot
+    has only empty `/var/lib/{dbus,misc,systemd}` and base-files symlinks; on the data
+    partition systemd recreates what is needed.*
 - **Checks done:** bitbake resolves all image and bundle dependencies without errors or
   warnings; 159 kernel options checked on 6.18; the key script produces a valid
   certificate chain. To check at the first build: `grub.cfg` syntax, GRUB modules,
@@ -510,6 +516,66 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Why:** the repository is public and must be readable and reproducible by anyone.
 - **Supersedes:** the convention "documentation and commits in Italian" of §5 (until
   2026-11-12, from `AGENTS.md` §6 v1.1).
+
+### D-038 — Phase 1 cleanup: package inventory, trimming, EFI partition check · `proposed` (2026-11-12, on the `build/phase1-cleanup` branch)
+- **Why:** AGENTS.md §5.5 requires a recorded reason for every package in the image;
+  until now only kernel modules and firmware (D-025) had one. The review also closed
+  the checks left open "for the first build" (D-024, D-025, D-026).
+- **Removed** (each one checked with a build and a full QEMU test):
+  - `busybox-syslog`: second system log next to systemd-journald
+    (`VIRTUAL-RUNTIME_base-utils-syslog = ""` in the distribution);
+  - `busybox-udhcpc`: second DHCP client, systemd-networkd already does DHCP
+    (`BAD_RECOMMENDATIONS`);
+  - `kbd-keymaps-pine`: keyboard layouts for Pine64 devices only (`BAD_RECOMMENDATIONS`);
+  - `libssh`, `libgcrypt`, `libgpg-error`: pulled only by cryptsetup's LUKS2 SSH token
+    plugin, which keeps unlock keys on a remote SSH server (`PACKAGECONFIG:remove =
+    "ssh-token"`);
+  - volatile bind mounts: `VOLATILE_BINDS = ""`. The `volatile-binds` package stays
+    (systemd depends on it) but installs no units; before, its units for `/var/lib`,
+    `/var/cache`, `/var/spool` were inactive only because `/var` was already writable,
+    and `/srv` was bound to a tmpfs;
+  - `/var/volatile` tmpfs line removed from fstab (`base-files` bbappend) and OE's
+    `00-create-volatile.conf` masked (`/etc/tmpfiles.d/… → /dev/null`): it made
+    `/var/tmp` a link into `/var/volatile` while `/var/log` was already a real
+    directory. Now both are real directories on the data partition.
+- **Added:** `dosfstools` (`fsck.vfat`): `efi.mount` requires
+  `systemd-fsck@dev-disk-by\x2dpartlabel-esp.service`, so the EFI partition is checked
+  and repaired at every boot before being mounted. GRUB writes `grubenv` there at every
+  boot: a power loss can leave the FAT file system dirty (seen during the QEMU tests).
+- **Kernel:** `CONFIG_MMC_SDHCI_ACPI=m` and `CONFIG_MMC_SDHCI_PLTFM=m` in `storage.cfg`;
+  `do_kernel_configcheck` no longer reports anything.
+- **Inventory of the image** (816 packages: 552 kernel modules and 121 firmware
+  packages, reasons in D-025; the other 143 below, grouped by purpose; `-locale-it`
+  packages are the Italian translations of each program, installed by
+  `IMAGE_LINGUAS`):
+  | Purpose | Packages | Reason |
+  |---|---|---|
+  | Kernel | `kernel`, `kernel-6.18.54-yocto-standard`, `kernel-image*`, `kernel-modules` (meta-package of the modules) | the Linux kernel, inside each slot (D-014, D-026) |
+  | Hardware | `packagegroup-project-os-desktop-hw`, `wireless-regdb-static` | firmware group and Wi‑Fi regulatory database (D-025) |
+  | Boot | `grub-efi`, `grub-common`, `grub-bootconf`, `grub-editenv`, `grub-locale-it` | GRUB boot menu (D-009); `grub-editenv` for RAUC (D-026) |
+  | Init and devices | `systemd`, `systemd-conf`, `systemd-extra-utils`, `systemd-udev-rules`, `systemd-vconsole-setup`, `systemd-serialgetty`, `systemd-mime`, `udev`, `udev-hwdb`, `kmod`, `libkmod2`, `libsystemd0`, `libsystemd-shared`, `libudev1`, `libseccomp`, `libnss-myhostname2`, `libnss-resolve2`, `libnss-systemd2`, `volatile-binds` | systemd as init (D-016) and its direct dependencies; `systemd-serialgetty` for the serial console |
+  | Network | `systemd-networkd`, `netbase` | network configuration (DHCP included); protocol and service tables |
+  | IPC | `dbus-1`, `dbus-common`, `dbus-tools`, `libdbus-1-3`, `libexpat1` | D-Bus, needed by systemd and by RAUC's service |
+  | Encryption and storage | `cryptsetup`, `systemd-crypt`, `libdevmapper`, `project-os-storage`, `e2fsprogs-mke2fs`, `e2fsprogs-e2fsck`, `libext2fs2`, `libe2p2`, `libcom-err2`, `dosfstools`, `util-linux-fsck`, `util-linux-mount`, `util-linux-umount`, `libmount1`, `libblkid1`, `libfdisk1`, `libsmartcols1`, `libuuid1` | LUKS2 data partition, repart, mounts and file system checks (D-026, D-038) |
+  | Updates | `rauc`, `rauc-conf`, `rauc-service`, `rauc-mark-good`, `libglib-2.0-0`, `libjson-glib-1.0-0`, `libnl-3-200`, `libnl-genl-3-200`, `libcurl4`, `libnghttp2-14`, `libidn2-0`, `libunistring5`, `libffi8`, `libpcre2`, `shared-mime-info`, `shared-mime-info-data`, `libxml2` | signed A/B updates (D-018, D-026). `libcurl` (with `nghttp2`, `idn2`) and `libnl` come from RAUC's default `network` and `streaming` features: kept for installing updates directly over HTTPS (Phase 8); `shared-mime-info` and `libxml2` are required by GLib |
+  | Crypto and certificates | `libssl3`, `libcrypto3`, `openssl`, `openssl-bin`, `openssl-conf`, `ca-certificates` | bundle signature checking (RAUC), HTTPS for updates; certificate authorities for HTTPS |
+  | Login and accounts | `libpam`, `libpam-runtime`, `pam-plugin-*` (deny, env, faildelay, group, keyinit, limits, loginuid, mail, motd, namespace, nologin, permit, rootok, securetty, shells, umask, unix, warn), `shadow-base`, `shadow-securetty`, `util-linux-agetty`, `util-linux-sulogin`, `libcrypt2` | authentication (`pam` distribution feature, logind), text login, emergency shell |
+  | Console | `kbd`, `kbd-keymaps`, `kbd-consolefonts`, `keymaps` | keyboard layouts and fonts of the text console |
+  | Base system | `base-files`, `busybox`, `os-release`, `ldconfig`, `libc6`, `libgcc1`, `libstdc++6`, `libacl1`, `libattr1`, `libz1`, `libzstd1`, `liblzma5`, `libpopt0`, `libjson-c5`, `util-linux-flock`, `packagegroup-core-boot` | file system layout and basic tools (BusyBox, until our own shell exists), C/C++ runtime, compression libraries, dependencies of the packages above |
+  | Swap tools | `util-linux-mkswap`, `util-linux-swapon`, `util-linux-swapoff`, `util-linux-swaponoff` | hard dependency of systemd; no swap is configured today (to be decided with the memory budget) |
+  | Locales | `locale-base-it-it`, `locale-base-en-us`, `glibc-locale-it` | Italian and English for the users (§6 of AGENTS.md allows Italian here) |
+- **Measured (QEMU, 2026-11-12):** system 610 MB in the slot (612 MB before), idle
+  memory in use about 77 MB out of 2 GB.
+- **Checks done:** three builds (low-resources mode), full QEMU test from a new disk:
+  first boot (`running`, no failed units, EFI partition checked, data partition
+  created), A/B update to B confirmed by `rauc-mark-good`, boot of B interrupted by a
+  reset → automatic rollback to A, EFI partition clean after the reset.
+- **Seen, not fixed (noted in ROADMAP):** `dbus-daemon: Failed to drop supplementary
+  groups: Operation not permitted` at every boot, harmless so far; RAUC's "No bootable
+  slot found" message during `rauc-mark-good`, expected (the slot is marked as tried
+  until it is confirmed); the kernel warns that the GPT backup header is not at the end
+  of the disk on the first boot in QEMU (the emulator disk is enlarged after the image
+  is written).
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
