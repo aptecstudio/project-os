@@ -14,12 +14,12 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-RESET=0
-TEXT=0
+reset=0
+text_mode=0
 for arg in "$@"; do
     case "$arg" in
-        --reset) RESET=1 ;;
-        --text) TEXT=1 ;;
+        --reset) reset=1 ;;
+        --text) text_mode=1 ;;
         *) echo "Unknown option: $arg" >&2; exit 2 ;;
     esac
 done
@@ -49,7 +49,7 @@ fi
 VARS_TEMPLATE="$(dirname "$CODE")/$(basename "$CODE" | sed 's/CODE/VARS/')"
 
 mkdir -p "$WORK"
-if [ "$RESET" -eq 1 ] || [ ! -f "$DISK" ]; then
+if [ "$reset" -eq 1 ] || [ ! -f "$DISK" ]; then
     echo "Preparing a new disk from the latest build..."
     cp --sparse=always "$IMAGE" "$DISK"
     truncate -s +16G "$DISK"
@@ -79,7 +79,7 @@ if [ -n "${SNAP:-}" ]; then
     fi
 fi
 
-if [ "$TEXT" -eq 1 ]; then
+if [ "$text_mode" -eq 1 ]; then
     DISPLAY_ARGS="-nographic -serial mon:stdio"
 else
     DISPLAY_ARGS="-vga std -serial mon:stdio"

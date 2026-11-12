@@ -1,0 +1,11 @@
+# Python style of project-os (AGENTS.md §7): PEP 8 and PEP 257, checked by ruff.
+target-version = "py311"
+line-length = 88
+
+[lint]
+# pycodestyle (E, W), Pyflakes (F), import order (I), PEP 8 naming (N), docstrings (D),
+# modern syntax (UP), likely bugs (B)
+select = ["E", "W", "F", "I", "N", "D", "UP", "B"]
+
+[lint.pydocstyle]
+convention = "pep257"

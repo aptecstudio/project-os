@@ -1,0 +1,4 @@
+# Shell style of project-os (AGENTS.md §7): POSIX sh, checked by ShellCheck.
+shell=sh
+# Follow files sourced with ".", such as /etc/os-release
+external-sources=true

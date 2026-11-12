@@ -1,10 +1,10 @@
 # AGENTS.md — Guide for AI agents and people
 
-> **Status:** v1.3 — created on 2026-11-11; §1 updated the same day with the user's
+> **Status:** v1.4 — created on 2026-11-11; §1 updated the same day with the user's
 > authorization (change of approach from Debian to a system built from source); §6
 > rewritten on 2026-11-12 with the user's authorization (language, D-037); whole file
 > translated into English on 2026-11-12 with the user's authorization, content and
-> meaning unchanged.
+> meaning unchanged; §7 added on 2026-11-12 at the user's request (code style).
 > **This file is locked.** See §2 before proposing any change.
 
 ## 1. Purpose
@@ -98,3 +98,35 @@ Security is a project requirement, not an add-on feature.
    prompts) is in **Italian**, the user's language.
 4. Text that exists in the repository in another language is translated when it is
    touched; new text is always in English.
+
+## 7. Code style (fixed rule)
+
+The code is public and will be read by many human developers: it must be easy to
+understand for someone who has never seen it.
+
+1. **Standard conventions of each language**, for naming, formatting and structure,
+   checked by its standard tools (`tools/lint.sh` runs them all):
+
+   | Language / file | Convention | Check |
+   |---|---|---|
+   | Rust | Rust API Guidelines, `rustfmt` formatting | `cargo fmt --check`, `cargo clippy` |
+   | JavaScript | `camelCase` for variables and functions, `PascalCase` for classes, `UPPER_SNAKE_CASE` for constants; ES modules style, 2-space indentation | ESLint, Prettier |
+   | Python | PEP 8 (names, layout), PEP 257 (docstrings), type hints | `ruff check`, `ruff format --check` |
+   | POSIX shell | POSIX `sh`; `lower_snake_case` for functions and local variables, `UPPER_SNAKE_CASE` for environment variables and constants; 4-space indentation; quoted expansions | ShellCheck |
+   | BitBake (recipes, classes, configuration) | OpenEmbedded style guide: variable order, 4-space indentation in functions, `lower_snake_case` function names with the `project_os_` prefix | `oelint-adv` |
+   | systemd units, kas YAML, kernel fragments, GRUB, wic | the upstream documentation's format, one setting per line, grouped by purpose | review |
+
+2. **Readable layout:** one blank line between logical blocks, two before top-level
+   definitions where the language's convention asks for it; no line longer than the
+   tool's default (100 characters where no tool sets one; only URLs, checksums and
+   similar values that cannot be split may be longer); no dead or commented-out code.
+3. **Comments explain the why**, not what the code already says: every file starts
+   with a short header (what it is, which decision of `MEMORY.md` it implements);
+   non-obvious choices, workarounds and security-relevant lines carry a comment with
+   the reason and, where useful, the decision ID (`D-0xx`).
+4. **Clear names**, in English (§6), describing purpose rather than type; no
+   abbreviations except well-known ones (`fd`, `url`, `id`).
+5. **No new code without its check:** a change is complete only when `tools/lint.sh`
+   passes; code that does not follow these conventions is corrected when it is
+   touched, and existing code was brought in line on 2026-11-12.
+

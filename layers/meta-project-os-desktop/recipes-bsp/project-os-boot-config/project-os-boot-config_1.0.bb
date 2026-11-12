@@ -1,7 +1,9 @@
+# nooelint: oelint.var.mandatoryvar.SRC_URI - grubenv is generated, there are no sources
 SUMMARY = "project-os desktop — initial state of the A/B boot slots"
 DESCRIPTION = "Generates grubenv, the variable block that GRUB reads to choose the \
-slot to boot and that RAUC updates on every installation (D-026). Factory state: \
-slot A valid, slot B empty."
+               slot to boot and that RAUC updates on every installation (D-026). \
+               Factory state: slot A valid, slot B empty."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec6d293b95dea7b07891"
 
@@ -32,4 +34,6 @@ do_deploy() {
     install -d ${DEPLOYDIR}/project-os
     install -m 0644 ${B}/grubenv ${DEPLOYDIR}/project-os/grubenv
 }
+do_compile[doc] = "Generate grubenv with the initial state of the A/B slots"
+do_deploy[doc] = "Deploy grubenv for the EFI partition of the disk image"
 addtask deploy after do_compile before do_build

@@ -90,6 +90,8 @@ move to `MEMORY.md` as a `confirmed` entry.
 - [x] Start of Phase 1 approved: proceed one step at a time, with the user's
       confirmation at each step
 - [x] Repository in English: code, documentation and commits (D-037)
+- [x] Code style rule in `AGENTS.md` §7, checks in `tools/lint.sh`, existing code
+      reviewed (D-046)
 - [ ] Build host ready (DA-11)
 
 ## Phase 1 — Base system: Yocto, kernel, boot · `in progress`
@@ -186,8 +188,8 @@ with boot menu, A/B partitions and full hardware support.
       compressed because of systemd's hard dependencies (D-043)
 - [ ] Measure image size and idle memory; record them in `MEMORY.md`
       *(QEMU: 610 MB, ~77 MB of RAM, D-038; on real hardware in step 6.19)*
-- [ ] Regenerate `branding/previews/grub-menu.png` with the English menu texts
-      (`branding/tools/render.py`, with step 5b)
+- [x] Regenerate `branding/previews/grub-menu.png` with the English menu texts
+      (2026-11-12, Inter 4.1 from the official release, D-046)
 
 ## Phase 2 — Graphics stack: WebKitGTK from the fork and compositor · `proposed`
 
@@ -220,7 +222,14 @@ Goal: the application model (R-07, R-09) on top of broker and compositor.
 
 - [ ] Cargo workspace with bindings to WebKitGTK 6.0 and JavaScriptCore
 - [ ] v0 specification of the `package.json` format (`docs/manifest.md`)
-- [ ] Specification of the `system` object APIs (`docs/api/`, D-029)
+- [ ] Specification of the `system` object APIs (`docs/api/`, D-029), with the class and
+      event model (R-35, D-045)
+- [ ] System API developer guide (R-36): `docs/api/` indexed by namespace, one page per
+      namespace (classes, methods, events, permission in `package.json`, errors,
+      examples), written together with each API
+- [ ] Specification of the `systemui` library (`docs/api/ui.md`, R-34, D-045): base
+      component class, built-in components, custom components, events, ownership of
+      the DOM tree and removal; `systemui` declaration in `package.json`
 - [ ] `app://` protocol bound to the app folder, separate WebKit context per app, path
       checks (D-031)
 - [ ] `include()` and `includeAsync()`: own scope, `exports`, cache, cycle error with
@@ -240,12 +249,23 @@ Goal: the application model (R-07, R-09) on top of broker and compositor.
 
 - [ ] Define the visual style, a Windows 11 / macOS Big Sur / MIUI hybrid (D-032), and
       record it in `MEMORY.md` §3
+- [ ] `systemui` library (R-34, D-045): wrapper that creates and owns the DOM elements,
+      their tree and their removal; built-in components (buttons, headers, footers,
+      text fields, lists…) with the system style; custom components; tests of the
+      component lifecycle (no leaks, no orphan elements)
+- [ ] `systemui` developer guide (R-36, D-045): a `docs/systemui/` folder of Markdown
+      pages, indexed and organized by component (one page per component: purpose,
+      constructor options, properties, methods, events, examples), plus getting
+      started, custom components and lifecycle pages; written together with each
+      component, not at the end
 - [ ] Shell: panel, launcher, window management, notifications
-- [ ] Library of predefined HTML dialogs (R-10)
+- [ ] Library of predefined system dialogs (R-10), built with `systemui`
 - [ ] `xdg-desktop-portal` backend and polkit agent with HTML dialogs
 - [ ] Adaptive desktop ↔ mobile layout, touch input
 
 ## Phase 6 — System applications · `proposed`
+
+All system apps are built with `systemui` (R-34), without HTML written by hand.
 
 - [ ] Settings (network, Bluetooth, audio, display, app permissions)
 - [ ] File manager
@@ -341,3 +361,7 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | Steps 4c.1 and 3b: systemd initramfs and early Intel/AMD microcode loaded by GRUB; boot, A/B update and rollback tested in QEMU (D-043) |
 | 2026-11-12 | 1 | Step 4c.2: data partition created, unlocked and mounted by the initramfs, persistent `/etc` overlay, update conflict report; tested in QEMU with reboot, A/B update, simulated conflict and rollback (D-044) |
 | 2026-11-12 | 0 | QEMU test convention recorded in `MEMORY.md` §5: full A/B test for changes to the boot chain, boot test for changes inside the system |
+| 2026-11-12 | 4–6 | New requirements: `systemui` library (`system.ui.*`, declared in `package.json`, classes and events, custom components, no HTML) and class/event model for all APIs (R-34, R-35, D-045); roadmap items in Phases 4, 5, 6 |
+| 2026-11-12 | 0 | Code style rule written into `AGENTS.md` §7 at the user's request; `tools/lint.sh` with ShellCheck, ruff, oelint-adv; all existing code reviewed, bbappends limited to our distribution/machine (D-046) |
+| 2026-11-12 | 5 | New requirement: `systemui` developer guide in `docs/systemui/`, indexed Markdown pages by component (R-36, D-045) |
+| 2026-11-12 | 4 | Developer guide extended to all system APIs, `docs/api/` by namespace (R-36, the user's choice) |

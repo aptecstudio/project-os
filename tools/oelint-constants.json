@@ -1,0 +1,19 @@
+{
+    "variables": {
+        "known": [
+            "BUNDLE_ARGS",
+            "PROJECT_OS_EARLY_INITRD",
+            "PROJECT_OS_EARLY_INITRD_DEPENDS",
+            "PROJECT_OS_INITRD_INSTALL",
+            "PROJECT_OS_KEYS",
+            "RAUC_BUNDLE_COMPATIBLE",
+            "RAUC_BUNDLE_DESCRIPTION",
+            "RAUC_BUNDLE_FORMAT",
+            "RAUC_BUNDLE_SLOTS",
+            "RAUC_BUNDLE_VERSION",
+            "RAUC_KEYRING_FILE",
+            "RAUC_SLOT_rootfs",
+            "VOLATILE_BINDS"
+        ]
+    }
+}

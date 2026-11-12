@@ -1,15 +1,17 @@
-SUMMARY = "project-os desktop — encrypted data partition, persistent /etc, EFI partition"
+SUMMARY = "project-os desktop — data partition, persistent /etc, EFI partition"
 DESCRIPTION = "Data partition: created on first boot (systemd-repart), unlocked \
-(crypttab) and mounted on /var by the initramfs, which also mounts the persistent /etc \
-overlay on it (package project-os-storage-initrd). In the system: partition \
-definition, /etc conflict report after updates, checking and mounting of the EFI \
-partition on /efi (D-026, D-038, D-044)."
+               (crypttab) and mounted on /var by the initramfs, which also mounts the \
+               persistent /etc overlay on it (package project-os-storage-initrd). In \
+               the system: partition definition, /etc conflict report after updates, \
+               checking and mounting of the EFI partition on /efi (D-026, D-038, \
+               D-044)."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec6d293b95dea7b07891"
 
 inherit systemd allarch features_check
 
-SRC_URI = " \
+SRC_URI = "\
     file://50-data.conf \
     file://efi.mount \
     file://etc-overlay-conflicts \
@@ -68,7 +70,7 @@ do_install() {
 
 SYSTEMD_SERVICE:${PN} = "efi.mount"
 
-FILES:${PN}-initrd = " \
+FILES:${PN}-initrd += "\
     ${sysconfdir}/crypttab \
     ${systemd_system_unitdir}/systemd-cryptsetup@data.service.d \
     ${systemd_system_unitdir}/project-os-repart.service \
@@ -76,7 +78,7 @@ FILES:${PN}-initrd = " \
     ${systemd_system_unitdir}/project-os-etc-overlay.service \
     ${systemd_system_unitdir}/initrd-fs.target.requires \
 "
-FILES:${PN} += " \
+FILES:${PN} += "\
     ${nonarch_libdir}/repart.d \
     ${nonarch_libdir}/project-os \
     ${systemd_system_unitdir} \
@@ -89,10 +91,10 @@ FILES:${PN} += " \
 #                step 4d)
 #   dosfstools   fsck.vfat, which systemd-fsck uses to check the EFI partition
 #   busybox      sh, find, cmp, mount for etc-overlay-conflicts
-RDEPENDS:${PN} = "systemd cryptsetup dosfstools busybox"
+RDEPENDS:${PN} = "busybox cryptsetup dosfstools systemd"
 # initramfs:
 #   e2fsprogs-mke2fs   mkfs.ext4, which systemd-repart uses to format the data partition
 #   e2fsprogs-e2fsck   fsck of the data partition before mounting it
 #   busybox            mkdir for the overlay directories, sh for the emergency shell
-RDEPENDS:${PN}-initrd = "systemd e2fsprogs-mke2fs e2fsprogs-e2fsck busybox util-linux-mount"
+RDEPENDS:${PN}-initrd = "busybox e2fsprogs-e2fsck e2fsprogs-mke2fs systemd util-linux-mount"
 REQUIRED_DISTRO_FEATURES = "systemd"

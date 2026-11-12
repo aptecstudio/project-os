@@ -1,6 +1,10 @@
+# nooelint: oelint.file.underscores,oelint.var.mandatoryvar.SRC_URI - a bundle has no
+# sources of its own (it packs the system image) and, like the RAUC bundle examples, no
+# version in its file name
 SUMMARY = "project-os desktop — system update bundle"
 DESCRIPTION = "Signed RAUC bundle with the system image: it is installed into the \
-unused slot and becomes active on the next reboot (D-018, D-026)."
+               unused slot and becomes active on the next reboot (D-018, D-026)."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 
 inherit bundle

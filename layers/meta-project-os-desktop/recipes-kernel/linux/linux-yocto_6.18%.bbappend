@@ -8,7 +8,7 @@ KBRANCH:project-os-amd64 = "v6.18/standard/base"
 # Modern hardware (R-04, D-025) and virtual machines (D-041). Each fragment is checked
 # against the kernel Kconfig files with tools/check-kernel-fragments.py, and against the
 # final configuration by do_project_os_configcheck below.
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend:project-os-amd64 := "${THISDIR}/files:"
 SRC_URI:append:project-os-amd64 = " \
     file://storage.cfg \
     file://graphics.cfg \
@@ -24,6 +24,9 @@ SRC_URI:append:project-os-amd64 = " \
 # Every option set by our fragments must end up in the final .config with the value we
 # asked for. do_kernel_configcheck does not report options dropped because one of their
 # dependencies is off: that is how DRM_VMWGFX and DRM_HYPERV went missing (D-041).
+# The task does nothing on other machines: it checks only the fragments in SRC_URI,
+# which are added for project-os-amd64 alone.
+# nooelint: oelint.vars.noncoreoverride
 python do_project_os_configcheck() {
     import os
     import re
@@ -66,4 +69,5 @@ python do_project_os_configcheck() {
                  "final configuration (missing dependency?):\n" + "\n".join(errors))
     bb.note("project-os kernel fragments: all options are in the final configuration")
 }
+do_project_os_configcheck[doc] = "Check the project-os fragments against the final .config"
 addtask project_os_configcheck after do_kernel_configcheck before do_compile

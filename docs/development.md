@@ -78,6 +78,10 @@ kas build kas/desktop-amd64.yml:kas/dev.yml                          # default
 kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml    # low resources
 ```
 
+**Code style.** Before committing a change, run `tools/lint.sh`: it checks shell
+scripts (ShellCheck), Python (ruff) and BitBake recipes (oelint-adv) with the
+conventions of `AGENTS.md` §7, and later Rust and JavaScript too.
+
 ## 4. Test the image in the emulator
 
 ```sh
@@ -139,5 +143,6 @@ other copy, and goes back to the previous one by itself if the boot does not com
 | `kas/` | build configuration |
 | `layers/` | Yocto recipes: distribution, image, machine, kernel, boot |
 | `branding/` | placeholder logo and boot menu theme |
-| `tools/` | scripts from this guide and checking tools |
+| `tools/` | scripts from this guide and checking tools (`lint.sh` for the code style) |
+| `ruff.toml`, `.shellcheckrc`, `tools/oelint-constants.json` | settings of the style checks |
 | `build/`, `sources/` | created by the build, not versioned |

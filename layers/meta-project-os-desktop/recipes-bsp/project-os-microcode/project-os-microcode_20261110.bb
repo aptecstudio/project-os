@@ -1,11 +1,12 @@
 SUMMARY = "project-os desktop — early CPU microcode for Intel and AMD"
 DESCRIPTION = "Builds microcode.cpio, the uncompressed archive that GRUB loads before \
-the initramfs: the kernel finds kernel/x86/microcode/GenuineIntel.bin and \
-AuthenticAMD.bin there and updates the processor microcode at the very start of the \
-boot, before anything else runs (R-04, step 3b, D-043)."
+               the initramfs: the kernel finds kernel/x86/microcode/GenuineIntel.bin \
+               and AuthenticAMD.bin there and updates the processor microcode at the \
+               very start of the boot, before anything else runs (R-04, step 3b, \
+               D-043)."
 HOMEPAGE = "https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files"
 LICENSE = "Intel-Microcode-License & Firmware-amd-ucode"
-LIC_FILES_CHKSUM = " \
+LIC_FILES_CHKSUM = "\
     file://intel/license;md5=d8405101ec6e90c1d84b082b0c40c721 \
     file://linux-firmware-${LINUX_FIRMWARE_PV}/LICENSE.amd-ucode;md5=450f217aadc787514165e9568652d700 \
 "
@@ -17,10 +18,13 @@ NO_GENERIC_LICENSE[Firmware-amd-ucode] = "linux-firmware-${LINUX_FIRMWARE_PV}/LI
 # OpenEmbedded-Core uses (same file and digest as its linux-firmware recipe); keep
 # LINUX_FIRMWARE_PV in sync when OE-Core moves to a newer linux-firmware.
 LINUX_FIRMWARE_PV = "20260410"
-SRC_URI = " \
-    git://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files.git;protocol=https;nobranch=1;name=intel;destsuffix=intel \
-    ${KERNELORG_MIRROR}/linux/kernel/firmware/linux-firmware-${LINUX_FIRMWARE_PV}.tar.xz;name=linux-firmware \
-"
+# Two sources on purpose, one per vendor. The linux-firmware tarball is the same
+# download as OE-Core's linux-firmware recipe, shared in DL_DIR (its name carries
+# LINUX_FIRMWARE_PV rather than PV).
+# nooelint: oelint.vars.downloadfilename
+SRC_URI = "${KERNELORG_MIRROR}/linux/kernel/firmware/linux-firmware-${LINUX_FIRMWARE_PV}.tar.xz;name=linux-firmware"
+# nooelint: oelint.vars.srcuridomains
+SRC_URI += "git://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files.git;protocol=https;nobranch=1;name=intel;destsuffix=intel"
 # Tag microcode-20261110
 SRCREV_intel = "d71fe4e2f0f70a49ebbac7f2c7e915f181361974"
 SRC_URI[linux-firmware.sha256sum] = "b7812ed6d59f6b09ecceddaa0be842a7e82a79cc0e46ca60478a4ebf02f1e178"
@@ -50,11 +54,14 @@ do_compile() {
     # with "kernel/", without "./", for the kernel's early cpio parser.
     find ${B}/root -exec touch -h -d @${SOURCE_DATE_EPOCH} {} +
     cd ${B}/root
-    find kernel | LC_ALL=C sort | cpio --quiet -o -H newc -R 0:0 --reproducible > ${B}/microcode.cpio
+    find kernel | LC_ALL=C sort \
+        | cpio --quiet -o -H newc -R 0:0 --reproducible > ${B}/microcode.cpio
 }
 
 do_deploy() {
     install -d ${DEPLOYDIR}/project-os
     install -m 0644 ${B}/microcode.cpio ${DEPLOYDIR}/project-os/microcode.cpio
 }
+do_compile[doc] = "Build microcode.cpio with the Intel and AMD microcode for early loading"
+do_deploy[doc] = "Deploy microcode.cpio for GRUB"
 addtask deploy after do_compile before do_build

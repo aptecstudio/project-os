@@ -1,8 +1,9 @@
 SUMMARY = "project-os — initramfs"
 DESCRIPTION = "systemd in initrd mode: finds the system slot given on the kernel \
-command line, mounts it on /sysroot and switches to it; the machine adds what else it \
-needs before the switch, e.g. the encrypted data partition and the /etc overlay \
-(D-042, D-043, D-044)."
+               command line, mounts it on /sysroot and switches to it; the machine \
+               adds what else it needs before the switch, e.g. the encrypted data \
+               partition and the /etc overlay (D-042, D-043, D-044)."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 
 # Only what systemd needs to find, check and mount the root file system (AGENTS.md
@@ -11,7 +12,7 @@ LICENSE = "GPL-3.0-only"
 # /bin/sh). No kernel modules: the boot drivers are built in.
 # PROJECT_OS_INITRD_INSTALL: what the machine adds (e.g. project-os-storage-initrd).
 PROJECT_OS_INITRD_INSTALL ??= ""
-PACKAGE_INSTALL = " \
+PACKAGE_INSTALL = "\
     systemd \
     udev \
     systemd-udev-rules \
@@ -36,6 +37,7 @@ inherit core-image
 
 # systemd runs as /init and knows it is in an initramfs from /etc/initrd-release
 ROOTFS_POSTPROCESS_COMMAND += "project_os_initrd_setup"
+project_os_initrd_setup[doc] = "Make systemd the init of the initramfs and mark it as an initrd"
 project_os_initrd_setup() {
     ln -sf ${nonarch_libdir}/systemd/systemd ${IMAGE_ROOTFS}/init
     cp ${IMAGE_ROOTFS}${nonarch_libdir}/os-release ${IMAGE_ROOTFS}${sysconfdir}/initrd-release

@@ -14,8 +14,10 @@ REPORT=/var/lib/project-os/etc-conflicts
 
 [ -d "$UPPER" ] || exit 0
 
-# Device of the new system slot (RAUC environment)
+# Device of the new system slot (RAUC environment: RAUC_SLOT_CLASS_<n> and
+# RAUC_SLOT_DEVICE_<n> for every slot number <n> in RAUC_TARGET_SLOTS)
 new_dev=""
+class=""
 for i in ${RAUC_TARGET_SLOTS:-}; do
     eval "class=\${RAUC_SLOT_CLASS_$i:-}"
     if [ "$class" = "rootfs" ]; then
@@ -26,6 +28,7 @@ done
 
 work=$(mktemp -d /run/project-os-etc-check.XXXXXX) || exit 0
 mkdir "$work/old" "$work/new"
+# shellcheck disable=SC2329  # called through the EXIT trap below
 cleanup() {
     umount "$work/new" 2>/dev/null
     umount "$work/old" 2>/dev/null

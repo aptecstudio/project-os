@@ -1,22 +1,23 @@
 SUMMARY = "project-os desktop — firmware for modern hardware"
 DESCRIPTION = "Firmware for graphics cards, Wi-Fi, Bluetooth, network and processors \
-of Intel/AMD PCs (R-04, D-025). The drivers are in the kernel; here are only the files \
-the drivers load when the devices start."
+               of Intel/AMD PCs (R-04, D-025). The drivers are in the kernel; here are \
+               only the files the drivers load when the devices start."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
-RDEPENDS:${PN} = " \
-    ${GRAPHICS} \
-    ${WIFI} \
+RDEPENDS:${PN} = "\
+    ${AUDIO} \
     ${BLUETOOTH} \
     ${ETHERNET} \
-    ${AUDIO} \
+    ${GRAPHICS} \
+    ${WIFI} \
 "
 
 # Graphics: Intel (i915, xe), AMD (amdgpu, radeon), NVIDIA (nouveau)
-GRAPHICS = " \
+GRAPHICS = "\
     linux-firmware-i915 \
     linux-firmware-xe \
     linux-firmware-amdgpu \
@@ -27,7 +28,7 @@ GRAPHICS = " \
 
 # Wi-Fi: Intel, Qualcomm Atheros, Realtek, MediaTek, Broadcom; database of the
 # frequencies allowed per country (mandatory for cfg80211)
-WIFI = " \
+WIFI = "\
     linux-firmware-iwlwifi \
     linux-firmware-iwlwifi-misc \
     linux-firmware-ath9k \
@@ -47,7 +48,7 @@ WIFI = " \
 
 # Bluetooth: Intel, Qualcomm, Realtek (the other Realtek and MediaTek ones are already
 # in the Wi-Fi packages above)
-BLUETOOTH = " \
+BLUETOOTH = "\
     linux-firmware-ibt \
     linux-firmware-ibt-misc \
     linux-firmware-qca \

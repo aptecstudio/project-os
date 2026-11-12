@@ -1,11 +1,14 @@
 SUMMARY = "Sound Open Firmware for Intel audio DSPs"
 DESCRIPTION = "Firmware and topologies for the audio DSP of Intel laptops and PCs \
-(Sound Open Firmware), loaded by the kernel's SOF drivers. Needed for internal \
-speakers and microphones on most Intel laptops from the 11th generation on (R-04, \
-D-025, D-039). Not in linux-firmware: released by the SOF project as sof-bin."
+               (Sound Open Firmware), loaded by the kernel's SOF drivers. Needed for \
+               internal speakers and microphones on most Intel laptops from the 11th \
+               generation on (R-04, D-025, D-039). Not in linux-firmware: released by \
+               the SOF project as sof-bin."
 HOMEPAGE = "https://github.com/thesofproject/sof-bin"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENCE.Intel;md5=54b4f1a2dd35fd85bc7a1d4afa731b78"
+
+DEPENDS += "zstd-native"
 
 SRC_URI = "https://github.com/thesofproject/sof-bin/releases/download/v${PV}/sof-bin-${PV}.tar.gz"
 # Same digest as published by GitHub for the release asset
@@ -13,8 +16,6 @@ SRC_URI[sha256sum] = "5f7bc30b2b5c1e6b0da55a33fc44e2b7f56ae9b06952edcde614f51ef6
 S = "${UNPACKDIR}/sof-bin-${PV}"
 
 inherit allarch
-
-DEPENDS = "zstd-native"
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
@@ -61,4 +62,4 @@ do_install() {
     fi
 }
 
-FILES:${PN} = "${FW_DIR}"
+FILES:${PN} += "${FW_DIR}"

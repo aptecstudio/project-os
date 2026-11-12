@@ -54,8 +54,11 @@ Set by the user on 2026-11-11.
 | R-31 | **Isolated root folder for each app:** scripts, images and other resources are loaded only from there, with a dedicated protocol (`app://`), and only the app itself can access its own resources. External files only through the filesystem system APIs. |
 | R-32 | **Design:** a hybrid of Windows 11, macOS Big Sur and Xiaomi MIUI. |
 | R-33 | **Interoperability between devices:** the devices running project-os, desktop and mobile, cooperate as a single ecosystem, on the model of Apple's. |
+| R-34 | **System UI library `systemui`:** our own library to build graphical interfaces (buttons, headers, footers, text fields and everything an interface needs), reached as `system.ui.*` like the other APIs (R-29). An app that wants it declares `systemui` in its `package.json`. Developers can create their own custom components. Apps (system apps included) do not write HTML: the whole interface is written in JavaScript, with a class and event model. The library is a wrapper that creates the DOM elements and manages their tree and their removal. |
+| R-35 | **Class and event model for the APIs:** the system APIs (`system.*`) also follow the class and event model, like `system.ui`. |
+| R-36 | **Developer guides:** a documentation folder of indexed Markdown pages for `systemui`, organized by component, written as a real guide for programmers on how to build interfaces with the framework; the same kind of guide for all the system APIs (`system.*`), organized by namespace. |
 
-*R-16…R-19 added by the user on 2026-11-11. R-20…R-24 added the same day: change of
+*R-34, R-35 and R-36 added by the user on 2026-11-12. R-16…R-19 added by the user on 2026-11-11. R-20…R-24 added the same day: change of
 approach, from Debian to a system built from scratch. R-25…R-28 added the same day.
 R-29…R-32 added the same day (evening). R-33 added the same day, from the laptop.*
 
@@ -516,6 +519,10 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   user asked) and `branding/previews/grub-menu.png`, whose Italian texts are drawn in
   the image: `branding/tools/render.py` already has the English texts, the preview is
   regenerated when Pillow and `rsvg-convert` are available (ROADMAP, Phase 1).
+  *Regenerated on 2026-11-12 (D-046) with Pillow in a virtual environment and Inter 4.1
+  from the official release (`Inter-4.1.zip`, SHA-256 `9883fdd4…56b11e`; GitHub
+  publishes no digest for it); only the preview, the theme images were already
+  identical.*
 - **Why:** the repository is public and must be readable and reproducible by anyone.
 - **Supersedes:** the convention "documentation and commits in Italian" of §5 (until
   2026-11-12, from `AGENTS.md` §6 v1.1).
@@ -768,6 +775,75 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   the overlay later (programs read `/etc` from the first moment); one mount unit for
   the overlay (its directories must exist first, a mount unit cannot create them).
 
+### D-045 — `systemui` library and class/event model of the APIs · `requirement` (R-34, R-35, 2026-11-12), details `proposed`
+- **What the user fixed:** see R-34 and R-35. In short: `system.ui.*` is our UI
+  library; an app declares `systemui` in `package.json` to use it; built-in components
+  (buttons, headers, footers, text fields…) plus custom components; no HTML written by
+  hand, everything in JavaScript with classes and events; the library creates and
+  owns the DOM elements, their tree and their removal. The other `system.*` APIs use
+  the same class and event model.
+- **First reading of the design (to be defined in Phase 4, `docs/api/ui.md`):**
+  - a base class (e.g. `system.ui.Component`) that every component extends, built-in
+    and custom alike: it owns its DOM element, its children and its listeners;
+    removing a component removes its subtree and releases listeners and resources,
+    so apps do not leak memory or leave orphan elements;
+  - events with one uniform interface on components and APIs (e.g. `on(name,
+    handler)` / `off(name, handler)`); asynchronous operations of the APIs keep
+    returning a `Promise` where an answer comes later (to be confirmed);
+  - the visual style of Phase 5 (D-032) applied by default, so apps look like the
+    system without writing CSS; themes and light/dark from the system;
+  - security rule of D-029 unchanged: `system.ui` exists only if `systemui` is declared
+    in `package.json`; the library runs in the app's own context and gives no extra
+    native access;
+  - exact name and form of the `package.json` field (e.g. a list of system libraries)
+    defined with the manifest specification (`docs/manifest.md`).
+- **Consequences:** the system dialogs (R-10), the shell (Phase 5) and the system apps
+  (Phase 6) are built with `systemui`; so the library comes before the shell.
+- **Developer guide (R-36):** `docs/systemui/`, in English (AGENTS.md §6): an index
+  (`README.md`) linking every page; getting started (declaring `systemui` in
+  `package.json`, first window); one page per component with purpose, constructor
+  options, properties, methods, events and examples; pages on custom components and on
+  the component lifecycle (tree, removal). Each component ships with its page, so code
+  and guide stay in step. The other `system.*` APIs get the same kind of guide in
+  `docs/api/` (the user's choice, R-36): one page per namespace (`system.fs`,
+  `system.windows`…) with its classes, methods, events, the permission to declare in
+  `package.json`, errors and examples.
+- **Why:** the user's choice; a single way to build interfaces for us and for
+  third-party developers, consistent look, no DOM handling in app code.
+
+### D-046 — Code style checked by standard tools · `requirement` (AGENTS.md §7, 2026-11-12), details `proposed`
+- **What (user's request):** standard naming and style conventions of every language,
+  readable layout, comments that explain the why, written into `AGENTS.md` §7 as a fixed
+  rule; all the code written so far reviewed against them.
+- **Tools** (run together by `tools/lint.sh`, installed by `tools/setup-host.sh` through
+  pipx, no root needed): ShellCheck (`shellcheck-py`, `.shellcheckrc`), ruff for PEP 8
+  and PEP 257 (`ruff.toml`), oelint-adv for the OpenEmbedded style guide
+  (`tools/oelint-constants.json` declares the RAUC and project-os variables it does not
+  know). Rust (`cargo fmt`, `clippy`) and JavaScript (ESLint, Prettier) are run as soon
+  as the repository has a `Cargo.toml` or `package.json`.
+- **oelint-adv rules left out**, each with its reason in `tools/lint.sh`:
+  `suggestedvar.SECTION/BUGTRACKER/CVE_PRODUCT` and `bbclassextend` (meant for
+  recipes of software published elsewhere), `licenseremotefile` (our recipes have no
+  upstream license file). Single exceptions are marked in the recipe with
+  `# nooelint:` and the reason (bundle without sources, generated `grubenv`, two
+  download sources of the microcode, kernel check task without override).
+- **Review of the existing code (2026-11-12):**
+  - shell: ShellCheck clean; script-level variables that change renamed to
+    `lower_snake_case` (`reset`, `text_mode`, `userns_restriction`);
+  - Python: descriptive names instead of one-letter ones, PEP 257 docstrings, ruff
+    formatting; `branding/tools/render.py` checked by regenerating the theme images:
+    all 19 identical, pixel by pixel;
+  - BitBake: multi-line values without leading space (except `:append`, where it is
+    needed), descriptions within 88 columns, `HOMEPAGE`, alphabetical dependencies,
+    `DEPENDS +=`, `${localstatedir}`, `[doc]` for every custom task and function,
+    recipe files with a version (`project-os-storage_1.0.bb`,
+    `project-os-boot-config_1.0.bb`); **bbappends limited to our distribution or
+    machine** (`:project-os`, `:project-os-amd64`), so the layers stay usable next to
+    others ("Yocto Project compatible" rule). Final values of 23 affected variables
+    compared before and after: same effect (only order and wording differ).
+- **Why:** the repository is public and must be understandable by any developer; tools
+  make the rule checkable instead of a matter of taste.
+
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
   global **`system`** object, with one sub-object per area, like `chrome.*` in
@@ -787,9 +863,10 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Security rule:** a namespace exists in the `system` object only if the app declared
   it in `package.json` and the user granted it; otherwise it is `undefined`, like the
   `chrome.*` APIs not declared in the manifest (AGENTS.md §5.1).
-- **Style (proposed):** asynchronous functions returning a `Promise`; events with
+- ~~**Style (proposed):** asynchronous functions returning a `Promise`; events with
   `system.<namespace>.on<Event>.addListener()`, as in extensions; errors as exceptions
-  with a code (`PermissionDenied`, `NotFound`…).
+  with a code (`PermissionDenied`, `NotFound`…).~~ *Superseded by R-35 and D-045:
+  class and event model, as in `system.ui`.*
 - **Why `system`:** the user's choice; independent of the final name of the system.
 - **To be defined in Phase 4:** full list of functions, in `docs/api/`.
 
@@ -982,7 +1059,8 @@ project-os/
 
 ## 5. Syntax conventions
 
-*To be completed when languages and tools are chosen.* Already fixed (AGENTS.md §6,
+**Code style (AGENTS.md §7, D-046):** standard conventions of each language, checked
+by `tools/lint.sh` before every commit. Already fixed (AGENTS.md §6,
 D-037): **everything in English** — identifiers, comments, script options and messages,
 documentation and commits; Italian only in translation files. Conventional Commits.
 *(Until 2026-11-12: documentation and commits in Italian, identifiers in English —

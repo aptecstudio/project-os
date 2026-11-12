@@ -1,7 +1,8 @@
 SUMMARY = "project-os — base image"
-DESCRIPTION = "Minimal system: kernel, glibc, systemd. Boots to a text terminal. \
-The next layers (graphics, broker, shell) are added in the following phases of the \
-roadmap."
+DESCRIPTION = "Minimal system: kernel, glibc, systemd. Boots to a text terminal. The \
+               next layers (graphics, broker, shell) are added in the following phases \
+               of the roadmap."
+HOMEPAGE = "https://github.com/aptecstudio/project-os"
 LICENSE = "GPL-3.0-only"
 
 inherit core-image
@@ -30,16 +31,19 @@ IMAGE_FEATURES:remove = "package-management"
 
 # /home lives on the data partition: in the image it becomes a link to /var/home
 ROOTFS_POSTPROCESS_COMMAND += "project_os_home_on_data"
+project_os_home_on_data[doc] = "Replace /home with a link to /var/home on the data partition"
 project_os_home_on_data() {
     rm -rf ${IMAGE_ROOTFS}/home
     ln -s var/home ${IMAGE_ROOTFS}/home
-    install -d ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d
-    echo "d /var/home 0755 root root -" > ${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d/project-os-home.conf
+    tmpfiles_dir=${IMAGE_ROOTFS}${nonarch_libdir}/tmpfiles.d
+    install -d $tmpfiles_dir
+    echo "d ${localstatedir}/home 0755 root root -" > $tmpfiles_dir/project-os-home.conf
 }
 
 # Mount point of the EFI partition (efi.mount): on the read-only system systemd cannot
 # create it at boot. Root-only access, like the mounted ESP (umask=0077).
 ROOTFS_POSTPROCESS_COMMAND += "project_os_efi_mountpoint"
+project_os_efi_mountpoint[doc] = "Create the /efi mount point of the EFI partition"
 project_os_efi_mountpoint() {
     install -d -m 0700 ${IMAGE_ROOTFS}/efi
 }
@@ -51,6 +55,7 @@ PROJECT_OS_EARLY_INITRD ??= ""
 PROJECT_OS_EARLY_INITRD_DEPENDS ??= ""
 do_rootfs[depends] += "project-os-initramfs:do_image_complete ${PROJECT_OS_EARLY_INITRD_DEPENDS}"
 ROOTFS_POSTPROCESS_COMMAND += "project_os_install_initramfs"
+project_os_install_initramfs[doc] = "Install the initramfs and early archives in /boot"
 project_os_install_initramfs() {
     install -d ${IMAGE_ROOTFS}/boot
     install -m 0644 ${DEPLOY_DIR_IMAGE}/project-os-initramfs-${MACHINE}.cpio.zst \

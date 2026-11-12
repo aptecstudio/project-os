@@ -9,6 +9,7 @@
 #   - the programs required by Yocto 6.0 "Wrynose";
 #   - kas (build tool, D-024), through pipx;
 #   - QEMU and the OVMF UEFI firmware, to test images in the emulator;
+#   - the code style tools of tools/lint.sh (ShellCheck, ruff, oelint-adv), through pipx;
 #   - the development keys to sign updates (outside the repository).
 # Asks for confirmation before changing system settings.
 set -eu
@@ -26,6 +27,7 @@ if [ "$(id -u)" -eq 0 ]; then
     exit 1
 fi
 
+# shellcheck source=/dev/null
 . /etc/os-release
 case "${ID:-}:${VERSION_ID:-}" in
     ubuntu:24.04|ubuntu:26.04|debian:13) ;;
@@ -51,18 +53,21 @@ if ! locale -a | grep -qi '^en_US\.utf-\?8$'; then
     sudo locale-gen
 fi
 
-say "Installing kas"
+say "Installing kas and the code style tools (AGENTS.md §7)"
 pipx ensurepath >/dev/null
-if pipx list 2>/dev/null | grep -q 'package kas '; then
-    pipx upgrade kas
-else
-    pipx install kas
-fi
+# ShellCheck comes from its official Python package (shellcheck-py): no root needed
+for tool in kas ruff shellcheck-py oelint-adv; do
+    if pipx list 2>/dev/null | grep -q "package $tool "; then
+        pipx upgrade "$tool"
+    else
+        pipx install "$tool"
+    fi
+done
 
 # Ubuntu 24.04 and later restrict unprivileged user namespaces with AppArmor; bitbake
 # uses them to isolate compilation steps from the network.
-F=/proc/sys/kernel/apparmor_restrict_unprivileged_userns
-if [ -r "$F" ] && [ "$(cat "$F")" = "1" ]; then
+userns_restriction=/proc/sys/kernel/apparmor_restrict_unprivileged_userns
+if [ -r "$userns_restriction" ] && [ "$(cat "$userns_restriction")" = "1" ]; then
     say "User namespaces restricted by AppArmor"
     echo "Bitbake needs user namespaces to isolate compilation from the network."
     echo "I can allow them permanently on this machine"
