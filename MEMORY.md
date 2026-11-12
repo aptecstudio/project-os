@@ -930,7 +930,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   is at the login 36 s after the command, verified and `running`, with `B_TRY=1`
   left set.
 
-### D-048 — Unified kernel image per slot on the EFI partition, lz4hc slots (step 4c.4) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+### D-048 — Unified kernel image per slot on the EFI partition, lz4hc slots (step 4c.4) · `confirmed` (2026-11-12, on the `build/verified-boot` branch)
 - **Boot files out of the slot:** each slot's boot files live on the EFI partition, in
   `EFI/project-os/A` and `EFI/project-os/B`, built by `project_os_slot_boot.bbclass`
   (which replaces `project_os_slot_verity`) as `<image>.slot-boot/`:

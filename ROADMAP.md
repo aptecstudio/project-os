@@ -30,7 +30,7 @@ Phases are carried out **one at a time**, in order (D-021).
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
 **Next step:** step 4d (data unlocking with password and recovery key) on the
-`build/verified-boot` branch, after the user's review of step 4c.4 (D-048); then
+`build/verified-boot` branch (step 4c.4 approved, D-048); then
 4e, 5b, and the real hardware test session (step 6) with all the hardware checks
 together. One step at a time, with the user's confirmation.
 
@@ -377,3 +377,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | Step 4c.3: erofs slots verified by dm-verity, root hash per slot on the EFI partition written by the bundle hook before activation; tested in QEMU with boot, A/B update, rollback and a corrupted block that stops the boot (D-047) |
 | 2026-11-12 | 1 | D-047 approved; automatic restart when PID 1 cannot go on (`systemd.crash_action=reboot`), so a corrupted slot rolls back without a manual reset; `grub.cfg` tracked by the disk image build; tested in QEMU |
 | 2026-11-12 | 1 | Step 4c.4: UKI with one profile per slot and separate files for BIOS on the EFI partition, no kernel in the slot, lz4hc erofs (the user's choice); tested in QEMU with UKI boot of both slots, A/B update, rollback, a corrupted block and the BIOS files (D-048) |
+| 2026-11-12 | 1 | D-048 approved by the user; work paused before step 4d |
