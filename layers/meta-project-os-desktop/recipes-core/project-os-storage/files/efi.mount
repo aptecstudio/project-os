@@ -5,6 +5,10 @@
 [Unit]
 Description=project-os EFI partition (/efi)
 Documentation=https://github.com/aptecstudio/project-os
+# Check (and repair) the FAT file system before mounting it: GRUB writes grubenv on it
+# at every boot, and a power loss can leave it dirty
+Requires=systemd-fsck@dev-disk-by\x2dpartlabel-esp.service
+After=systemd-fsck@dev-disk-by\x2dpartlabel-esp.service
 Before=local-fs.target
 
 [Mount]
