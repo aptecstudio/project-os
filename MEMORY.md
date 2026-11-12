@@ -988,6 +988,22 @@ documentation and commits; Italian only in translation files. Conventional Commi
 *(Until 2026-11-12: documentation and commits in Italian, identifiers in English —
 superseded by D-037.)*
 
+**Testing in QEMU (convention approved by the user, 2026-11-12):** every change is
+tested in QEMU before its commit, with the QEMU window visible to the user. How much
+depends on what the change touches:
+
+| The change touches… | Test |
+|---|---|
+| GRUB, partitions, RAUC, initramfs, kernel command line, mounts at boot | boot from a new disk + A/B update to slot B + interrupted boot of B with automatic rollback to A |
+| only packages or files inside the system (firmware, programs, configuration) | boot from a new disk and checks of the system (`running`, no failed units, the change in place) |
+
+Why the full test for the boot chain: slot B comes from a different file (the update
+bundle, not the full disk image), uses other GRUB entries and the state in `grubenv`,
+and the automatic rollback is the safety net of every installed PC. Errors found only
+this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
+`true`/`false` against RAUC's `1`/`0` in `grubenv` (D-026). Checks that need real
+hardware go to the hardware test session (D-040).
+
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
 a time**, the one open for review (today `build/ab-partitions`). New steps and updates
 to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches

@@ -340,3 +340,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |
 | 2026-11-12 | 1 | Steps 4c.1 and 3b: systemd initramfs and early Intel/AMD microcode loaded by GRUB; boot, A/B update and rollback tested in QEMU (D-043) |
 | 2026-11-12 | 1 | Step 4c.2: data partition created, unlocked and mounted by the initramfs, persistent `/etc` overlay, update conflict report; tested in QEMU with reboot, A/B update, simulated conflict and rollback (D-044) |
+| 2026-11-12 | 0 | QEMU test convention recorded in `MEMORY.md` §5: full A/B test for changes to the boot chain, boot test for changes inside the system |
