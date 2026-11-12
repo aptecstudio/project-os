@@ -29,8 +29,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4c.4 (UKI per slot on the EFI partition) on the
-`build/verified-boot` branch (step 4c.3 approved, D-047); then 4d,
+**Next step:** step 4d (data unlocking with password and recovery key) on the
+`build/verified-boot` branch, after the user's review of step 4c.4 (D-048); then
 4e, 5b, and the real hardware test session (step 6) with all the hardware checks
 together. One step at a time, with the user's confirmation.
 
@@ -118,7 +118,7 @@ with boot menu, A/B partitions and full hardware support.
   - [x] 4a. Disk layout: ESP, A/B slots, BIOS space, encrypted data partition created on
         first boot
   - [x] 4b. Slot selection in GRUB and signed RAUC updates
-  - [ ] 4c. erofs + dm-verity system, systemd initramfs, unified kernel image (UKI) per
+  - [x] 4c. erofs + dm-verity system, systemd initramfs, unified kernel image (UKI) per
         slot, persistent `/etc` (plan in D-042)
     - [x] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b,
           D-043)
@@ -127,8 +127,8 @@ with boot menu, A/B partitions and full hardware support.
     - [x] 4c.3 erofs system verified by dm-verity: root hash per slot on the EFI
           partition, written by the bundle hook; a corrupted block stops the boot
           (D-047)
-    - [ ] 4c.4 UKI per slot on the EFI partition, plus separate kernel + initramfs for
-          BIOS boot
+    - [x] 4c.4 UKI per slot on the EFI partition (two profiles, @0 slot A and @1 slot
+          B), plus separate kernel + initramfs for BIOS boot; lz4hc slots (D-048)
   - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
         extra method where present; limit the memory of the key derivation for old
         PCs with little RAM (D-044)
@@ -188,6 +188,10 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Decide on swap (zram or swap file) with the memory budget; today only the
       tools are installed, as a systemd dependency (D-038)
 - [ ] Vulnerability monitoring process for the components (D-012)
+- [ ] Remove from the slot the unused `/boot/EFI/BOOT` files of the `grub-efi` package
+      (D-048)
+- [ ] Update GRUB and `grub.cfg` on the EFI partition with RAUC (today only the slots
+      and their boot files are updated, D-048)
 - [ ] Size budget: the NVIDIA firmware for nouveau (GSP) is 109 MB of the image, keep
       only the versions the kernel loads (D-041 review); the initramfs is 18.9 MB
       compressed because of systemd's hard dependencies (D-043)
@@ -372,3 +376,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 4 | Developer guide extended to all system APIs, `docs/api/` by namespace (R-36, the user's choice) |
 | 2026-11-12 | 1 | Step 4c.3: erofs slots verified by dm-verity, root hash per slot on the EFI partition written by the bundle hook before activation; tested in QEMU with boot, A/B update, rollback and a corrupted block that stops the boot (D-047) |
 | 2026-11-12 | 1 | D-047 approved; automatic restart when PID 1 cannot go on (`systemd.crash_action=reboot`), so a corrupted slot rolls back without a manual reset; `grub.cfg` tracked by the disk image build; tested in QEMU |
+| 2026-11-12 | 1 | Step 4c.4: UKI with one profile per slot and separate files for BIOS on the EFI partition, no kernel in the slot, lz4hc erofs (the user's choice); tested in QEMU with UKI boot of both slots, A/B update, rollback, a corrupted block and the BIOS files (D-048) |

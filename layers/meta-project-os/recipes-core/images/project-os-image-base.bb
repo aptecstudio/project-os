@@ -12,8 +12,10 @@ inherit core-image
 # packagegroup-core-boot does not include them by itself.
 IMAGE_INSTALL = "packagegroup-core-boot ${MACHINE_EXTRA_RRECOMMENDS} ${CORE_IMAGE_EXTRA_INSTALL}"
 
-# Kernel inside the system slot: GRUB loads it from the chosen slot (D-026)
-IMAGE_INSTALL += "kernel-image"
+# No kernel or initramfs in the system slot: the hardware layer puts them where its
+# boot loader reads them (desktop: on the EFI partition, as a unified kernel image and
+# as separate files, project_os_slot_boot, D-048). The kernel modules stay in the slot
+# (MACHINE_EXTRA_RRECOMMENDS).
 
 # Signed A/B updates (D-018, D-026)
 IMAGE_INSTALL += "rauc"
@@ -46,21 +48,4 @@ ROOTFS_POSTPROCESS_COMMAND += "project_os_efi_mountpoint"
 project_os_efi_mountpoint[doc] = "Create the /efi mount point of the EFI partition"
 project_os_efi_mountpoint() {
     install -d -m 0700 ${IMAGE_ROOTFS}/efi
-}
-
-# initramfs next to the kernel, in /boot of the slot (D-043): GRUB loads first the
-# archives the machine lists in PROJECT_OS_EARLY_INITRD (e.g. CPU microcode, which the
-# kernel must find uncompressed at the very start), then the initramfs.
-PROJECT_OS_EARLY_INITRD ??= ""
-PROJECT_OS_EARLY_INITRD_DEPENDS ??= ""
-do_rootfs[depends] += "project-os-initramfs:do_image_complete ${PROJECT_OS_EARLY_INITRD_DEPENDS}"
-ROOTFS_POSTPROCESS_COMMAND += "project_os_install_initramfs"
-project_os_install_initramfs[doc] = "Install the initramfs and early archives in /boot"
-project_os_install_initramfs() {
-    install -d ${IMAGE_ROOTFS}/boot
-    install -m 0644 ${DEPLOY_DIR_IMAGE}/project-os-initramfs-${MACHINE}.cpio.zst \
-        ${IMAGE_ROOTFS}/boot/initramfs.cpio.zst
-    for f in ${PROJECT_OS_EARLY_INITRD}; do
-        install -m 0644 ${DEPLOY_DIR_IMAGE}/$f ${IMAGE_ROOTFS}/boot/$(basename $f)
-    done
 }

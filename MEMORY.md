@@ -707,7 +707,9 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   `AuthenticAMD.bin` (the `amd-ucode` containers of linux-firmware 20260410, the same
   file and digest as OE-Core's recipe). Reproducible: fixed times and owner, sorted
   entries. 19.5 MB.
-- **Boot:** the machine lists early archives in `PROJECT_OS_EARLY_INITRD`; the image
+- **Boot** *(superseded by D-048: the early archives and the initramfs are in the UKI
+  and in `EFI/project-os/<A|B>` on the EFI partition, no longer in the slot)*: the
+  machine lists early archives in `PROJECT_OS_EARLY_INITRD`; the image
   copies them and the initramfs into `/boot` of the slot, and GRUB loads
   `initrd microcode.cpio initramfs.cpio.zst`: the kernel finds the microcode
   uncompressed at the start of the first archive, as early loading requires. Boot
@@ -851,13 +853,15 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   the same root hash). wic copies that file into slot A (`rawcopy`), and the update
   bundle writes the same file into the inactive slot (RAUC slot `type=raw`). Kernel:
   `CONFIG_EROFS_FS=y`; GRUB: `erofs` module instead of `ext2`.
-- **Uncompressed erofs:** until step 4c.4 GRUB reads kernel and initramfs from inside
+- **Uncompressed erofs** *(superseded by D-048: lz4hc, once GRUB no longer reads the
+  slot)*: until step 4c.4 GRUB reads kernel and initramfs from inside
   the slot, and the erofs driver of GRUB 2.14 refuses any image with compression
   features (it accepts only `chunked_file`). The firmware is already compressed on
   its own (zstd). Compression to be reconsidered in 4c.4, with the kernel on the EFI
   partition.
-- **Where the root hash lives:** next to `grubenv` on the EFI partition, one file per
-  slot, `EFI/BOOT/slot-A.env` and `slot-B.env`: a GRUB environment block with
+- **Where the root hash lives** *(superseded by D-048: inside each slot's UKI, and in
+  `EFI/project-os/<A|B>/boot.env` for the BIOS path)*: next to `grubenv` on the EFI
+  partition, one file per slot, `EFI/BOOT/slot-A.env` and `slot-B.env`: a GRUB environment block with
   `roothash` and `verity_options` (the veritytab options: `superblock=false`,
   `data-blocks`, `hash-offset`, `salt`…), generated at build time by
   `project_os_slot_verity.bbclass` from the parameters of `image_types_verity`.
@@ -925,6 +929,76 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   action: the firmware starts twice by itself (B stops and restarts, then A), and A
   is at the login 36 s after the command, verified and `running`, with `B_TRY=1`
   left set.
+
+### D-048 — Unified kernel image per slot on the EFI partition, lz4hc slots (step 4c.4) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+- **Boot files out of the slot:** each slot's boot files live on the EFI partition, in
+  `EFI/project-os/A` and `EFI/project-os/B`, built by `project_os_slot_boot.bbclass`
+  (which replaces `project_os_slot_verity`) as `<image>.slot-boot/`:
+  - `project-os.efi`: **unified kernel image (UKI)** made with `ukify` (systemd 259):
+    systemd-boot stub, kernel, CPU microcode then initramfs (the microcode must be
+    first and uncompressed), `os-release`, and the kernel command line with the
+    dm-verity root hash. GRUB starts it with `chainloader … @0` (slot A) or `@1`;
+  - `bzImage`, `microcode.cpio`, `initramfs.cpio.zst` and `boot.env` (GRUB
+    environment block, 2048 bytes, with `cmdline_a` and `cmdline_b`): the same as
+    separate files, for GRUB when the PC boots from BIOS (step 4e, R-26).
+  The slot holds no kernel (`kernel-image` removed from the image; the machine drops
+  `kernel-base`'s recommendation of it, which the modules brought in).
+- **Two profiles in one UKI (multi-profile, systemd-stub 257+):** the same system can
+  be installed in either slot, and the command line must name the slot's partition
+  (`PARTLABEL=root_a`/`root_b`, `rauc.slot`). The UKI itself is profile 0, slot A (its
+  own `.cmdline`), and the profile of slot B is joined as profile 1. The stub reads the
+  `@N` argument even with Secure Boot, where any other argument from the loader is
+  ignored, so the line that runs is always the one in the (future signed) UKI.
+  Profile 0 is also what runs if the UKI is started with no argument. Found while
+  building: joining both slots as separate profiles makes `ukify` add an empty base
+  profile (`ID=main`, no command line) as `@0`.
+- **One command line, from the build:** `PROJECT_OS_KERNEL_CMDLINE` in the machine (the
+  options and reasons that were in `grub.cfg`, D-047); the class adds root hash, tree
+  parameters and the slot's part. `grub.cfg` no longer composes kernel options: it
+  reads `cmdline_x` from each slot's `boot.env` (only that name) and never chooses a
+  slot without it.
+- **GRUB reads only the EFI partition:** `erofs` module dropped from `GRUB_BUILDIN`
+  (and `regexp`, no longer used); wic no longer puts a kernel at the root of the EFI
+  partition (`install-kernel-into-boot-dir=false`).
+- **Updates:** the bundle carries the `slot-boot` directory; the hook (slot
+  post-install, before RAUC marks the slot bootable) removes the old files of that
+  slot, copies the new ones to `<bootname>.new` and renames it. Removing first keeps
+  the EFI partition at two sets of boot files plus the one being written.
+- **lz4hc erofs (the user's choice, 2026-11-12):** with GRUB no longer reading the
+  slot, it can be compressed. Measured on the system without `/boot`: uncompressed
+  600 MB, lz4hc 472–483 MB, lzma 444 MB (397 MB are firmware already compressed with
+  zstd). lz4hc: fast decompression even on old processors (R-25), the usual choice of
+  erofs (Android); lzma discarded (10–20 times slower to decompress), zstd not
+  available in the erofs-utils of the build. Default 4 KiB clusters (483 MB against
+  472 MB with 64 KiB): a random read decompresses one block at most. Kernel:
+  `CONFIG_EROFS_FS_ZIP=y`. The decompressor only reads data already verified by
+  dm-verity.
+- **Discarded alternatives:** one UKI per slot built twice (two signed files of 52 MB
+  in every bundle instead of one); root partition found from the root hash (systemd's
+  convention: GPT partition UUID = first half of the hash; it would mean editing the
+  partition table at every update, and two slots with the same system would share a
+  UUID); OE's `uki` class (a single initrd, so no early microcode, and a single
+  command line); GRUB passing the slot's options to the UKI (ignored with Secure
+  Boot).
+- **Sizes:** slot 512 MB (507 MB erofs + tree; 688 MB uncompressed with `/boot` in
+  D-047); UKI 52 MB; boot files per slot 104 MB; EFI partition with both slots 199 MB
+  of 511 MB; bundle 584 MB (523 MB in D-047: it now also carries the boot files).
+- **Still open:** the slot's `/boot` keeps `EFI/BOOT/bootx64.efi` and `grub.cfg` from
+  the `grub-efi` package, not used (GRUB on the EFI partition is written by wic) — to
+  remove with the size budget; GRUB and `grub.cfg` on the EFI partition are not
+  updated by RAUC yet; signing of UKI and GRUB with Secure Boot in Phase 8.
+- **Checks done (QEMU, new disk, 2026-11-12):** UKI sections checked (base `.cmdline`
+  slot A, profiles `slot-a` and `slot-b`, the second with its own `.cmdline`). Slot A
+  boots through the UKI (no `BOOT_IMAGE=` from GRUB), `/dev/mapper/root` verified on
+  `nvme0n1p3`, erofs lz4hc, system `running`, no failed units, free memory as before
+  (about 1.87 GB of 2 GB). A/B update: the hook writes `EFI/project-os/B`, B boots with
+  profile `@1` of its own UKI (`root_b`, `rauc.slot=B`) and is confirmed. Interrupted
+  boot of B → A. One corrupted block in B (block 119138, the first compressed block of
+  `/usr/lib/systemd/systemd`), B re-armed, one `reboot`: the firmware starts twice by
+  itself and A is at the login in 42 s; from A, `veritysetup verify` of B fails
+  exactly at that block. BIOS path tried from GRUB's command line on UEFI
+  (`linux …/A/bzImage $A_CMDLINE`, `initrd` microcode + initramfs): boots, verified,
+  `running`.
 
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
