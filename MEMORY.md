@@ -718,7 +718,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   (`CONFIG_EXTRA_FIRMWARE`, it would tie every microcode update to a kernel rebuild).
 - **Checks done (QEMU):** boot through the initramfs ("Switching root" at about 2 s),
   system `running`, no failed units; A/B update to slot B through its own initramfs,
-  confirmed; interrupted boot of B → automatic rollback to A. Slot: 667 MB (629 MB
+  confirmed; interrupted boot of B → automatic rollback to A. Slot: 665 MB (629 MB
   before: kernel, initramfs and microcode in `/boot`). In a virtual machine the kernel
   skips microcode updates (the hypervisor handles them): the real check is in the
   hardware test session (ROADMAP step 6.17, D-040).
