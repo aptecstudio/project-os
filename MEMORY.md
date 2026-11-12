@@ -723,6 +723,51 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   skips microcode updates (the hypervisor handles them): the real check is in the
   hardware test session (ROADMAP step 6.17, D-040).
 
+### D-044 — Persistent /etc overlay, data partition handled by the initramfs (step 4c.2) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
+- **Data partition in the initramfs:** `/etc` is needed before the system starts, so
+  creation, unlocking and mounting of the data partition move from the system to the
+  initramfs (package `project-os-storage-initrd`, added by the machine through
+  `PROJECT_OS_INITRD_INSTALL`):
+  - `project-os-repart.service`: after `/sysroot` is mounted, `systemd-repart
+    --root=/sysroot` reads the partition definition of the system
+    (`/usr/lib/repart.d/50-data.conf`, which stays in one place) and works on the disk
+    of the slot. systemd's own initrd repart service looks inside the initramfs and
+    runs before `/sysroot`, so it does nothing here; on the system it is masked;
+  - `crypttab` in the initramfs, `systemd-cryptsetup@data` after repart;
+  - `sysroot-var.mount`: fsck of the data partition, then mount on `/sysroot/var`; the
+    mount stays after the switch as `/var`. The system no longer has `crypttab` or
+    `var.mount`.
+- **`/etc` overlay** (`project-os-etc-overlay.service`, before `initrd-fs.target`):
+  lower layer the read-only `/etc` of the slot, upper and work directories in
+  `/var/lib/project-os/etc-overlay/` on the encrypted data partition. Kernel:
+  `CONFIG_OVERLAY_FS=y` (built in, no modules in the initramfs). BusyBox added to the
+  initramfs (`mkdir`, and `/bin/sh` for the emergency shell).
+- **Update conflicts** (`/usr/lib/project-os/etc-overlay-conflicts`, RAUC
+  post-install handler): mounts the booted slot without the overlay (non-recursive
+  bind mount of `/`) and the new slot read-only, and for every file changed or deleted
+  locally (upper layer) checks whether the update changes it; the list goes to
+  `/var/lib/project-os/etc-conflicts` and to RAUC's log. The local version is kept; the
+  update never fails because of it.
+- **`ldconfig.service` masked:** with a writable `/etc` it wrote `ld.so.cache` into the
+  overlay, a copy that could go stale after an update and hide the cache of the new
+  slot. The image already has the right cache. systemd's other "needs update" services
+  stay (e.g. `systemd-sysusers` adds new system users after an update even if
+  `/etc/passwd` was changed locally).
+- **Checks done (QEMU, new disk):** first boot creates, unlocks, checks and mounts the
+  data partition and the overlay before the switch, system `running`; host name, a new
+  user, a network file and an edit of `/etc/issue` survive a reboot; RAUC runs the
+  handler during the update (empty report, no differences in a same-build bundle); a
+  change to `/etc/issue` written into slot B is reported as a conflict; slot B boots
+  with all local changes and keeps the local `/etc/issue`; interrupted boot of B →
+  rollback to A with all changes. Slot 665 MB, initramfs 19.3 MB, idle memory about
+  81 MB.
+- **Seen, for step 4d:** on first boot the LUKS2 key derivation (Argon2id) of
+  systemd-repart used up to 893 MB of RAM (2 GB VM): on old PCs with little memory
+  (R-25) the memory cost must be limited when the password is set.
+- **Discarded alternatives:** keeping repart and unlocking in the system and mounting
+  the overlay later (programs read `/etc` from the first moment); one mount unit for
+  the overlay (its directories must exist first, a mount unit cannot create them).
+
 ### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
 - **What (R-29):** in the context of the main script and of the app windows there is a
   global **`system`** object, with one sub-object per area, like `chrome.*` in

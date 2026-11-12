@@ -1,0 +1,19 @@
+# project-os initramfs — data partition on /sysroot/var (D-026, D-044): unlocked and
+# mounted before switching to the system, because the /etc overlay lives on it. The
+# mount stays in place after the switch, as /var.
+[Unit]
+Description=project-os data (/var), from the initramfs
+Documentation=https://github.com/aptecstudio/project-os
+DefaultDependencies=no
+Requires=systemd-cryptsetup@data.service systemd-fsck@dev-mapper-data.service
+After=systemd-cryptsetup@data.service systemd-fsck@dev-mapper-data.service sysroot.mount
+Before=initrd-fs.target
+
+[Mount]
+What=/dev/mapper/data
+Where=/sysroot/var
+Type=ext4
+Options=nodev,nosuid
+
+[Install]
+RequiredBy=initrd-fs.target

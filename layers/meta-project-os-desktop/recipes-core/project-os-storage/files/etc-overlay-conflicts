@@ -1,0 +1,69 @@
+#!/bin/sh
+# project-os — /etc overlay conflicts after an update (D-042, D-044).
+#
+# Run by RAUC as post-install handler, after the new system has been written to the
+# inactive slot. Files that the user changed (or deleted) in /etc live in the upper
+# layer of the overlay and hide the version of the system. If the update changes one
+# of those files, the user's version will keep hiding the new one: the script lists
+# these files in /var/lib/project-os/etc-conflicts and prints them, so that RAUC logs
+# them (and, later, Settings can show them). It never makes the update fail.
+set -u
+
+UPPER=/var/lib/project-os/etc-overlay/upper
+REPORT=/var/lib/project-os/etc-conflicts
+
+[ -d "$UPPER" ] || exit 0
+
+# Device of the new system slot (RAUC environment)
+new_dev=""
+for i in ${RAUC_TARGET_SLOTS:-}; do
+    eval "class=\${RAUC_SLOT_CLASS_$i:-}"
+    if [ "$class" = "rootfs" ]; then
+        eval "new_dev=\${RAUC_SLOT_DEVICE_$i:-}"
+    fi
+done
+[ -n "$new_dev" ] || exit 0
+
+work=$(mktemp -d /run/project-os-etc-check.XXXXXX) || exit 0
+mkdir "$work/old" "$work/new"
+cleanup() {
+    umount "$work/new" 2>/dev/null
+    umount "$work/old" 2>/dev/null
+    rmdir "$work/new" "$work/old" "$work"
+}
+trap cleanup EXIT
+# The booted slot without the overlay on top (a non-recursive bind mount of / does not
+# carry the /etc overlay), and the new slot, read-only
+mount --bind / "$work/old" || exit 0
+mount -o ro "$new_dev" "$work/new" || exit 0
+
+# Same content in the old and new system? Missing on both sides counts as the same.
+same() {
+    if [ -L "$1" ] || [ -L "$2" ]; then
+        [ -L "$1" ] && [ -L "$2" ] && [ "$(readlink "$1")" = "$(readlink "$2")" ]
+    elif [ -e "$1" ] || [ -e "$2" ]; then
+        [ -f "$1" ] && [ -f "$2" ] && cmp -s "$1" "$2"
+    else
+        true
+    fi
+}
+
+: > "$REPORT.new"
+cd "$UPPER" || exit 0
+find . \( -type f -o -type l -o -type c \) | sort | while read -r entry; do
+    path=${entry#./}
+    if ! same "$work/old/etc/$path" "$work/new/etc/$path"; then
+        if [ -c "$entry" ]; then
+            echo "/etc/$path (deleted locally, changed by the update)" >> "$REPORT.new"
+        else
+            echo "/etc/$path (changed locally, changed by the update)" >> "$REPORT.new"
+        fi
+    fi
+done
+mv "$REPORT.new" "$REPORT"
+
+if [ -s "$REPORT" ]; then
+    echo "project-os: $(wc -l < "$REPORT") file(s) in /etc changed locally are also changed by this update; the local version is kept:"
+    cat "$REPORT"
+fi
+exit 0

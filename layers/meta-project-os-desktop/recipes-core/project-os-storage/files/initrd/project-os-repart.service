@@ -1,0 +1,21 @@
+# project-os initramfs — creates the encrypted data partition on first boot (D-026,
+# D-044). Runs after the system slot is mounted on /sysroot: with --root=/sysroot,
+# systemd-repart reads the partition definitions of the system (/usr/lib/repart.d) and
+# works on the disk the slot is on. On later boots it finds the partition and changes
+# nothing. (systemd's own systemd-repart.service in the initrd looks for definitions
+# inside the initramfs and runs before /sysroot is mounted, so it does nothing here.)
+[Unit]
+Description=Create the project-os data partition (first boot)
+Documentation=https://github.com/aptecstudio/project-os
+DefaultDependencies=no
+ConditionPathExists=/etc/initrd-release
+Requires=sysroot.mount
+After=sysroot.mount
+Before=initrd-fs.target shutdown.target initrd-switch-root.target
+Conflicts=shutdown.target initrd-switch-root.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=systemd-repart --dry-run=no --root=/sysroot
+SuccessExitStatus=76 77

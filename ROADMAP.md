@@ -29,8 +29,8 @@ Phases are carried out **one at a time**, in order (D-021).
 | 8 | Installation, setup and updates | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
-**Next step:** step 4c.2 (persistent `/etc` overlay) on the `build/verified-boot`
-branch; then 4c.3, 4c.4, 4d, 4e, 5b, and the real hardware test session (step 6) with
+**Next step:** step 4c.3 (erofs system verified by dm-verity) on the
+`build/verified-boot` branch; then 4c.4, 4d, 4e, 5b, and the real hardware test session (step 6) with
 all the hardware checks together. One step at a time, with the user's confirmation. One step
 at a time, with the user's confirmation.
 
@@ -120,13 +120,14 @@ with boot menu, A/B partitions and full hardware support.
         slot, persistent `/etc` (plan in D-042)
     - [x] 4c.1 systemd initramfs with early Intel and AMD microcode (together with 3b,
           D-043)
-    - [ ] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
-          reported
+    - [x] 4c.2 persistent `/etc`: overlay on the data partition, update conflicts
+          reported (D-044)
     - [ ] 4c.3 erofs system verified by dm-verity
     - [ ] 4c.4 UKI per slot on the EFI partition, plus separate kernel + initramfs for
           BIOS boot
   - [ ] 4d. Data unlocking: password and recovery key (without TPM, R-27); TPM as an
-        extra method where present
+        extra method where present; limit the memory of the key derivation for old
+        PCs with little RAM (D-044)
   - [ ] 4e. BIOS boot with GRUB in the same image (R-26)
 - [ ] 5. GRUB boot menu (D-009):
   - [x] 5a. Placeholder logo and theme in `branding/`, with preview (D-023)
@@ -338,3 +339,4 @@ ecosystem (R-33, D-033). Requires DA-12.
 | 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |
 | 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |
 | 2026-11-12 | 1 | Steps 4c.1 and 3b: systemd initramfs and early Intel/AMD microcode loaded by GRUB; boot, A/B update and rollback tested in QEMU (D-043) |
+| 2026-11-12 | 1 | Step 4c.2: data partition created, unlocked and mounted by the initramfs, persistent `/etc` overlay, update conflict report; tested in QEMU with reboot, A/B update, simulated conflict and rollback (D-044) |

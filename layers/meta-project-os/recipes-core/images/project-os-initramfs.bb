@@ -1,12 +1,16 @@
 SUMMARY = "project-os — initramfs"
 DESCRIPTION = "systemd in initrd mode: finds the system slot given on the kernel \
-command line, mounts it on /sysroot and switches to it. The base for the encrypted \
-/etc overlay (step 4c.2) and dm-verity (step 4c.3) (D-042, D-043)."
+command line, mounts it on /sysroot and switches to it; the machine adds what else it \
+needs before the switch, e.g. the encrypted data partition and the /etc overlay \
+(D-042, D-043, D-044)."
 LICENSE = "GPL-3.0-only"
 
 # Only what systemd needs to find, check and mount the root file system (AGENTS.md
 # §5.5): udev for /dev/disk/by-partlabel, fsck for ext4, mount, the os-release data
-# that becomes /etc/initrd-release. No kernel modules: the boot drivers are built in.
+# that becomes /etc/initrd-release, BusyBox for the emergency shell (sulogin needs
+# /bin/sh). No kernel modules: the boot drivers are built in.
+# PROJECT_OS_INITRD_INSTALL: what the machine adds (e.g. project-os-storage-initrd).
+PROJECT_OS_INITRD_INSTALL ??= ""
 PACKAGE_INSTALL = " \
     systemd \
     udev \
@@ -15,6 +19,8 @@ PACKAGE_INSTALL = " \
     util-linux-fsck \
     e2fsprogs-e2fsck \
     os-release \
+    busybox \
+    ${PROJECT_OS_INITRD_INSTALL} \
 "
 # Nothing else from recommendations: the initramfs stays small
 NO_RECOMMENDATIONS = "1"

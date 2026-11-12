@@ -109,7 +109,9 @@ other copy, and goes back to the previous one by itself if the boot does not com
 - **Data is not protected:** the data partition uses an empty key until the setup
   exists (ROADMAP, step 4d).
 - **BIOS boot** not available yet: UEFI only (step 4e).
-- **Changes to `/etc`** (network, users) do not survive a reboot (step 4c).
+- **Changes to `/etc`** (network, users, host name) are kept on the encrypted data
+  partition and survive reboots and updates; if an update changes a file you edited,
+  your version is kept and the file is listed in `/var/lib/project-os/etc-conflicts`.
 - **Android / mobile emulator:** not yet, it comes with Phase 7.
 
 ## 6. If something goes wrong

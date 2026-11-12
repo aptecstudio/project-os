@@ -1,0 +1,20 @@
+# project-os initramfs — persistent /etc (D-042, D-044). The /etc of the system slot
+# stays read-only as the lower layer; changes go to the upper layer on the encrypted
+# data partition. Mounted before initrd-fs.target, so systemd already reads the
+# overlaid /etc (fstab included) when it switches to the system.
+[Unit]
+Description=Persistent /etc overlay on the data partition, from the initramfs
+Documentation=https://github.com/aptecstudio/project-os
+DefaultDependencies=no
+Requires=sysroot-var.mount
+After=sysroot-var.mount
+Before=initrd-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=mkdir -p /sysroot/var/lib/project-os/etc-overlay/upper /sysroot/var/lib/project-os/etc-overlay/work
+ExecStart=mount -t overlay overlay -o lowerdir=/sysroot/etc,upperdir=/sysroot/var/lib/project-os/etc-overlay/upper,workdir=/sysroot/var/lib/project-os/etc-overlay/work /sysroot/etc
+
+[Install]
+RequiredBy=initrd-fs.target
