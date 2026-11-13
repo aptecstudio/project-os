@@ -64,8 +64,8 @@ from an existing distribution.
 
 | Device | How it is installed |
 |---|---|
-| 64-bit Intel/AMD desktop PCs and laptops | From a USB stick, with a guided setup: language, keyboard, disk (next to Windows too), encryption, user |
-| Google Pixel (first supported phone) | From the phone's recovery; on first boot a guided setup asks for network, user and unlock code |
+| 64-bit Intel/AMD desktop PCs and laptops | From the `.iso` image, on a USB stick or a DVD, with a guided setup: language, keyboard, disk (next to Windows too), encryption, user |
+| Google Pixel (first supported phone) | By flashing the published package with `fastboot` (or from a custom recovery, where there is one); on first boot a guided setup asks for network, user and unlock code |
 | Older Oppo and Samsung models | Later, model by model |
 
 Phones need an unlockable bootloader: it depends on the model and sometimes on the
