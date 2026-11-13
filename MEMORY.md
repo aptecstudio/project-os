@@ -1051,9 +1051,11 @@ Set by the user (2026-11-11 to 2026-11-13).
 
 ### D-051 — WPE WebKit for web views and the browser, on both targets · `confirmed` (the user's choice, 2026-11-13)
 - **What (R-41):** web content is shown with **WPE WebKit**, the WebKit port made for
-  embedding without GTK, instead of WebKitGTK. It hands its frames to the embedder as
-  EGL/DMA-BUF buffers, which the framework draws as a texture inside its own scene
-  (D-050): a `WebView` component like any other, with no GTK in the image.
+  embedding without GTK, instead of WebKitGTK. Through its platform API (WPEPlatform,
+  the stable default since 2.54) it hands its frames to the embedder as GPU buffers
+  (`WPEBufferDMABuf` on desktop, `WPEBufferAndroid` on Android), which the framework
+  draws as a texture inside its own scene (D-050): a `WebView` component like any
+  other, with no GTK in the image. How WPE is kept from showing UI of its own: D-055.
 - **Same fork:** WPE and WebKitGTK are built from the same WebKit tree, from the same
   `webkitglib/<version>` stable branches and with the same security advisories, so the
   fork `aptecstudio/WebKit` and its `project-os/2.54` branch (D-019) stay valid; only
@@ -1125,6 +1127,53 @@ Set by the user (2026-11-11 to 2026-11-13).
   every other app. Web content lives only in web views and in the browser (D-051).
 - **Why:** a single framework for everything; the installation medium (D-010) needs
   only the framework and no web engine, so it is smaller and starts faster.
+
+### D-055 — Web views show only our system UI · `requirement` (the user, 2026-11-13), details `proposed`
+- **What (the user's requirement):** WPE WebKit must never show dialogs, menus or windows
+  of its own: every request of a web page for UI goes through the system dialogs (R-10)
+  and the components of the framework.
+- **Why it is possible:** unlike WebKitGTK, which builds GTK dialogs and menus by itself
+  when a signal is not handled, WPE has no toolkit and passes these requests to the
+  embedder through signals of `WebKitWebView`; WebKit's Wayland, DRM and headless
+  outputs are only *platform implementations* of WPEPlatform, and an embedder can
+  provide its own by subclassing `WPEDisplay`, `WPEView` and `WPEToplevel`.
+- **How (proposed):**
+  1. **Own WPE platform:** the framework implements `WPEDisplay`, `WPEView` and
+     `WPEToplevel` (Rust, through bindings) and sets it as the primary display, so the
+     web process renders off-screen and WPE never opens a Wayland window or talks to the
+     compositor: its frames reach us as `WPEBuffer`s, and input comes only from our
+     component. The built-in Wayland and DRM platforms are left out of the build in the
+     fork (headless kept only for tests), so no code path can create a window of its
+     own.
+  2. **Every UI request handled** by the `WebView` component, which answers it and
+     stops the default handler (the signal returns `TRUE`):
+     | WebKit signal | Shown with |
+     |---|---|
+     | `script-dialog` (`alert`, `confirm`, `prompt`, leave-page confirmation) | system dialog (`system.dialogs`) |
+     | `show-option-menu` (`<select>` lists) | popup menu of the framework |
+     | `context-menu` | context menu of the framework |
+     | `run-file-chooser` | system file dialog through the broker (D-005, D-006); the page receives only the chosen files |
+     | `permission-request` (location, notifications, camera, microphone, clipboard, pointer lock…) | system permission dialog; denied when unanswered, as WebKit's own default |
+     | `authenticate` (HTTP login, client certificates) | system credentials dialog |
+     | `load-failed-with-tls-errors` | error page of the framework; no bypass by default (AGENTS.md §5.6) |
+     | `show-notification` | system notifications |
+     | `create`, `ready-to-show`, `close` (`window.open`), `enter-fullscreen`, `leave-fullscreen` | windows of the framework, decided by the app |
+     | `decide-policy` (downloads, new windows, navigation) | the app, then the system download and permission rules |
+  3. **Portal requests:** whatever WebKit asks through `xdg-desktop-portal` (e.g. the
+     file chooser from its sandbox) reaches our portal backend, which shows the same
+     native dialogs (D-006).
+  4. **Guard for new WebKit versions:** a test lists the signals of `WebKitWebView`
+     and fails if one that can ask for UI is not handled by the component; it runs at
+     every rebase of the fork (D-019), so a new kind of request cannot slip through
+     with WebKit's default. A set of test pages triggers each request and checks that
+     our handler answers and that the app has no surface other than its own windows.
+- **Inside the page:** buttons, check boxes, scroll bars and media controls are drawn
+  by WebKit in the page itself, with its own theme; they are not dialogs. Restyling
+  them to the system style (D-032) is a patch of the fork's theme, to be decided in
+  Phase 5. `<input type=color>` has no picker in WPE today; if enabled, it uses ours.
+- **Discarded alternatives:** WebKit's built-in Wayland platform (it creates its own
+  toplevel windows on the compositor); leaving signals to their defaults (behaviour
+  that changes between WebKit versions, and outside our style and permission model).
 
 ---
 

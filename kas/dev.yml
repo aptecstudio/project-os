@@ -12,7 +12,8 @@ header:
 local_conf_header:
   dev: |
     # Passwordless root login, also on the serial console
-    EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login serial-autologin-root"
+    EXTRA_IMAGE_FEATURES += "allow-empty-password empty-root-password allow-root-login \
+        serial-autologin-root"
     # Testing in QEMU: tools/run-qemu.sh uses QEMU and the OVMF firmware of the build
     # host (installed by tools/setup-host.sh). They are not built here: the qemuboot
     # class and the ovmf recipe would pull in QEMU with graphics, hence Mesa, LLVM and

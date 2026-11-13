@@ -13,8 +13,12 @@ Before=initrd-fs.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=mkdir -p /sysroot/var/lib/project-os/etc-overlay/upper /sysroot/var/lib/project-os/etc-overlay/work
-ExecStart=mount -t overlay overlay -o lowerdir=/sysroot/etc,upperdir=/sysroot/var/lib/project-os/etc-overlay/upper,workdir=/sysroot/var/lib/project-os/etc-overlay/work /sysroot/etc
+ExecStart=mkdir -p \
+    /sysroot/var/lib/project-os/etc-overlay/upper \
+    /sysroot/var/lib/project-os/etc-overlay/work
+ExecStart=mount -t overlay overlay \
+    -o lowerdir=/sysroot/etc,upperdir=/sysroot/var/lib/project-os/etc-overlay/upper,workdir=/sysroot/var/lib/project-os/etc-overlay/work \
+    /sysroot/etc
 
 [Install]
 RequiredBy=initrd-fs.target

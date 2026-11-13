@@ -32,7 +32,8 @@ fi
 case "${ID:-}:${VERSION_ID:-}" in
     ubuntu:24.04|ubuntu:26.04|debian:13) ;;
     *)
-        echo "Warning: $PRETTY_NAME is not among the tested systems (Ubuntu 24.04/26.04, Debian 13)."
+        echo "Warning: $PRETTY_NAME is not among the tested systems" \
+            "(Ubuntu 24.04/26.04, Debian 13)."
         ask "Continue anyway?" || exit 1
         ;;
 esac

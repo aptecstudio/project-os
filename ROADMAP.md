@@ -28,7 +28,7 @@ Phases are carried out **one at a time**, in order (D-021).
 `build/verified-boot` branch; then 4e, 5b, and the real hardware test session (step 6)
 with all the hardware checks together. One step at a time, with the user's
 confirmation. Awaiting approval: the `proposed` details of the new application model
-(D-049, D-050, D-052, D-053).
+(D-049, D-050, D-052, D-053, D-055).
 
 ---
 
@@ -73,8 +73,8 @@ move to `MEMORY.md` as a `confirmed` entry and leave this list.
       reviewed (D-046)
 - [x] Native application model: Luau, own framework on EGL with Skia, WPE WebKit for
       web views, folder and `.pak` apps, XML layouts; shell, dialogs and setup native
-      (R-37…R-41, D-049…D-054)
-- [ ] Approval of the `proposed` details of D-049, D-050, D-052, D-053
+      (R-37…R-41, D-049…D-055)
+- [ ] Approval of the `proposed` details of D-049, D-050, D-052, D-053, D-055
 - [ ] Build host ready (DA-11)
 
 ## Phase 1 — Base system: Yocto, kernel, boot · `in progress`
@@ -200,6 +200,9 @@ with boot menu, A/B partitions and full hardware support.
 - [ ] Documented procedure: integration of each official security release, re-applying
       our patches, new tag of the fork
 - [ ] Hardening: unneeded WebKit features disabled, restrictive build options
+- [ ] Own WPEPlatform implementation (`WPEDisplay`, `WPEView`, `WPEToplevel`) set as the
+      primary display; built-in Wayland and DRM platforms left out of the fork's build
+      (D-055)
 - [ ] A WPE web view drawn as a texture inside the Skia scene of the test client
 
 ## Phase 3 — Broker, permissions, sandbox and `.pak` packages · `proposed`
@@ -245,7 +248,10 @@ Goal: the application model (R-09, R-37…R-40) on top of broker and compositor.
 - [ ] XML layouts parsed and validated against the schema, `self:find("id")`, event
       binding to the controller class (D-053)
 - [ ] `WebView` component on WPE with a declared message channel, never access to
-      `system` (D-051)
+      `system` (D-051); every UI request of the page answered with system dialogs and
+      framework components, never WebKit defaults (D-055)
+- [ ] Guard test: every `WebKitWebView` signal that can ask for UI is handled; test pages
+      for each request; run at every rebase of the fork (D-055)
 - [ ] App subprocesses with cascading termination; background workers in separate VMs
 - [ ] Connection of the system APIs to the broker, according to the manifest
       permissions
@@ -270,6 +276,8 @@ Goal: the application model (R-09, R-37…R-40) on top of broker and compositor.
       (D-054)
 - [ ] Library of predefined system dialogs (R-10), built with `systemui`
 - [ ] `xdg-desktop-portal` backend and polkit agent with native dialogs (D-006)
+- [ ] Decide whether to restyle WebKit's in-page controls (buttons, check boxes, scroll
+      bars, media controls) to the system style with a patch of the fork (D-055)
 - [ ] Adaptive desktop ↔ mobile layout, touch input
 
 ## Phase 6 — System applications · `proposed`
