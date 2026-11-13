@@ -6,8 +6,8 @@
 #   kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml
 #
 # Meant for a laptop with about 8 GB of RAM, 4 cores and 40-50 GB of free disk space.
-# Enough for the Phase 1 image; not for WebKitGTK (Phase 2), which needs the full build
-# host.
+# Enough for the Phase 1 image; not for WPE WebKit and Skia (Phase 2), which need the
+# full build host.
 
 header:
   version: 14

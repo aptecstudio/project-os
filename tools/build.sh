@@ -7,7 +7,7 @@
 #   shell            terminal with the bitbake environment, for manual commands
 #   --low-resources  for PCs with little RAM or disk space, for example a laptop
 #                    (kas/low-resources.yml): slower build, but it fits in about 8 GB
-#                    of RAM and 45 GB of disk. Enough for Phase 1, not for WebKitGTK.
+#                    of RAM and 45 GB of disk. Enough for Phase 1, not for WebKit.
 #   --help           show this help
 #
 # Default mode: full performance, for the recommended build host (docs/development.md:

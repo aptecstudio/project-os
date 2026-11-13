@@ -5,8 +5,9 @@
 # Usage: tools/lint.sh
 #
 # Tools (installed by tools/setup-host.sh, through pipx): ShellCheck (shellcheck-py),
-# ruff, oelint-adv. Rust (cargo fmt, clippy) and JavaScript (ESLint, Prettier) are
-# checked as soon as the repository has a Cargo.toml or a package.json.
+# ruff, oelint-adv. Rust (cargo fmt, clippy), Luau (StyLua, selene, luau-analyze) and
+# JavaScript (ESLint, Prettier) are checked as soon as the repository has code in that
+# language; XML layouts are validated once the framework's schema exists (Phase 4).
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -82,6 +83,20 @@ if [ -n "$(tracked_files 'Cargo.toml' '*/Cargo.toml')" ]; then
     require_tool cargo
     run_check "Rust (cargo fmt)" cargo fmt --all --check
     run_check "Rust (cargo clippy)" cargo clippy --all-targets -- -D warnings
+fi
+
+# Luau, the main language of apps and shell (D-049); --!strict files are type-checked
+luau_files=$(tracked_files '*.lua' '*.luau')
+if [ -n "$luau_files" ]; then
+    require_tool stylua
+    require_tool selene
+    require_tool luau-analyze
+    # shellcheck disable=SC2086
+    run_check "Luau (StyLua)" stylua --check $luau_files
+    # shellcheck disable=SC2086
+    run_check "Luau (selene)" selene $luau_files
+    # shellcheck disable=SC2086
+    run_check "Luau (luau-analyze)" luau-analyze $luau_files
 fi
 
 if [ -n "$(tracked_files 'package.json' '*/package.json')" ]; then

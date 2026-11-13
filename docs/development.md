@@ -24,7 +24,7 @@ If your PC already runs Linux (Ubuntu or Debian), you can work directly there.
 
 **Laptop or PC with few resources** (about 8 GB of RAM, 4 cores and 45 GB free): enough
 for the Phase 1 image, with the `--low-resources` mode (section 3). It will not be
-enough from Phase 2 on, when WebKitGTK is compiled.
+enough from Phase 2 on, when WPE WebKit and Skia are compiled.
 
 ## 2. Download the project and prepare the machine
 
@@ -80,7 +80,7 @@ kas build kas/desktop-amd64.yml:kas/dev.yml:kas/low-resources.yml    # low resou
 
 **Code style.** Before committing a change, run `tools/lint.sh`: it checks shell
 scripts (ShellCheck), Python (ruff) and BitBake recipes (oelint-adv) with the
-conventions of `AGENTS.md` §7, and later Rust and JavaScript too.
+conventions of `AGENTS.md` §7, and later Rust, Luau and JavaScript too.
 
 ## 4. Test the image in the emulator
 
@@ -99,8 +99,8 @@ What to expect today:
 4. text login: user `root`, no password (development configuration only); on the
    terminal console the login is automatic.
 
-There is no graphical interface yet: it comes with Phases 2 (WebKit and compositor) and
-5 (shell).
+There is no graphical interface yet: it comes with Phases 2 (graphics framework and
+compositor) and 5 (shell).
 
 **Testing an update.** `tools/build.sh update` produces the signed bundle in
 `build/tmp/deploy/images/project-os-amd64/`. Inside the emulator, download it (for
