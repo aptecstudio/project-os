@@ -23,10 +23,11 @@
 
 project-os is an operating system for **Intel and AMD PCs** and for **smartphones and
 tablets**. Everything you see on screen (panels, windows, settings, dialogs, even the
-installer) is written in **Lua** on project-os's own graphics framework, drawn on the GPU
-through **EGL**; apps can describe their screens in Lua or in XML. Web pages are shown by
-the **WebKit** engine, in web views and in the browser. Underneath there is an essential Linux system, built piece by piece from
-source, without starting from an existing distribution.
+installer) is a native app written in **Lua**, on project-os's own graphics framework
+drawn on the GPU through **EGL**; apps describe their screens in Lua or in XML. Web pages
+are shown by the **WebKit** engine, only in web views and in the browser. Underneath
+there is an essential Linux system, built piece by piece from source, without starting
+from an existing distribution.
 
 ## What you will get
 
