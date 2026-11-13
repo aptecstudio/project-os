@@ -1,111 +1,61 @@
 # MEMORY.md — Choices, style and conventions
 
-Record of the project decisions and their reasons, of the visual style, of the code
-structure and of the syntax conventions. Update rules in `AGENTS.md` §3.
+Current state of the project decisions and their reasons, of the visual style, of the
+code structure and of the syntax conventions. Update rules in `AGENTS.md` §3: this file
+describes only the current state; the history of each choice is in the git commits.
 
 **Decision states:** `requirement` (set by the user) · `confirmed` (approved) ·
-`proposed` (awaiting approval) · `superseded` (replaced, see the entry indicated).
-
-*Translated from Italian to English on 2026-11-12, at the user's request (D-037). The
-content, including superseded choices, is unchanged; state names are translated
-(`requisito` → `requirement`, `confermata` → `confirmed`, `proposta` → `proposed`,
-`superata` → `superseded`).*
+`proposed` (awaiting approval).
 
 ---
 
 ## 1. Basic requirements
 
-Set by the user on 2026-11-11.
+Set by the user (2026-11-11 to 2026-11-13).
 
 | ID | Requirement |
 |---|---|
-| ~~R-01~~ | ~~The system derives from a stable Debian release.~~ *Superseded by R-20.* |
-| R-02 | System reduced to the essentials: no superfluous packages, clean and light. *(Reworded without Debian after R-20.)* |
+| R-02 | System reduced to the essentials: no superfluous packages, clean and light. |
 | R-03 | **Wayland** for video and input devices. |
 | R-04 | Keep support for the main modern hardware (audio, Bluetooth, Wi‑Fi, GPU, etc.) in the kernel and firmware. |
 | R-05 | Architectures: **mobile ARM** (smartphones, tablets) and **Intel/AMD desktop**. |
-| R-06 | Graphical interface made with the stable release of **WebKitGTK**. |
-| R-07 | Each application (shell and panels included) has a **main JavaScript script** that can open windows bound to its own process, Electron style but based on WebKitGTK. |
-| R-08 | Rendering and animations handled entirely by the WebKit engine. |
-| R-09 | Each application is a process that can have subprocesses. |
-| R-10 | All system dialogs are replaced by predefined HTML + JS + CSS dialogs. |
+| R-09 | Each application is a process that can have subprocesses; its windows belong to its own process (shell and panels included). |
+| R-10 | All system dialogs are replaced by predefined dialogs of the system, built with the native framework. |
 | R-11 | Each application declares in its `package.json` name, metadata and the native APIs it requires, also as an extra security layer. |
 | R-12 | Each application has basic system APIs: filesystem, devices, windows, system services. |
 | R-13 | An application can request root access from its `package.json` and/or through dedicated APIs. |
 | R-14 | The system must be **secure**. |
 | R-15 | Main branch of the repository: `main`. |
-| R-16 | **Mobile:** installation through the device recovery; the setup continues on first boot with an HTML interface. |
-| R-17 | **Desktop:** installation with a wizard application in Windows/Debian style, with HTML rendering like all the other apps. |
+| R-16 | **Mobile:** installation through the device recovery; the setup continues on first boot with a graphical interface. |
+| R-17 | **Desktop:** installation with a wizard application in Windows/Debian style, built like all the other apps. |
 | R-18 | **Desktop:** boot menu with centered entries and the system logo (a generic logo at first), allowing dual boot with Windows or other systems. |
 | R-19 | No live mode for now. |
-
 | R-20 | **No starting distribution:** start from Linux (the kernel) and build every package on top. |
 | R-21 | **One system, two bases:** with few changes, the Android-based mobile version (vendor kernel and drivers) and the desktop one; both on Linux. |
 | R-22 | Native components in **Rust**. |
 | R-23 | First mobile device: the user's **Google Pixel**. Not to be neglected: older **Oppo** and **Samsung** models the user owns. |
 | R-24 | **Differentiated setup:** on desktop it includes disk formatting, keyboard layout and basic configuration; on mobile it asks for other data or starts from later steps (the system is already installed from the recovery). |
-
 | R-25 | **Backward compatibility at every level and in every context of the project**: hardware, boot, formats, APIs, data, updates. |
 | R-26 | **Desktop:** boot from both UEFI and legacy BIOS, with the same image. |
 | R-27 | **Encryption without TPM:** the data partition must work on older PCs without a TPM chip too. |
 | R-28 | **Desktop processors:** all 64-bit x86 processors (baseline x86-64 instructions). |
 | R-29 | **App APIs as objects in the script context**, like the `chrome.*` APIs of extensions: apps reach them from a global object, without importing them. |
-| R-30 | **Dynamic script loading with `include("url")`** and its counterpart **`includeAsync("url")`**, not with CommonJS or ES modules. Each included script has an `exports` object with the symbols it exposes to the includer; included scripts are cached; cyclic imports are prevented. |
-| R-31 | **Isolated root folder for each app:** scripts, images and other resources are loaded only from there, with a dedicated protocol (`app://`), and only the app itself can access its own resources. External files only through the filesystem system APIs. |
+| R-30 | **Dynamic script loading with `include("url")`** and its counterpart **`includeAsync("url")`**, not with the language's own module system. Each included script exposes its symbols to the includer through its exports; included scripts are cached; cyclic imports are prevented. |
+| R-31 | **Isolated root for each app:** scripts, images and other resources are loaded only from there, with a dedicated protocol (`app://`), and only the app itself can access its own resources. External files only through the filesystem system APIs. |
 | R-32 | **Design:** a hybrid of Windows 11, macOS Big Sur and Xiaomi MIUI. |
 | R-33 | **Interoperability between devices:** the devices running project-os, desktop and mobile, cooperate as a single ecosystem, on the model of Apple's. |
-| R-34 | **System UI library `systemui`:** our own library to build graphical interfaces (buttons, headers, footers, text fields and everything an interface needs), reached as `system.ui.*` like the other APIs (R-29). An app that wants it declares `systemui` in its `package.json`. Developers can create their own custom components. Apps (system apps included) do not write HTML: the whole interface is written in JavaScript, with a class and event model. The library is a wrapper that creates the DOM elements and manages their tree and their removal. |
+| R-34 | **UI framework `systemui`:** our own framework to build graphical interfaces (buttons, headers, footers, text fields and everything an interface needs), reached as `system.ui.*` like the other APIs (R-29). An app that wants it declares `systemui` in its `package.json`. Developers can create their own custom components. Apps (system apps included) do not write HTML: interfaces are written in Lua or XML (R-40), with a class and event model; the framework owns the component tree and its removal. |
 | R-35 | **Class and event model for the APIs:** the system APIs (`system.*`) also follow the class and event model, like `system.ui`. |
 | R-36 | **Developer guides:** a documentation folder of indexed Markdown pages for `systemui`, organized by component, written as a real guide for programmers on how to build interfaces with the framework; the same kind of guide for all the system APIs (`system.*`), organized by namespace. |
-
-*R-34, R-35 and R-36 added by the user on 2026-11-12. R-16…R-19 added by the user on 2026-11-11. R-20…R-24 added the same day: change of
-approach, from Debian to a system built from scratch. R-25…R-28 added the same day.
-R-29…R-32 added the same day (evening). R-33 added the same day, from the laptop.*
+| R-37 | **Native interface, Lua as the main language:** applications do not run on a web engine. The main script of every app is written in **object-oriented Lua**; Lua is the main language of the project for apps, shell and system interfaces. |
+| R-38 | **Own graphics framework on EGL**, the same on desktop and mobile, that draws the components of `systemui`. |
+| R-39 | **App formats:** an app is a **folder** whose resources are reached with `app://` (R-31), or a **`.pak` package** (a zip archive with the `.pak` extension). |
+| R-40 | **Component descriptions** either in a Lua script or in **XML**, Android-layout style. |
+| R-41 | **WebKit** is the base for web views and for a future web browser; on mobile another library may be used if needed, but the goal is a single system on both kinds of device (WPE WebKit chosen, D-051). |
 
 ---
 
 ## 2. Decision log
-
-### D-001 — Debian 13 "Trixie" as the base · `superseded` by D-012 (R-20)
-- **What:** start from the current stable, Debian 13, on the `main`, `contrib`,
-  `non-free-firmware` components, plus `trixie-security` and `trixie-updates`.
-- **Why:** it is the stable release supported the longest (security until 2028, LTS
-  beyond) and includes WebKitGTK for GTK 4 (`webkitgtk-6.0` API), which receives
-  security updates.
-- **Discarded alternatives:** testing/unstable (contradicts R-01).
-
-### D-002 — Build by addition, not by subtraction · `superseded` by D-012 (the principle stays: every component enters only with a reason)
-- **What:** generate the system with `mmdebstrap --variant=minbase` (or `debos` for the
-  images) and add an explicit list of packages, instead of installing full Debian and
-  then removing.
-- **Why:** it is reproducible, each package has a reason (AGENTS.md §5.5) and no orphan
-  dependencies remain. `--no-install-recommends` enabled by default.
-- **Discarded alternatives:** standard installation + removal (fragile, leaves leftovers).
-
-### D-003 — Full Debian kernel and firmware · `superseded` by D-014 (the R-04 goal remains valid)
-- **What:** use `linux-image-amd64` / `linux-image-arm64` with all modules, plus
-  `firmware-linux-free`, `firmware-misc-nonfree`, `firmware-sof-signed` (Intel audio),
-  `firmware-iwlwifi`, `firmware-realtek`, `firmware-atheros`, `firmware-brcm80211`,
-  `firmware-amd-graphics`, `intel-microcode`, `amd64-microcode`; PipeWire + WirePlumber
-  audio stack; BlueZ Bluetooth.
-- **Why:** R-04. Reducing the user packages must not reduce hardware support; kernel
-  modules that are not loaded cost nothing at runtime.
-- **To check:** final firmware list for the chosen ARM devices.
-
-### D-004 — Two levels of ARM support · `superseded` by D-014 (the constraints below remain valid)
-- **What:** generic ARM64 (UEFI/device tree, e.g. SBCs, virtual machines) with the
-  Debian kernel; smartphones and tablets only on an explicitly supported model list.
-- **User's goal (2026-11-11):** the most popular smartphones on the market — Google
-  Pixel, Samsung, Xiaomi, Oppo.
-- **Known constraints:**
-  - most of these phones do not boot a standard Debian kernel: either a per-device
-    kernel is needed, or the vendor's Android kernel through Halium/libhybris (the
-    approach of Droidian, also Debian-based);
-  - with Halium the GPU goes through the Android drivers: WebKitGTK has to be checked
-    on that path;
-  - bootloader unlocking varies: generally possible on Pixels not tied to a carrier,
-    limited or absent on several Samsung, Xiaomi and Oppo models.
-- **Why:** promising "all ARM devices" is not realistic; models are chosen one by one.
 
 ### D-005 — Security: permission broker and per-app sandbox · `confirmed` (2026-11-11)
 - **What:**
@@ -123,76 +73,118 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   protection. Mediation keeps the functionality with a controlled risk.
 
 ### D-006 — System dialogs through portals · `confirmed` (2026-11-11)
-- **What:** implement our own `xdg-desktop-portal` backend and polkit agent that show
-  the requests (file selection, permissions, password, authentication) as HTML dialogs
-  of the shell.
-- **Why:** R-10. It is the point where GTK and the system services already ask for an
-  interaction; replacing it there also covers software not written for project-os.
+- **What:** our own `xdg-desktop-portal` backend and polkit agent show the requests
+  (file selection, permissions, password, authentication) as system dialogs of the
+  shell, built with the native framework (D-054).
+- **Why:** R-10. It is the point where toolkits and the system services already ask for
+  an interaction; replacing it there also covers software not written for project-os.
 
 ### D-007 — Own Wayland compositor · `confirmed` (2026-11-11)
-- **What:** a minimal compositor written for project-os (wlroots or Smithay based, see
-  DA-07). Each app window is a separate Wayland surface; the web shell draws panels and
-  decorations through *layer-shell* and decides window layout and animations through a
-  private compositor ↔ shell protocol.
-- **Why:** R-08 and R-14: animations under the control of the web shell and windows
-  isolated per process.
-- **Discarded alternatives:** kiosk with internal WebViews (weak isolation), existing
-  compositor (little control over animations).
-
-### D-008 — Main script run on JavaScriptCore · `confirmed` (2026-11-11)
-- **What:** the main script of each app runs in a JavaScriptCore context (WebKit's JS
-  engine, GLib API `libjavascriptcoregtk-6.0`) hosted by a native project-os process,
-  which exposes only the granted system APIs and creates the app's WebKitGTK windows.
-- **Why:** same JS engine in main script and windows; no API exposed by default (unlike
-  Node.js or GJS, which give access to files and processes), so the permission model
-  starts from zero.
-- **Consequence:** no native Node/npm modules; pure JS libraries remain usable through
-  bundling.
-- **Discarded alternatives:** GJS, Node.js.
+- **What:** a minimal compositor written for project-os, in Rust on Smithay (D-013).
+  Each app window is a separate Wayland surface; the shell (a native app of the
+  framework, D-054) draws panels and decorations through *layer-shell* and decides
+  window layout and animations through a private compositor ↔ shell protocol.
+- **Why:** R-14 and the animations of the framework (D-050): windows isolated per
+  process, animations under the control of the shell.
+- **Discarded alternatives:** a single process drawing every app (weak isolation), an
+  existing compositor (little control over animations).
 
 ### D-009 — Desktop boot menu: GRUB 2 with own theme · `confirmed` (2026-11-11)
 - **What:** GRUB 2 (UEFI) with a project-os theme: centered menu, logo at the top, own
   background and fonts. Detection of Windows and other systems with `os-prober` (to be
   re-enabled with `GRUB_DISABLE_OS_PROBER=false`).
-- **Secure Boot (revised after R-20):** without Debian there is no longer a `shim`
-  already signed by Microsoft. Initial phase: project-os keys enrolled by the user
+- **Secure Boot:** with no upstream distribution there is no `shim` already signed by
+  Microsoft. Initial phase: project-os keys enrolled by the user
   (MOK) during installation; getting a shim signed by Microsoft is a long-term goal.
 - **Logo:** generic SVG placeholder, exported to PNG for the theme, until the brand is
   defined.
 - **Why:** R-18. GRUB supports graphical themes, multiboot and Secure Boot.
 - **Discarded alternatives:** systemd-boot (no graphical theme); rEFInd (to be
-  re-evaluated if GRUB turns out awkward to integrate without Debian).
+  re-evaluated if GRUB turns out awkward to integrate).
 
 ### D-010 — Desktop installation medium · `confirmed` (2026-11-11)
 - **What:** a USB installation image that starts only the bare minimum (kernel,
-  compositor, runtime, broker) and opens the installation wizard directly; no user
-  session or apps.
-- **Why:** R-17 and R-19. The HTML wizard needs the rendering engine already running,
-  so the installation environment has to boot; it remains however a closed environment
-  dedicated to installation, not a usable live system.
+  compositor, Lua runtime and framework, broker) and opens the installation wizard
+  directly (a native app, D-054); no user session or apps. No web engine on the
+  medium.
+- **Why:** R-17 and R-19. The wizard needs the graphics stack running, so the
+  installation environment has to boot; it stays a closed environment dedicated to
+  installation, not a usable live system.
 - **The wizard handles:** language, keyboard, disk and partitions (next to an existing
   Windows too, without touching its boot), disk encryption, user, GRUB installation.
 
 ### D-011 — Mobile installation from recovery · `confirmed` (2026-11-11)
 - **What:** for each supported model, a package installable from the recovery (e.g. a
   zip flashable from a custom recovery), plus the fastboot images where needed. On
-  first boot the HTML setup app starts (see D-017 for the steps).
+  first boot the setup app starts (see D-017 for the steps).
 - **Why:** R-16. It is the standard method on Android phones with an unlocked
   bootloader.
 
 ### D-012 — System built from source with Yocto/OpenEmbedded · `confirmed` (2026-11-11)
-- **What:** every component (toolchain, libc, libraries, WebKitGTK, kernel) is compiled
+- **What:** every component (toolchain, libc, libraries, WebKit, Skia, kernel) is compiled
   from source with Yocto/OpenEmbedded, on the current LTS branch. Our code lives in own
   layers: `meta-project-os` (common user space, the same on all platforms),
   `meta-project-os-desktop` and `meta-project-os-mobile` (hardware layer, D-014), plus
   one layer for each mobile device.
-- **Discarded alternatives:** Buildroot (struggles with WebKitGTK and with many
+- **Discarded alternatives:** Buildroot (struggles with WebKit and with many
   devices), own tool in Rust (all to be written and maintained).
 - **Why:** R-20. Full control over what goes into the system and reproducible builds.
 - **Important consequence:** **update security** becomes the project's responsibility.
   Without an upstream distribution, every known flaw (WebKit in particular, which has
   many every year) has to be tracked and fixed by us. A vulnerability monitoring
-  process is needed from Phase 1. For WebKitGTK see D-019.
+  process is needed from Phase 1. For WebKit see D-019.
+
+### D-013 — Native components in Rust · `confirmed` (2026-11-11)
+- **What:** compositor (on Smithay), Luau runtime host and graphics framework (D-049,
+  D-050), broker, system daemons and own build tools in Rust. External C/C++ libraries
+  (Luau, Skia, WPE WebKit, Mesa) are used through bindings.
+- **Why:** R-22; memory safety in the most exposed components (R-14).
+- **Discarded alternatives:** C with wlroots.
+
+### D-014 — Single user space, per-platform hardware layer · `confirmed` (2026-11-11)
+- **What:** everything above the kernel (libc, compositor, runtime, framework, shell,
+  apps) is identical on desktop and mobile. Only the **hardware layer** changes:
+  - **desktop (amd64):** mainline Linux kernel, Mesa for the GPU, linux-firmware
+    firmware;
+  - **mobile (arm64, Android base):** the phone vendor's kernel and firmware, Android
+    drivers (GPU, modem, sensors, camera) reached through Halium/libhybris; where a model
+    has good mainline support, that can be used.
+- **Why:** R-21. The differences stay confined in one folder per platform and device;
+  the rest is compiled twice (amd64, arm64) without changes.
+- **Constraints:**
+  - libhybris requires glibc (D-015);
+  - the framework (D-050) and WPE WebKit (D-051) must work with EGL through libhybris:
+    to be checked early, it is the main technical risk on the mobile side;
+  - most phones do not boot a mainline kernel: a per-device kernel or the vendor's
+    Android kernel through Halium/libhybris is needed, so phones are supported only from
+    an explicit list of models (R-23), chosen one by one;
+  - bootloader unlocking varies: generally possible on Pixels not tied to a carrier,
+    limited or absent on several Samsung, Xiaomi and Oppo models.
+
+### D-015 — C library: glibc · `confirmed` (2026-11-11)
+- **Why:** needed for libhybris (Android drivers, D-014) and the best tested with WebKit.
+- **Discarded alternatives:** musl (incompatible with libhybris, less tested with WebKit).
+
+### D-016 — Init: systemd · `confirmed` (2026-11-11)
+- **What:** systemd as init, with udev, logind and journald.
+- **Why:** session and device management (logind/udev) is needed by the compositor;
+  built-in service sandboxing; existing Halium support.
+- **Alternatives:** lightweight inits (s6, dinit) or an own init in Rust: fewer
+  dependencies, but udev/sessions/seats to be rebuilt.
+
+### D-017 — Differentiated desktop / mobile setup · `confirmed` (2026-11-11)
+- **What:** a single setup app (native framework, D-054) with steps enabled according to
+  the platform (R-24).
+  - **Desktop (from the USB image, D-010):** language → keyboard layout → time zone →
+    network (optional) → disk: partitioning/formatting, next to Windows too → disk
+    encryption → user and password → summary and installation (with GRUB and
+    detection of other systems) → reboot → first boot: preferences.
+  - **Mobile (first boot after the recovery):** language → Wi‑Fi/SIM network (PIN) →
+    automatic time zone → user and unlock code (PIN/password, fingerprint if any) →
+    system permissions (location, notifications) → preferences. No disk or physical
+    keyboard step.
+- **Why:** on mobile the system is already written by the recovery; on desktop the
+  setup is also the installation.
 
 ### D-018 — Immutable system with A/B updates · `confirmed` (2026-11-11)
 - **What:** read-only system partition, verified with dm-verity and signed; two slots
@@ -205,22 +197,23 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   cannot modify the system partition.
 - **Discarded alternatives:** traditional package manager (less secure and predictable).
 
-### D-019 — WebKitGTK fork maintained by the project · `confirmed` (2026-11-11)
-- **What (decided by the user):** WebKitGTK is compiled from a fork of the project, on
-  which we fix vulnerabilities ourselves.
-- **Approach (proposed):** an *aligned* fork, not a diverging one:
-  - the fork follows the official stable WebKitGTK branch (`webkitglib/<version>`) and
-    receives every official security release as soon as it comes out (WSA advisories);
+### D-019 — WebKit fork maintained by the project · `confirmed` (2026-11-11)
+- **What (decided by the user):** WebKit is compiled from a fork of the project, on
+  which we fix vulnerabilities ourselves. It is built as **WPE WebKit** (D-051).
+- **Approach:** an *aligned* fork, not a diverging one:
+  - the fork follows the official stable branch (`webkitglib/<version>`, shared by the
+    WPE and GTK ports) and receives every official security release as soon as it
+    comes out (WSA advisories);
   - our changes are in separate, documented commits, re-applied on top of each new
     stable version;
   - our own fixes: for known vulnerabilities without an official fix, for hardening
     (unneeded features disabled, more restrictive build options) and for the
-    integration with the broker and the JSC runtime;
+    integration with the framework (D-050) and the broker;
   - each fix of ours, when of general interest, is proposed upstream.
 - **Why:** a diverging fork loses the official fixes, which are the vast majority of
   those available (WebKit is a project of millions of lines with a dedicated security
   team); an aligned one adds a layer of ours without giving them up.
-- **In Yocto:** the `webkitgtk` recipe of `meta-project-os` points to the fork and to
+- **In Yocto:** the `wpewebkit` recipe of `meta-project-os` points to the fork and to
   the tag released by us.
 - **Repository:** `aptecstudio/WebKit`, fork of `WebKit/WebKit` with all branches.
   - `main`: copy of the official one, without our changes;
@@ -229,6 +222,47 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
     our patches are re-applied;
   - first branch: `project-os/2.54`, from `webkitglib/2.54` (commit `2b614de`, created
     on 2026-11-11; latest official release at that date: 2.54.2).
+
+### D-020 — GPL-3.0 license · `confirmed` (2026-11-11)
+- **What:** the project-os code is released under the GNU GPL v3 license (`LICENSE`
+  file). The WebKit fork keeps WebKit's original licenses (LGPL/BSD).
+- **Why:** the user's choice; whoever modifies and distributes the system must publish
+  its code, avoiding closed forks.
+
+### D-021 — Phases in sequence, not in parallel · `confirmed` (2026-11-11)
+- **What:** work happens on one phase at a time, in roadmap order.
+- **Why:** the user's request.
+
+### D-022 — Bottom-up development · `confirmed` (2026-11-11)
+- **What:** phase order: base system (Yocto, kernel, boot) → graphics stack → broker →
+  app runtime → shell → system apps → mobile → installation.
+- **Why:** the user's choice: each level is built and tested on the real system below
+  it.
+- **Accepted cost:** the application model (the newest part) is checked later; Yocto
+  builds take hours and a robust build host (DA-11).
+- **Discarded alternative:** starting from the runtime prototype on an existing
+  distribution.
+
+### D-023 — Placeholder logo and GRUB theme · `confirmed` (2026-11-11)
+- **What:**
+  - generic logo in `branding/logo/project-os-logo.svg`, **monochrome white** (ring and
+    central dot) on a dark background, in the style of the elementary OS boot screen,
+    as asked by the user; it stays a **placeholder**, the final brand is to be decided;
+  - GRUB theme in `branding/grub-theme/`: logo and name at the top, centered entries
+    520 px wide, selected entry highlighted by a light semi-transparent box, countdown
+    and key help at the bottom;
+  - all images are regenerated with `branding/tools/render.py` (SVG → PNG with
+    `rsvg-convert`, background and boxes with Pillow/NumPy); `branding/previews/`
+    holds an approximate preview, which does not go into the image.
+- **Font:** Inter (OFL‑1.1 license). The `.pf2` files for GRUB are not in the
+  repository: the Yocto recipe will download Inter from the official project and
+  generate them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28).
+- **Background:** ordered dithering instead of noise, to avoid color banding with a
+  light PNG (224 KB against 1.6 MB).
+- **Menu texts:** English (D-037); the localization of the boot menu is to be decided
+  later.
+- **Why:** R-18; the theme lives in `branding/` as the single source, and the recipe
+  will copy it into the image.
 
 ### D-024 — Yocto build configuration · `confirmed` (2026-11-11)
 - **Pinned versions:** Yocto 6.0 "Wrynose" (LTS), OpenEmbedded-Core `2285da0`, bitbake
@@ -241,17 +275,15 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   documented).
 - **Sources without poky:** OpenEmbedded-Core and bitbake directly, with our
   `project-os` distribution (`layers/meta-project-os/conf/distro/project-os.conf`).
-- **`project-os-amd64` machine:** x86-64-v2 instructions (`corei7-64`), to work on PCs
-  from 2008 onwards; x86-64-v3 discarded because it would exclude PCs from before about
-  2013. *This part is superseded by D-027 (baseline x86-64).* `linux-yocto` 6.18 LTS
+- **`project-os-amd64` machine:** baseline x86-64 instructions (D-027); `linux-yocto` 6.18 LTS
   kernel with the reference configuration for 64-bit PCs (`common-pc-64`), UEFI boot
   with GRUB.
 - **Excluded distribution features** (reasons in the distribution file): x11,
   pulseaudio, nfs, zeroconf, 3g, nfc, ptest, multiarch, debuginfod.
 - **Check done:** bitbake reads configuration, image and kernel without errors or
   warnings (read-only check, no compilation). To check at the first build: download,
-  compilation, `wic` partition layout, syntax of the kas files. *All confirmed by the
-  first full build (2026-11-11) and the QEMU tests (2026-11-12, D-026).*
+  compilation, `wic` partition layout, syntax of the kas files: all confirmed by the
+  first full build (2026-11-11) and the QEMU tests (D-026).
 
 ### D-025 — Kernel and firmware for desktop hardware · `confirmed` (2026-11-11)
 - **Configuration fragments** in
@@ -259,133 +291,165 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   file systems, graphics, audio, Bluetooth, Wi‑Fi, wired network, input and platform.
   147 options, all checked against the Kconfig files of Linux 6.18.
 - **Built in (=y) only the boot drivers** (NVMe, SATA, ext4, FAT, UEFI framebuffer,
-  keyboard, USB 3): there is no initramfs, so the system disk must be readable before
-  loading modules. Everything else is a module, loaded only if the hardware is there.
+  keyboard, USB 3): the initramfs carries no kernel modules (D-043), so the system disk
+  must be readable before loading modules. Everything else is a module, loaded only if the hardware is there.
 - **Graphics:** Intel (i915, xe), AMD (amdgpu, the first GCN too, and radeon), NVIDIA
   only with the free nouveau driver; drivers for virtual machines (QEMU, VirtualBox,
   VMware, Hyper‑V).
 - **Firmware:** `packagegroup-project-os-desktop-hw`, 27 `linux-firmware` packages plus
   the Wi‑Fi frequency database; compressed with zstd.
-- **Missing, to be written as own recipes** (they are not in OpenEmbedded-Core): Intel
-  SOF audio firmware (Intel laptops from the 11th generation; *done in D-039*), Intel
-  microcode. The
-  microcode has to be loaded at boot through an initramfs to be effective: to be
-  decided with the boot layout (step 4).
+- **Own recipes** for what OpenEmbedded-Core does not have: Intel SOF audio firmware
+  (D-039) and Intel microcode, loaded early (D-043).
 - **Tool:** `tools/check-kernel-fragments.py` checks that each option exists in the
   kernel version and that the value is allowed by the type; it already found an error
-  (`TG3` instead of `TIGON3`). The build checks the dependencies between options.
-  *Not enough: options dropped for a missing dependency went unnoticed; since D-041 the
-  build compares the fragments with the final configuration.*
+  (`TG3` instead of `TIGON3`). Options dropped for a missing dependency are caught by
+  the build, which compares the fragments with the final configuration (D-041).
 - **Checks done:** bitbake resolves the image dependency graph without errors;
-  firmware, regdb and fragments enter the build. To check at the first build: kernel
-  compilation and warnings about option dependencies. *First build (2026-11-11): the
-  kernel compiles; `do_kernel_configcheck` reported only `MMC_SDHCI_ACPI` and
-  `MMC_SDHCI_PLTFM`, set to `y` by yocto-kernel-cache but necessarily `m` with our
-  `MMC=m`; now declared `=m` in `storage.cfg` (D-038).*
-- **Related fix:** the base image now includes `MACHINE_EXTRA_RRECOMMENDS`; before,
-  the machine's modules and firmware would have been left out.
+  firmware, regdb and fragments enter the build; the kernel compiles and
+  `do_kernel_configcheck` reports nothing (`MMC_SDHCI_ACPI` and `MMC_SDHCI_PLTFM` are
+  declared `=m` in `storage.cfg`, as our `MMC=m` requires, D-038).
+- **Base image:** includes `MACHINE_EXTRA_RRECOMMENDS`, otherwise the machine's modules
+  and firmware would be left out.
 
-### D-027 — Processors: baseline x86-64 · `confirmed` (2026-11-11)
-- **What:** `DEFAULTTUNE = "x86-64"`: all 64-bit processors (Athlon 64, 64-bit Pentium
-  4, Core 2 and later). Supersedes the x86-64-v2 part of D-024.
-- **Why:** R-25, R-28. Accepted cost: slightly lower performance on modern processors.
-- **Discarded alternatives:** x86-64-v2 (excludes PCs from before about 2008); 32-bit
-  (WebKit on 32-bit is less and less supported, cost too high).
-
-### D-026 — A/B partitions, boot and data partition · `confirmed` (2026-11-12, merged into `main`)
+### D-026 — A/B partitions, boot and data partition · `confirmed` (2026-11-12)
 - **Disk layout (GPT)**, in `files/wic/project-os-ab.wks.in` (`.in` extension: bitbake
   substitutes variables such as `${EFI_PROVIDER}` in it):
   | # | Name | Size | Contents |
   |---|---|---|---|
   | 1 | `bios_grub` | 1 MiB | GRUB for BIOS boot (step 4e) |
-  | 2 | `esp` | 512 MiB | EFI partition: GRUB, menu, theme, slot state (`grubenv`); mounted on `/efi`, root-only access |
-  | 3 | `root_a` | 4 GiB | system, copy A, read-only, kernel included |
+  | 2 | `esp` | 512 MiB | EFI partition: GRUB, menu, theme, slot state (`grubenv`), boot files of each slot (D-048); mounted on `/efi`, root-only access |
+  | 3 | `root_a` | 4 GiB | system, copy A: erofs verified by dm-verity, read-only (D-047) |
   | 4 | `root_b` | 4 GiB | system, copy B, written by updates |
-  | 5 | `data` | rest | data, created on first boot, encrypted, mounted on `/var` (`/home` → `/var/home`) |
+  | 5 | `data` | rest | data, created on first boot, encrypted, mounted on `/var` (`/home` → `/var/home`) by the initramfs (D-044) |
 - **Slot selection:** GRUB (`files/wic/project-os-grub.cfg`) boots the first valid slot
   of `ORDER` without pending attempts, and records the attempt; `rauc-mark-good`
   confirms it once the system is up. If the boot fails, on reboot it switches to the
   other slot. In the menu the active slot is called "project-os", the other one
-  "previous version" (Italian texts until D-037, now in English).
+  "project-os (previous version)". `grubenv` values are `1`/`0`, like RAUC's reference
+  layout: RAUC writes them that way, and `true`/`false` made every slot unbootable after
+  the first update (found in QEMU).
 - **Updates:** RAUC (`recipes-core/rauc/files/system.conf`); bundles signed in *verity*
   format, zstd-compressed (`project-os-bundle`). The CA certificate goes into the
   image; keys outside the repository (`PROJECT_OS_KEYS`, `tools/gen-dev-keys.sh`).
-- **Data partition:** created by `systemd-repart` on the free space, LUKS2. Unlocking
-  with `crypttab`: works without TPM (R-27). In this phase the key is **empty**
-  (placeholder, data not protected): the setup will enroll password and recovery key,
-  and the TPM as an extra method where present (step 4d and Phase 8).
+- **Data partition:** created by `systemd-repart` on the free space, LUKS2, works
+  without TPM (R-27). Until step 4d the key is **empty** (placeholder, data not
+  protected): the setup will enroll password and recovery key, and the TPM as an extra
+  method where present (step 4d and Phase 8). `e2fsprogs-mke2fs` is needed: repart
+  creates and encrypts the partition but formats it with `mkfs.ext4`.
+- **EFI partition mount:** `efi.mount` (`project-os-storage`) mounts it by the GPT label
+  `esp`, like the slots and the data partition, so every slot mounts it the same way;
+  the `/efi` directory is created at build time (`project_os_efi_mountpoint`, 0700),
+  because the read-only system cannot create it. Discarded: an fstab line written by
+  wic (it is only on the first-installation disk, not in the slot image that updates
+  write) or by the recipe (the FAT serial number changes at every build).
 - **Kernel:** dm-crypt, dm-verity, AES-XTS, SHA-256, loop and zstd squashfs built in
   (`ab-crypt.cfg`).
 - **Related decisions:** `systemd.gpt_auto=0` (partitions are mounted only as
-  described, never by type); `/home` on the data partition.
-- **Known limitations, to be solved in the sub-steps:**
-  - kernel read by GRUB inside the slot without verification: with erofs + dm-verity
-    and a signed unified kernel image (UKI) in step 4c;
-  - read-only `/etc`: machine, network and users do not persist until step 4c (overlay
-    of `/etc` on the data partition, from the initramfs);
-  - BIOS boot: OpenEmbedded does not install GRUB for BIOS in images; we write it in
-    step 4e;
-  - packages that put files in `/var` at build time: covered by the data partition
-    mounted on top; to check at the first build. *Checked (2026-11-12, D-038): the slot
-    has only empty `/var/lib/{dbus,misc,systemd}` and base-files symlinks; on the data
-    partition systemd recreates what is needed.*
-- **Checks done:** bitbake resolves all image and bundle dependencies without errors or
-  warnings; 159 kernel options checked on 6.18; the key script produces a valid
-  certificate chain. To check at the first build: `grub.cfg` syntax, GRUB modules,
-  partition creation, boot and A/B update.
-- **First test in QEMU (2026-11-12):** GRUB starts, reads `grubenv`, chooses slot A and
-  boots the kernel; systemd ends up in emergency mode because of two errors, fixed:
-  - systemd-repart creates and encrypts the data partition but does not format it: the
-    image lacked `mkfs.ext4`. Added `e2fsprogs-mke2fs` to the dependencies of
-    `project-os-storage`;
-  - wic wrote the ESP in fstab as `/dev/sda2`, which does not exist with NVMe or virtio
-    disks. First attempt, `--use-uuid` (`UUID=` line): *superseded* the same day, see
-    below (wic's fstab line does not reach updates);
-  - then `/efi` did not mount: the directory did not exist and on the read-only system
-    systemd cannot create it. The image creates it at build time
-    (`project_os_efi_mountpoint`, permissions 0700).
-- **Result after the fixes (2026-11-12, QEMU with KVM):** login reached; system
-  `running`, no failed service; RAUC booted from A, slot A *good* (`rauc-mark-good`
-  works), slot B *bad* because still empty; `/` ext4 read-only, `/efi` and `/var`
-  (LUKS2, 15.6 GB) mounted. After a reboot the data in `/var/home` is still there and
-  systemd-repart changes nothing.
-- **A/B update test (2026-11-12, QEMU):** three errors found and fixed:
-  - the bundle looked for the slot's `.ext4` image, which the build did not produce:
-    the machine now generates `wic wic.bmap ext4`;
-  - RAUC writes the values `1`/`0` in `grubenv`, while `grub.cfg` and the initial
-    `grubenv` used `true`/`false`: after the first update (and already after
-    `rauc-mark-good`) no slot was bootable and the menu stopped without a countdown.
-    Now everything uses `1`/`0`, like RAUC's reference layout;
-  - in slot B `/efi` did not mount: wic writes the fstab line only on the
-    first-installation disk, not in the slot image. Now `efi.mount`
-    (`project-os-storage`) mounts it by the GPT label `esp`, like the slots and the data
-    partition; the mount point was removed from the `wks` layout. Discarded: adding the
-    line to fstab in the recipe, because the FAT serial number changes at every build.
-- **Result:** installation of the signed bundle from A (signature verified) → reboot →
-  GRUB chooses B by itself → `rauc-mark-good` confirms it (`B_TRY=0`). Boot of B
-  interrupted with a reset right after GRUB (`B_TRY=1` left set) → on reboot GRUB goes
-  back to A by itself, which runs without errors. The automatic rollback to the
-  previous version works.
+  described, never by type); `/home` on the data partition; packages that put files in
+  `/var` at build time are covered by the data partition mounted on top (the slot has
+  only empty `/var/lib/{dbus,misc,systemd}` and base-files symlinks; systemd recreates
+  what is needed).
+- **Still open:** BIOS boot (OpenEmbedded does not install GRUB for BIOS in images; step
+  4e); data unlocking (step 4d).
+- **Checks done (QEMU):** first boot from a new disk, data persistent after reboot,
+  signed A/B update to B confirmed by `rauc-mark-good`, interrupted boot of B →
+  automatic rollback to A. Repeated for every change to the boot chain (§5).
 
-### D-028 — Tools for the build host and the emulator · `confirmed` (2026-11-12, merged into `main`)
-- **Guide:** `docs/development.md` (until D-037 `docs/sviluppo.md`), for the user who
-  works from their own PC.
+### D-027 — Processors: baseline x86-64 · `confirmed` (2026-11-11)
+- **What:** `DEFAULTTUNE = "x86-64"`: all 64-bit processors (Athlon 64, 64-bit Pentium
+  4, Core 2 and later).
+- **Why:** R-25, R-28. Accepted cost: slightly lower performance on modern processors.
+- **Discarded alternatives:** x86-64-v2 (excludes PCs from before about 2008); 32-bit
+  (WebKit on 32-bit is less and less supported, cost too high).
+
+### D-028 — Tools for the build host and the emulator · `confirmed` (2026-11-12)
+- **Guide:** `docs/development.md`, for whoever builds from their own PC.
 - **Scripts:** `tools/setup-host.sh` (programs for Yocto, kas through pipx, QEMU, OVMF,
   development keys; asks for confirmation before touching AppArmor), `tools/build.sh`
   (development build, update, bitbake shell), `tools/run-qemu.sh` (emulator).
-- **Emulator:** QEMU `q35` with OVMF UEFI firmware; **NVMe** disk, because the driver
-  is built into the kernel and there is no initramfs yet (a virtio disk would not be
-  seen); copy of the image with 16 GB free for the data partition; KVM if available,
-  otherwise the `qemu64` processor (baseline x86-64, D-027).
+- **Emulator:** QEMU `q35` with OVMF UEFI firmware; **NVMe** disk; copy of the image with
+  16 GB free for the data partition; KVM if available, otherwise the `qemu64`
+  processor (baseline x86-64, D-027).
 - **Recommended build host:** Ubuntu Server 24.04/26.04 LTS. On Ubuntu 24.04 and later
   bitbake needs user namespaces, restricted by AppArmor: the script explains the change
   and asks for confirmation.
-- **Checks done:** script syntax; image path compared with bitbake. Run on the user's
-  laptop on 2026-11-11 and 2026-11-12.
-- **Fix (2026-11-12):** started from a snap app (VS Code installed as a snap), QEMU
-  inherited the snap's GTK/GIO variables and did not open the window (`libpthread`
-  error from `core20`). `tools/run-qemu.sh` removes them when `SNAP` is set. Checked
-  also from a clean environment without snap variables: the window opens.
+- **Snap environments:** started from a snap app (e.g. VS Code installed as a snap),
+  QEMU inherits the snap's GTK/GIO variables and does not open its window;
+  `tools/run-qemu.sh` removes them when `SNAP` is set.
+- **Checks done:** script syntax; run on the user's laptop; window opening checked with
+  and without snap variables.
+
+### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
+- **What (R-29):** in the Lua context of every app there is a global **`system`**
+  object, with one sub-object per area, like `chrome.*` in extensions. Initial proposal
+  of the namespaces:
+  | Namespace | Contents |
+  |---|---|
+  | `system.runtime` | information about the app, background workers and their messages |
+  | `system.windows` | create, close, move the app's windows |
+  | `system.ui` | the `systemui` component framework (R-34, D-045, D-050) |
+  | `system.process` | the app's subprocesses (R-09) |
+  | `system.fs` | files outside the app folder, within the granted limits (R-31) |
+  | `system.storage` | private, persistent app data |
+  | `system.devices` | devices (camera, audio, USB, Bluetooth…) |
+  | `system.services` | system services (network, notifications, power…) |
+  | `system.dialogs` | native system dialogs (R-10, D-054) |
+  | `system.permissions` | granted permissions, requesting new permissions |
+  | `system.root` | privileged operations mediated by the broker (R-13, D-005) |
+- **Security rule:** a namespace exists in the `system` object only if the app declared
+  it in `package.json` and the user granted it; otherwise it is `nil`, like the
+  `chrome.*` APIs not declared in the manifest (AGENTS.md §5.1). Web content in web
+  views never sees `system` (D-051).
+- **Style:** the class and event model (R-35, D-045), with waiting calls that suspend
+  the calling coroutine (D-053); errors raised with a code (`PermissionDenied`,
+  `NotFound`…).
+- **Why `system`:** the user's choice; independent of the final name of the system.
+- **To be defined in Phase 4:** full list of functions, in `docs/api/`.
+
+### D-030 — `include()` and `includeAsync()` · `confirmed` (principle), details `proposed`
+- **What (R-30), in Lua (D-053):**
+  - `include(url)` loads and runs a script and **returns its exports** (the table the
+    chunk returns, or its `exports` table); `includeAsync(url)` does the same while
+    suspending only the calling coroutine;
+  - the included script runs in its own scope (it does not pollute the includer's
+    variables) and sees `exports`, `include`, `includeAsync`, `class` and `system`;
+  - **cache:** each script is run only once per VM; later inclusions of the same
+    address return the same exports;
+  - **cycles:** if a script includes another one that is still loading along the same
+    chain, the inclusion fails with an `IncludeCycleError` that shows the chain (e.g.
+    `app://a.lua → app://b.lua → app://a.lua`). This also applies to `includeAsync`:
+    the chain of whoever requested the load is checked, so two asynchronous loads do
+    not stay stuck waiting for each other (the user's choice: an error, not partial
+    exports as in Node.js).
+- **Allowed addresses (proposed):** only `app://`, i.e. the app folder or `.pak` (R-31,
+  D-052); relative addresses are resolved against the including script. No scripts
+  from the network: remote code must not be able to reach the native APIs
+  (AGENTS.md §5.4). Lua's own `require` and `load` of bytecode are not available
+  (D-049).
+
+### D-031 — App folder and `app://` protocol · `confirmed` (principle), details `proposed`
+- **What (R-31):** each app has an isolated root, a folder or a `.pak` file (D-052); its
+  resources are reached with **`app://` followed by the path inside it**, for example
+  `app://img/logo.png` or `app://lib/utils.lua`.
+- **Only the app accesses its own resources (the user's choice):** the same address in
+  two apps points to two different roots; an app has no way to refer to another one's
+  resources. Implementation (proposed): the `app://` resolver lives in the native host
+  of each app and is bound to its root; a web view of the app gets its own handler bound
+  to the same root (D-051).
+- **Security rules (proposed):**
+  - normalized paths: no `..` or symbolic links that leave the root;
+  - app root read-only (it is the installed package); the data the app writes lives
+    elsewhere, through `system.storage` or `system.fs`;
+  - no `file://`; external files only through `system.fs`, within the permission
+    limits;
+  - in web views `app://` is registered as a secure context, so the web APIs that
+    require it work.
+
+### D-032 — Windows 11, macOS Big Sur, Xiaomi MIUI hybrid design · `confirmed` (requirement), details in Phase 5
+- **What (R-32):** the visual style combines the three references; it is defined in
+  Phase 5 and recorded in §3.
+- **Inspiration, not copying:** visual language and behaviors are taken up, not icons,
+  logos, wallpapers or other protected graphic elements of the three systems.
 
 ### D-033 — Ecosystem of project-os devices · `proposed` (2026-11-11)
 - **What:** a system service in Rust (*continuity daemon*) that connects the devices of
@@ -421,15 +485,12 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **References to study:** KDE Connect / GSConnect (open protocol with similar
   features), Apple Continuity, Google Quick Share.
 
-### D-034 — Laptop as temporary build host · `confirmed` (2026-11-12, merged into `main`)
+### D-034 — Laptop as temporary build host · `confirmed` (2026-11-12)
 - **What:** until the full build host exists (DA-11), Phase 1 can be built on the
   user's laptop: Debian 13, 4 cores, 7.4 GB of RAM, 42 GB free. `kas/low-resources.yml`
   sets 2 bitbake tasks and `make -j 3` (at most 6 compilations together, so RAM does
   not run out), `rm_work` (deletes the work files of each finished recipe) and a clean
-  stop of the build below 5 GB free.
-  ~~`tools/build.sh` adds it by itself below 16 GB of RAM
-  (`PROJECT_OS_LOW_RESOURCES=1|0` to force or exclude it).~~ *Automatic choice
-  superseded by D-036: the mode is now chosen with `--low-resources`.*
+  stop of the build below 5 GB free. Enabled with `--low-resources` (D-036).
 - **Why:** the Phase 1 image should fit in about 30-40 GB with `rm_work` (estimate, to
   be measured at the first build); the first build is long, later ones reuse the
   `sstate` cache.
@@ -438,12 +499,12 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   image of 8.6 GB nominal (4 GB slots A and B) and 695 MB actually used.
 - **Measured in QEMU (2026-11-12):** system 612 MB used in the slot; idle memory in use
   about 70 MB out of 2 GB. Incremental build after a fix: 2-3 minutes.
-- **Limitations:** not enough for WebKitGTK (Phase 2), which wants more than 2 GB of
-  RAM per compilation process and much more disk. DA-11 stays open.
+- **Limitations:** not enough for WPE WebKit and Skia (Phase 2), which want more than
+  2 GB of RAM per compilation process and much more disk. DA-11 stays open.
 - **Discarded alternative:** a separate preparation script for the laptop:
   `tools/setup-host.sh` already covers Debian 13.
 
-### D-035 — Downloads from the Yocto mirror, no QEMU built by Yocto · `confirmed` (2026-11-12, merged into `main`)
+### D-035 — Downloads from the Yocto mirror, no QEMU built by Yocto · `confirmed` (2026-11-12)
 - **Problem (first build on the laptop, 2026-11-11):**
   - the `git.yoctoproject.org` git server serves clones at about 17 KB/s, even those
     reduced to the last commit: the `linux-yocto` kernel (several GB) would have taken
@@ -467,13 +528,12 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   same server; keeping `runqemu`, which is not needed because there is
   `tools/run-qemu.sh`.
 
-### D-036 — Two build modes: full-performance default, low resources on request · `confirmed` (2026-11-12, merged into `main`)
+### D-036 — Two build modes: full-performance default, low resources on request · `confirmed` (2026-11-12)
 - **What (user's request):** `tools/build.sh` builds by default at full performance
   (`kas/desktop-amd64.yml:kas/dev.yml`, bitbake settings: all cores, work files kept).
   The low-resources mode (`kas/low-resources.yml`, D-034) stays as a second choice and
-  is enabled only explicitly with `tools/build.sh --low-resources` (named
-  `--poche-risorse` until D-037) or `PROJECT_OS_LOW_RESOURCES=1` (compatible with the
-  previous script, R-25).
+  is enabled only explicitly with `tools/build.sh --low-resources` or
+  `PROJECT_OS_LOW_RESOURCES=1`.
 - **Resource check:** the script measures RAM and free space. In default mode it warns
   below 15 GB of RAM (a 16 GB PC shows a bit less) and, at the first build, below
   100 GB free (estimate: without `rm_work`; to be measured on the build host); with
@@ -494,42 +554,17 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   mode.
 
 ### D-037 — Repository in English · `requirement` (2026-11-12)
-- **What (user's request):** everything in the repository is written in **English**:
-  identifiers, comments, script options and messages, recipes, configurations, systemd
-  units, GRUB menu and theme texts, documentation (`README.md`, `docs/`, `MEMORY.md`,
-  `ROADMAP.md`) and commit messages. Italian only where it is needed for the user's
-  language, that is in translation files (language packs) and in the locale lists of
-  the distribution.
-- **Changes made:**
-  - script options: `--poche-risorse` → `--low-resources`, `--testo` → `--text`;
-    `tools/build.sh` commands `immagine|aggiornamento|shell` → `image|update|shell`; no
-    Italian aliases kept (decided by the user: the project has no releases yet);
-  - GRUB menu: "project-os (previous version)", "project-os (copy A/B)", "UEFI Firmware
-    Settings"; theme texts ("Booting automatically in %d seconds", key help);
-  - `DISTRO_CODENAME` `fase1` → `phase1` (shown in `/etc/os-release`);
-  - `docs/sviluppo.md` → `docs/development.md`;
-  - `MEMORY.md` and `ROADMAP.md` translated with unchanged content;
-  - `AGENTS.md` §6 rewritten as a fixed rule, with the user's explicit authorization
-    (v1.2): repository in English, communication with the user (chat, questions and
-    multiple-choice prompts) in Italian. Then the whole of `AGENTS.md` translated into
-    English with the user's authorization (v1.3), content and meaning unchanged; the
-    only adjustment is in §4, where "commit messages … in Italian" became "language: see
-    §6", to avoid two opposite rules.
-- **Not regenerated:** the OS images (they will be rebuilt in the next steps, as the
-  user asked) and `branding/previews/grub-menu.png`, whose Italian texts are drawn in
-  the image: `branding/tools/render.py` already has the English texts, the preview is
-  regenerated when Pillow and `rsvg-convert` are available (ROADMAP, Phase 1).
-  *Regenerated on 2026-11-12 (D-046) with Pillow in a virtual environment and Inter 4.1
-  from the official release (`Inter-4.1.zip`, SHA-256 `9883fdd4…56b11e`; GitHub
-  publishes no digest for it); only the preview, the theme images were already
-  identical.*
+- **What (user's request, AGENTS.md §6):** everything in the repository is written in
+  **English**: identifiers, comments, script options and messages, recipes,
+  configurations, systemd units, GRUB menu and theme texts, documentation and commit
+  messages. Italian only where it is needed for the user's language, that is in
+  translation files (language packs) and in the locale lists of the distribution. No
+  Italian aliases of options or commands.
 - **Why:** the repository is public and must be readable and reproducible by anyone.
-- **Supersedes:** the convention "documentation and commits in Italian" of §5 (until
-  2026-11-12, from `AGENTS.md` §6 v1.1).
 
-### D-038 — Phase 1 cleanup: package inventory, trimming, EFI partition check · `confirmed` (2026-11-12, merged into `main`)
+### D-038 — Phase 1 cleanup: package inventory, trimming, EFI partition check · `confirmed` (2026-11-12)
 - **Why:** AGENTS.md §5.5 requires a recorded reason for every package in the image;
-  until now only kernel modules and firmware (D-025) had one. The review also closed
+  before it only kernel modules and firmware (D-025) had one. The review also closed
   the checks left open "for the first build" (D-024, D-025, D-026).
 - **Removed** (each one checked with a build and a full QEMU test):
   - `busybox-syslog`: second system log next to systemd-journald
@@ -547,20 +582,20 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   - `/var/volatile` tmpfs line removed from fstab (`base-files` bbappend) and OE's
     `00-create-volatile.conf` masked (`/etc/tmpfiles.d/… → /dev/null`): it made
     `/var/tmp` a link into `/var/volatile` while `/var/log` was already a real
-    directory. Now both are real directories on the data partition.
+    directory. Both are real directories on the data partition.
 - **Added:** `dosfstools` (`fsck.vfat`): `efi.mount` requires
   `systemd-fsck@dev-disk-by\x2dpartlabel-esp.service`, so the EFI partition is checked
   and repaired at every boot before being mounted. GRUB writes `grubenv` there at every
   boot: a power loss can leave the FAT file system dirty (seen during the QEMU tests).
 - **Kernel:** `CONFIG_MMC_SDHCI_ACPI=m` and `CONFIG_MMC_SDHCI_PLTFM=m` in `storage.cfg`;
-  `do_kernel_configcheck` no longer reports anything.
+  `do_kernel_configcheck` reports nothing.
 - **Inventory of the image** (816 packages: 552 kernel modules and 121 firmware
   packages, reasons in D-025; the other 143 below, grouped by purpose; `-locale-it`
   packages are the Italian translations of each program, installed by
   `IMAGE_LINGUAS`):
   | Purpose | Packages | Reason |
   |---|---|---|
-  | Kernel | `kernel`, `kernel-6.18.54-yocto-standard`, `kernel-image*`, `kernel-modules` (meta-package of the modules) | the Linux kernel, inside each slot (D-014, D-026) |
+  | Kernel | `kernel-base`, `kernel-modules` (meta-package of the modules) | the Linux kernel's modules; the kernel itself is on the EFI partition, in each slot's boot files (D-014, D-048) |
   | Hardware | `packagegroup-project-os-desktop-hw`, `wireless-regdb-static` | firmware group and Wi‑Fi regulatory database (D-025) |
   | Boot | `grub-efi`, `grub-common`, `grub-bootconf`, `grub-editenv`, `grub-locale-it` | GRUB boot menu (D-009); `grub-editenv` for RAUC (D-026) |
   | Init and devices | `systemd`, `systemd-conf`, `systemd-extra-utils`, `systemd-udev-rules`, `systemd-vconsole-setup`, `systemd-serialgetty`, `systemd-mime`, `udev`, `udev-hwdb`, `kmod`, `libkmod2`, `libsystemd0`, `libsystemd-shared`, `libudev1`, `libseccomp`, `libnss-myhostname2`, `libnss-resolve2`, `libnss-systemd2`, `volatile-binds` | systemd as init (D-016) and its direct dependencies; `systemd-serialgetty` for the serial console |
@@ -587,7 +622,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   of the disk on the first boot in QEMU (the emulator disk is enlarged after the image
   is written).
 
-### D-039 — Intel SOF audio firmware from sof-bin · `confirmed` (2026-11-12, merged into `main`)
+### D-039 — Intel SOF audio firmware from sof-bin · `confirmed` (2026-11-12)
 - **What:** own recipe `sof-bin` (`layers/meta-project-os-desktop/recipes-bsp/sof-bin/`),
   version 2026.09.2, from the official releases of the SOF project
   (`github.com/thesofproject/sof-bin`), added to `packagegroup-project-os-desktop-hw`.
@@ -634,7 +669,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 - **Why:** fewer sessions on physical machines, the same image tested on all of them,
   and a single place to see what is still unproven.
 
-### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `confirmed` (2026-11-12, merged into `main`)
+### D-041 — Kernel options checked against the final configuration; VM guests and laptop GPIO/I2C · `confirmed` (2026-11-12)
 - **Problem (found while reviewing the video drivers):** some options of our fragments
   never reached the kernel, and no check noticed:
   - `DRM_VMWGFX` (VMware) and `DRM_HYPERV` (Hyper‑V) depend on `HYPERVISOR_GUEST`,
@@ -694,12 +729,12 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
 
 ### D-043 — systemd initramfs and early microcode (steps 4c.1 and 3b) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
 - **initramfs** (`project-os-initramfs`, in `meta-project-os`): systemd in initrd mode
-  (`/init` → systemd, `/etc/initrd-release` from `os-release`). It finds the slot given
-  by `root=PARTLABEL=…`, checks it with fsck, mounts it on `/sysroot` and switches to
-  it. Packages: `systemd`, `udev`, udev rules, `mount`, `fsck`, `e2fsck`,
-  `os-release`, without recommendations; systemd's hard dependencies (PAM, D-Bus,
-  OpenSSL, kbd, cryptsetup libraries…) come along. `cpio.zst`: 18.9 MB, 51 MB
-  unpacked — to be slimmed in the size budget.
+  (`/init` → systemd, `/etc/initrd-release` from `os-release`). It opens the slot with
+  dm-verity (D-047), checks and mounts it on `/sysroot`, prepares the data partition and
+  the `/etc` overlay (D-044) and switches to it. Packages: `systemd`, `udev`, udev
+  rules, `mount`, `fsck`, `e2fsck`, `os-release`, BusyBox, without recommendations;
+  systemd's hard dependencies (PAM, D-Bus, OpenSSL, kbd, cryptsetup libraries…) come
+  along. `cpio.zst`: about 19 MB — to be slimmed in the size budget.
 - **Microcode** (`project-os-microcode`, in `meta-project-os-desktop`): builds
   `microcode.cpio`, an uncompressed archive with `kernel/x86/microcode/GenuineIntel.bin`
   (all of `intel-ucode/` from Intel's official release `microcode-20261110`, pinned to
@@ -707,30 +742,23 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   `AuthenticAMD.bin` (the `amd-ucode` containers of linux-firmware 20260410, the same
   file and digest as OE-Core's recipe). Reproducible: fixed times and owner, sorted
   entries. 19.5 MB.
-- **Boot** *(superseded by D-048: the early archives and the initramfs are in the UKI
-  and in `EFI/project-os/<A|B>` on the EFI partition, no longer in the slot)*: the
-  machine lists early archives in `PROJECT_OS_EARLY_INITRD`; the image
-  copies them and the initramfs into `/boot` of the slot, and GRUB loads
-  `initrd microcode.cpio initramfs.cpio.zst`: the kernel finds the microcode
-  uncompressed at the start of the first archive, as early loading requires. Boot
-  files stay inside the slot, so the A/B update carries them (until step 4c.4 moves
-  them to the EFI partition).
-- **Removed:** `linux-firmware-microcode-amd` from the image (late loading is no longer
-  needed).
+- **Boot:** the machine lists early archives in `PROJECT_OS_EARLY_INITRD`; they are put
+  uncompressed and first, before the initramfs, in each slot's UKI and in the BIOS boot
+  files on the EFI partition (D-048): the kernel finds the microcode at the start of
+  the first archive, as early loading requires.
+- **Not in the image:** `linux-firmware-microcode-amd` (late loading is not needed).
 - **Why:** microcode loaded early fixes processor bugs and vulnerabilities before any
-  code runs (late loading is unsafe on many processors); the initramfs is needed by
-  the next sub-steps (encrypted `/etc` overlay, dm-verity).
+  code runs (late loading is unsafe on many processors); the initramfs is needed for
+  the encrypted `/etc` overlay and dm-verity.
 - **Discarded alternatives:** OE's shell-based `initramfs-framework` (a second init
   system to maintain, while systemd already handles fsck, crypttab and veritysetup);
   `iucode-tool` to build the Intel file (concatenation is what the kernel loader
   expects, no extra tool needed); microcode built into the kernel
   (`CONFIG_EXTRA_FIRMWARE`, it would tie every microcode update to a kernel rebuild).
 - **Checks done (QEMU):** boot through the initramfs ("Switching root" at about 2 s),
-  system `running`, no failed units; A/B update to slot B through its own initramfs,
-  confirmed; interrupted boot of B → automatic rollback to A. Slot: 665 MB (629 MB
-  before: kernel, initramfs and microcode in `/boot`). In a virtual machine the kernel
-  skips microcode updates (the hypervisor handles them): the real check is in the
-  hardware test session (ROADMAP step 6.17, D-040).
+  system `running`, no failed units; A/B update and rollback. In a virtual machine the
+  kernel skips microcode updates (the hypervisor handles them): the real check is in
+  the hardware test session (ROADMAP step 6.17, D-040).
 
 ### D-044 — Persistent /etc overlay, data partition handled by the initramfs (step 4c.2) · `proposed` (2026-11-12, on the `build/verified-boot` branch)
 - **Data partition in the initramfs:** `/etc` is needed before the system starts, so
@@ -744,7 +772,7 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
     runs before `/sysroot`, so it does nothing here; on the system it is masked;
   - `crypttab` in the initramfs, `systemd-cryptsetup@data` after repart;
   - `sysroot-var.mount`: fsck of the data partition, then mount on `/sysroot/var`; the
-    mount stays after the switch as `/var`. The system no longer has `crypttab` or
+    mount stays after the switch as `/var`. The system itself has no `crypttab` or
     `var.mount`.
 - **`/etc` overlay** (`project-os-etc-overlay.service`, before `initrd-fs.target`):
   lower layer the read-only `/etc` of the slot, upper and work directories in
@@ -777,41 +805,38 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   the overlay later (programs read `/etc` from the first moment); one mount unit for
   the overlay (its directories must exist first, a mount unit cannot create them).
 
-### D-045 — `systemui` library and class/event model of the APIs · `requirement` (R-34, R-35, 2026-11-12), details `proposed`
-- **What the user fixed:** see R-34 and R-35. In short: `system.ui.*` is our UI
-  library; an app declares `systemui` in `package.json` to use it; built-in components
-  (buttons, headers, footers, text fields…) plus custom components; no HTML written by
-  hand, everything in JavaScript with classes and events; the library creates and
-  owns the DOM elements, their tree and their removal. The other `system.*` APIs use
-  the same class and event model.
+### D-045 — `systemui` component framework and class/event model of the APIs · `requirement` (R-34, R-35, R-36), details `proposed`
+- **What the user fixed:** `system.ui.*` is our UI framework (R-34), drawn natively
+  (D-050) and used from Lua or XML (R-40, D-053); an app declares `systemui` in
+  `package.json` to use it; built-in components (buttons, headers, footers, text
+  fields…) plus custom components; no HTML; classes and events. The other `system.*`
+  APIs use the same class and event model (R-35).
 - **First reading of the design (to be defined in Phase 4, `docs/api/ui.md`):**
-  - a base class (e.g. `system.ui.Component`) that every component extends, built-in
-    and custom alike: it owns its DOM element, its children and its listeners;
-    removing a component removes its subtree and releases listeners and resources,
-    so apps do not leak memory or leave orphan elements;
-  - events with one uniform interface on components and APIs (e.g. `on(name,
-    handler)` / `off(name, handler)`); asynchronous operations of the APIs keep
-    returning a `Promise` where an answer comes later (to be confirmed);
+  - a base class (`system.ui.Component`) that every component extends, built-in and
+    custom alike: it owns its node of the framework, its children and its listeners;
+    removing a component removes its subtree and releases listeners and resources, so
+    apps do not leak memory or leave orphan nodes;
+  - events with one uniform interface on components and APIs (`on(name, handler)` /
+    `off(name, handler)`); waiting calls suspend the calling coroutine (D-053);
   - the visual style of Phase 5 (D-032) applied by default, so apps look like the
-    system without writing CSS; themes and light/dark from the system;
-  - security rule of D-029 unchanged: `system.ui` exists only if `systemui` is declared
-    in `package.json`; the library runs in the app's own context and gives no extra
-    native access;
-  - exact name and form of the `package.json` field (e.g. a list of system libraries)
-    defined with the manifest specification (`docs/manifest.md`).
+    system without styling code; themes and light/dark from the system;
+  - security rule of D-029: `system.ui` exists only if `systemui` is declared in
+    `package.json`; the framework gives no extra native access;
+  - exact name and form of the `package.json` field defined with the manifest
+    specification (`docs/manifest.md`).
 - **Consequences:** the system dialogs (R-10), the shell (Phase 5) and the system apps
-  (Phase 6) are built with `systemui`; so the library comes before the shell.
+  (Phase 6) are built with `systemui` (D-054); so the framework comes before the shell.
 - **Developer guide (R-36):** `docs/systemui/`, in English (AGENTS.md §6): an index
   (`README.md`) linking every page; getting started (declaring `systemui` in
-  `package.json`, first window); one page per component with purpose, constructor
-  options, properties, methods, events and examples; pages on custom components and on
-  the component lifecycle (tree, removal). Each component ships with its page, so code
-  and guide stay in step. The other `system.*` APIs get the same kind of guide in
-  `docs/api/` (the user's choice, R-36): one page per namespace (`system.fs`,
-  `system.windows`…) with its classes, methods, events, the permission to declare in
-  `package.json`, errors and examples.
+  `package.json`, first window, in Lua and in XML); one page per component with
+  purpose, properties, XML attributes, methods, events and examples; pages on custom
+  components and on the component lifecycle (tree, removal). Each component ships with
+  its page, so code and guide stay in step. The other `system.*` APIs get the same kind
+  of guide in `docs/api/` (the user's choice, R-36): one page per namespace
+  (`system.fs`, `system.windows`…) with its classes, methods, events, the permission to
+  declare in `package.json`, errors and examples.
 - **Why:** the user's choice; a single way to build interfaces for us and for
-  third-party developers, consistent look, no DOM handling in app code.
+  third-party developers, consistent look, no low-level drawing in app code.
 
 ### D-046 — Code style checked by standard tools · `requirement` (AGENTS.md §7, 2026-11-12), details `proposed`
 - **What (user's request):** standard naming and style conventions of every language,
@@ -821,8 +846,9 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   pipx, no root needed): ShellCheck (`shellcheck-py`, `.shellcheckrc`), ruff for PEP 8
   and PEP 257 (`ruff.toml`), oelint-adv for the OpenEmbedded style guide
   (`tools/oelint-constants.json` declares the RAUC and project-os variables it does not
-  know). Rust (`cargo fmt`, `clippy`) and JavaScript (ESLint, Prettier) are run as soon
-  as the repository has a `Cargo.toml` or `package.json`.
+  know). Rust (`cargo fmt`, `clippy`), Luau (StyLua, selene,
+  `luau-analyze`), XML layouts (schema validation) and JavaScript (ESLint, Prettier)
+  are run as soon as the repository has code in that language (AGENTS.md §7).
 - **oelint-adv rules left out**, each with its reason in `tools/lint.sh`:
   `suggestedvar.SECTION/BUGTRACKER/CVE_PRODUCT` and `bbclassextend` (meant for
   recipes of software published elsewhere), `licenseremotefile` (our recipes have no
@@ -847,93 +873,58 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   make the rule checkable instead of a matter of taste.
 
 ### D-047 — erofs system verified by dm-verity (step 4c.3) · `confirmed` (2026-11-12, on the `build/verified-boot` branch)
-- **Slot image:** the system is an **erofs** image with the **dm-verity hash tree
-  appended** (`erofs.verity`), made by meta-oe's `image_types_verity` (no verity
-  superblock, salt fixed in the machine as `VERITY_SALT`: the same system always gives
-  the same root hash). wic copies that file into slot A (`rawcopy`), and the update
-  bundle writes the same file into the inactive slot (RAUC slot `type=raw`). Kernel:
-  `CONFIG_EROFS_FS=y`; GRUB: `erofs` module instead of `ext2`.
-- **Uncompressed erofs** *(superseded by D-048: lz4hc, once GRUB no longer reads the
-  slot)*: until step 4c.4 GRUB reads kernel and initramfs from inside
-  the slot, and the erofs driver of GRUB 2.14 refuses any image with compression
-  features (it accepts only `chunked_file`). The firmware is already compressed on
-  its own (zstd). Compression to be reconsidered in 4c.4, with the kernel on the EFI
-  partition.
-- **Where the root hash lives** *(superseded by D-048: inside each slot's UKI, and in
-  `EFI/project-os/<A|B>/boot.env` for the BIOS path)*: next to `grubenv` on the EFI
-  partition, one file per slot, `EFI/BOOT/slot-A.env` and `slot-B.env`: a GRUB environment block with
-  `roothash` and `verity_options` (the veritytab options: `superblock=false`,
-  `data-blocks`, `hash-offset`, `salt`…), generated at build time by
-  `project_os_slot_verity.bbclass` from the parameters of `image_types_verity`.
-  `grub.cfg` reads each file with `load_env --file … roothash verity_options`, so the
-  file can set no other variable, and never chooses a slot without its root hash.
+- **Slot image:** the system is an **erofs** image (lz4hc, D-048) with the **dm-verity
+  hash tree appended** (`erofs-lz4hc.verity`), made by meta-oe's `image_types_verity`
+  (no verity superblock, salt fixed in the machine as `VERITY_SALT`: the same system
+  always gives the same root hash). wic copies that file into slot A (`rawcopy`), and
+  the update bundle writes the same file into the inactive slot (RAUC slot
+  `type=raw`). Kernel: `CONFIG_EROFS_FS=y`.
+- **Root hash:** in the kernel command line of each slot's boot files on the EFI
+  partition (the UKI and `boot.env`, D-048), generated at build time by
+  `project_os_slot_boot.bbclass` from the parameters of `image_types_verity`.
 - **Kernel command line:** `root=/dev/mapper/root rootfstype=erofs roothash=…
   systemd.verity_root_data=PARTLABEL=root_x systemd.verity_root_hash=PARTLABEL=root_x
   systemd.verity_root_options=…`: systemd-veritysetup-generator in the initramfs
   (already there with systemd's `cryptsetup` feature) opens the slot before mounting
-  it. Nothing added to the initramfs.
-- **Updates:** the bundle carries the image, its `*.slot-verity.env` and a hook
-  (`project-os-bundle-hook`, `slot-post-install`) that copies the parameters to
-  `slot-<bootname>.env` (new file, then renamed). RAUC runs slot hooks after writing
-  the slot and **before** marking it bootable, while the system post-install handler
-  runs only after the marking (checked in RAUC 1.15.2's source): if the hook fails,
-  the slot stays not bootable. The `/etc` conflict handler mounts the new slot with
-  `-t erofs`, without dm-verity (just written from the signed bundle).
+  it.
+- **Updates:** the bundle hook (`project-os-bundle-hook`, `slot-post-install`) writes the
+  slot's boot files (D-048). RAUC runs slot hooks after writing the slot and **before**
+  marking it bootable, while the system post-install handler runs only after the
+  marking (checked in RAUC 1.15.2's source): if the hook fails, the slot stays not
+  bootable. The `/etc` conflict handler mounts the new slot with `-t erofs`, without
+  dm-verity (just written from the signed bundle).
 - **Corrupted block:** dm-verity's default answer, a read error. A system file that
-  does not match the tree is not run; the boot stops and, at the next reboot, GRUB
-  moves to the other slot (attempt still recorded).
+  does not match the tree is not run; the boot stops, and `systemd.crash_action=reboot`
+  (the user's choice) restarts the PC after 10 s when PID 1 cannot go on, so GRUB moves
+  to the other slot by itself (attempt still recorded). Discarded: staying frozen with
+  the message on screen (a PC far from its user would wait forever).
+- **Boot menu tracked by the build:** `grub.cfg` reaches wic only through the
+  `bootloader --configfile` line, which bitbake does not track; the machine adds the
+  file to `do_image_wic[file-checksums]`, through `PROJECT_OS_DESKTOP_LAYERDIR` set in
+  `layer.conf`.
 - **Discarded alternatives:** ext4 with dm-verity (it works only if ext4 never tries
   to write, e.g. no journal replay; erofs is read-only by design and has no unused
-  free space in the image); separate hash partitions per slot (a different
-  partition layout and a tree over the whole partition, not just over the image);
-  root hash in `grubenv` (it would mix RAUC's state with the slot's data, and GRUB
-  rewrites `grubenv` at every boot); writing the parameters from the system
-  post-install handler (it runs after RAUC has already marked the slot bootable);
-  `panic-on-corruption` / `restart-on-corruption` (with a corrupted block read only
-  later, after `rauc-mark-good`, the PC would restart over and over).
-- **Not covered yet:** kernel and initramfs are still read by GRUB without
-  verification (step 4c.4: UKI, then signed with Secure Boot in Phase 8). The root
-  hash on the EFI partition is protected only by root-only access, like `grubenv` and
-  `grub.cfg`: the chain is trusted only from Secure Boot on. A development disk with
-  ext4 slots cannot update to this layout (RAUC does not update `grub.cfg` on the EFI
-  partition): it must be recreated (`tools/run-qemu.sh --reset`); there are no
-  installed systems yet.
-- **Automatic restart (the user's choice, 2026-11-12):** at first, after a corrupted
-  block stopped the boot, systemd froze (`Freezing execution`) and the PC waited for
-  a manual reset before GRUB moved to the other slot. Now `grub.cfg` adds
-  `systemd.crash_action=reboot`: when PID 1 cannot go on (a corrupted `/sbin/init`, or
-  any crash of PID 1) the PC restarts after 10 s, and GRUB moves to the other slot
-  because the attempt is still recorded. Discarded: staying frozen with the message
-  on screen (a PC far from its user would wait forever).
-- **Boot menu tracked by the build:** `grub.cfg` reaches wic only through the
-  `bootloader --configfile` line, which bitbake does not track: a change to the menu
-  alone did not rebuild the disk image (found while adding the option above). The
-  machine adds the file to `do_image_wic[file-checksums]`, through
-  `PROJECT_OS_DESKTOP_LAYERDIR` set in `layer.conf`.
-- **Checks done (QEMU, new disk, 2026-11-12):** host check of the tree
-  (`veritysetup verify`) and of the erofs features (none incompatible). Boot of slot
-  A: GRUB chooses it by itself, `/dev/mapper/root` *verified* on `nvme0n1p3`, `/`
-  erofs read-only, data partition, `/etc` overlay and `/efi` mounted, system
-  `running`, no failed units, about 74 MB of memory in use (81 MB before). A/B
-  update: signature verified, hook writes `slot-B.env`, conflict handler runs, B
-  boots verified on `nvme0n1p4` and is confirmed (`B_TRY=0`), local `/etc` changes
-  kept. Interrupted boot of B → GRUB back to A. **One corrupted block** in B (block
-  155383, inside `/usr/lib/systemd/systemd`) and B re-armed: the kernel reports
-  `data block 155383 is corrupted`, `/sbin/init` fails with an I/O error and the boot
-  stops; after a reset GRUB goes back to A. A new installation of the bundle repairs
-  B (block back to its original digest, `slot-B.env` replaced) and B boots again.
-  Slot: 688 MB (683 MB erofs + 5.4 MB tree; 665 MB with ext4); bundle 523 MB.
-- **Checks of the automatic restart (QEMU, new disk, 2026-11-12):** the option is on
-  the command line; boot of A, A/B update, boot of B confirmed, interrupted boot of B
-  → A. Then the same corrupted block in B, B re-armed, one `reboot` and no other
-  action: the firmware starts twice by itself (B stops and restarts, then A), and A
-  is at the login 36 s after the command, verified and `running`, with `B_TRY=1`
-  left set.
+  free space in the image); separate hash partitions per slot (a different partition
+  layout and a tree over the whole partition, not just over the image); root hash in
+  `grubenv` (it would mix RAUC's state with the slot's data, and GRUB rewrites
+  `grubenv` at every boot); writing boot data from the system post-install handler (it
+  runs after RAUC has already marked the slot bootable); `panic-on-corruption` /
+  `restart-on-corruption` (with a corrupted block read only later, after
+  `rauc-mark-good`, the PC would restart over and over).
+- **Not covered yet:** the root hash and the boot files on the EFI partition are
+  protected only by root-only access, like `grubenv` and `grub.cfg`: the chain is
+  trusted only from Secure Boot on (Phase 8).
+- **Checks done (QEMU, new disk):** host check of the tree (`veritysetup verify`); boot
+  of A with `/dev/mapper/root` *verified*, A/B update to B verified and confirmed,
+  interrupted boot of B → A; one corrupted block in B (inside
+  `/usr/lib/systemd/systemd`), one `reboot` and no other action: B stops, the PC
+  restarts twice by itself and A reaches the login; a new installation of the bundle
+  repairs B.
 
 ### D-048 — Unified kernel image per slot on the EFI partition, lz4hc slots (step 4c.4) · `confirmed` (2026-11-12, on the `build/verified-boot` branch)
 - **Boot files out of the slot:** each slot's boot files live on the EFI partition, in
   `EFI/project-os/A` and `EFI/project-os/B`, built by `project_os_slot_boot.bbclass`
-  (which replaces `project_os_slot_verity`) as `<image>.slot-boot/`:
+  as `<image>.slot-boot/`:
   - `project-os.efi`: **unified kernel image (UKI)** made with `ukify` (systemd 259):
     systemd-boot stub, kernel, CPU microcode then initramfs (the microcode must be
     first and uncompressed), `os-release`, and the kernel command line with the
@@ -952,20 +943,18 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   Profile 0 is also what runs if the UKI is started with no argument. Found while
   building: joining both slots as separate profiles makes `ukify` add an empty base
   profile (`ID=main`, no command line) as `@0`.
-- **One command line, from the build:** `PROJECT_OS_KERNEL_CMDLINE` in the machine (the
-  options and reasons that were in `grub.cfg`, D-047); the class adds root hash, tree
-  parameters and the slot's part. `grub.cfg` no longer composes kernel options: it
-  reads `cmdline_x` from each slot's `boot.env` (only that name) and never chooses a
+- **One command line, from the build:** `PROJECT_OS_KERNEL_CMDLINE` in the machine, with
+  the reason of each option; the class adds root hash, tree parameters and the slot's
+  part. `grub.cfg` composes no kernel options: it reads `cmdline_x` from each slot's `boot.env` (only that name) and never chooses a
   slot without it.
-- **GRUB reads only the EFI partition:** `erofs` module dropped from `GRUB_BUILDIN`
-  (and `regexp`, no longer used); wic no longer puts a kernel at the root of the EFI
-  partition (`install-kernel-into-boot-dir=false`).
+- **GRUB reads only the EFI partition:** no `erofs` or `regexp` module in
+  `GRUB_BUILDIN`; wic puts no kernel at the root of the EFI partition (`install-kernel-into-boot-dir=false`).
 - **Updates:** the bundle carries the `slot-boot` directory; the hook (slot
   post-install, before RAUC marks the slot bootable) removes the old files of that
   slot, copies the new ones to `<bootname>.new` and renames it. Removing first keeps
   the EFI partition at two sets of boot files plus the one being written.
-- **lz4hc erofs (the user's choice, 2026-11-12):** with GRUB no longer reading the
-  slot, it can be compressed. Measured on the system without `/boot`: uncompressed
+- **lz4hc erofs (the user's choice, 2026-11-12):** GRUB does not read the slot (its
+  erofs driver refuses compressed images), so the slot can be compressed. Measured on the system without `/boot`: uncompressed
   600 MB, lz4hc 472–483 MB, lzma 444 MB (397 MB are firmware already compressed with
   zstd). lz4hc: fast decompression even on old processors (R-25), the usual choice of
   erofs (Android); lzma discarded (10–20 times slower to decompress), zstd not
@@ -980,9 +969,9 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   UUID); OE's `uki` class (a single initrd, so no early microcode, and a single
   command line); GRUB passing the slot's options to the UKI (ignored with Secure
   Boot).
-- **Sizes:** slot 512 MB (507 MB erofs + tree; 688 MB uncompressed with `/boot` in
-  D-047); UKI 52 MB; boot files per slot 104 MB; EFI partition with both slots 199 MB
-  of 511 MB; bundle 584 MB (523 MB in D-047: it now also carries the boot files).
+- **Sizes:** slot 512 MB (507 MB erofs + tree); UKI 52 MB; boot files per slot 104 MB;
+  EFI partition with both slots 199 MB of 511 MB; bundle 584 MB (system and boot
+  files).
 - **Still open:** the slot's `/boot` keeps `EFI/BOOT/bootx64.efi` and `grub.cfg` from
   the `grub-efi` package, not used (GRUB on the EFI partition is written by wic) — to
   remove with the size budget; GRUB and `grub.cfg` on the EFI partition are not
@@ -1000,165 +989,142 @@ R-29…R-32 added the same day (evening). R-33 added the same day, from the lapt
   (`linux …/A/bzImage $A_CMDLINE`, `initrd` microcode + initramfs): boots, verified,
   `running`.
 
-### D-029 — System APIs in the global `system` object · `confirmed` (name and principle), details `proposed`
-- **What (R-29):** in the context of the main script and of the app windows there is a
-  global **`system`** object, with one sub-object per area, like `chrome.*` in
-  extensions. Initial proposal of the namespaces:
-  | Namespace | Contents |
-  |---|---|
-  | `system.runtime` | information about the app, messages between main script and windows |
-  | `system.windows` | create, close, move the app's windows |
-  | `system.process` | the app's subprocesses (R-09) |
-  | `system.fs` | files outside the app folder, within the granted limits (R-31) |
-  | `system.storage` | private, persistent app data |
-  | `system.devices` | devices (camera, audio, USB, Bluetooth…) |
-  | `system.services` | system services (network, notifications, power…) |
-  | `system.dialogs` | system dialogs in HTML (R-10) |
-  | `system.permissions` | granted permissions, requesting new permissions |
-  | `system.root` | privileged operations mediated by the broker (R-13, D-005) |
-- **Security rule:** a namespace exists in the `system` object only if the app declared
-  it in `package.json` and the user granted it; otherwise it is `undefined`, like the
-  `chrome.*` APIs not declared in the manifest (AGENTS.md §5.1).
-- ~~**Style (proposed):** asynchronous functions returning a `Promise`; events with
-  `system.<namespace>.on<Event>.addListener()`, as in extensions; errors as exceptions
-  with a code (`PermissionDenied`, `NotFound`…).~~ *Superseded by R-35 and D-045:
-  class and event model, as in `system.ui`.*
-- **Why `system`:** the user's choice; independent of the final name of the system.
-- **To be defined in Phase 4:** full list of functions, in `docs/api/`.
+### D-049 — Native application model, Luau as the main language · `requirement` (R-37, 2026-11-13), Luau `confirmed` (the user's choice, 2026-11-13), details `proposed`
+- **What:** the main script of every app, of the shell and of the system interfaces is
+  Lua, run by **Luau** (the Lua dialect made by Roblox for untrusted code, MIT
+  license), embedded in a native host in Rust through the `mlua` crate (D-013). One Luau
+  VM per app process, created empty: only the granted `system` namespaces (D-029) and
+  the language's safe standard library are in it.
+- **Why Luau (the user's choice, among Luau, Lua 5.4 and LuaJIT):**
+  - **made for sandboxing:** no `io`, `os.execute`, `debug` or file loading in the
+    language; `luaL_sandbox` makes built-in libraries and globals read-only, so one
+    script cannot change what another one sees;
+  - **backward compatibility as a policy** (R-25): Luau does not break existing code
+    between versions, while PUC Lua changes semantics between minor versions
+    (5.1 → 5.2 → 5.3 → 5.4);
+  - optional **types** (`--!strict`) checked by `luau-analyze`: large apps and the
+    framework API are checked before they run;
+  - fast interpreter without a JIT: no writable and executable memory needed (W^X
+    stays on). Luau's optional native code generation stays **off** (to be measured
+    later, only for system code if ever).
+- **Security rules (proposed):** only Lua **source** is loaded, never bytecode supplied
+  by the app (bytecode is not verified by the VM); the host compiles and may cache the
+  bytecode itself, outside the app's reach. A memory limit and an interrupt callback
+  per VM stop runaway scripts. Web content never reaches the VM (AGENTS.md §5.4,
+  D-051).
+- **Process model (proposed):** one process per app (R-09: subprocesses stay), one
+  main thread that runs the Lua VM and the UI of its windows (D-050); background work in
+  separate VMs (`system.runtime` workers) that exchange only copied messages, no shared
+  Lua state. Windows are native and belong to the app's process (R-09).
+- **Discarded alternatives:** Lua 5.4 (standard, but breaking changes between minor
+  versions, R-25); LuaJIT (fastest, but stuck at Lua 5.1 and its JIT needs writable and
+  executable memory); JavaScript on JavaScriptCore (R-37: the main language is Lua).
 
-### D-030 — `include()` and `includeAsync()` · `confirmed` (principle), details `proposed`
-- **What (R-30):**
-  - `include(url)` loads and runs a script and **returns its `exports`**;
-    `includeAsync(url)` does the same and returns a `Promise` of the `exports`;
-  - the included script runs in its own scope (it does not pollute the includer's
-    variables) and sees the variables `exports`, `include`, `includeAsync` and `system`;
-  - **cache:** each script is run only once per context; later inclusions of the same
-    address return the same `exports`;
-  - **cycles:** if a script includes another one that is still loading along the same
-    chain, the inclusion fails with an `IncludeCycleError` that shows the chain (e.g.
-    `app://a.js → app://b.js → app://a.js`). This also applies to `includeAsync`: the
-    chain of whoever requested the load is checked, so two asynchronous loads do not
-    stay stuck waiting for each other (the user's choice: an error, not partial
-    `exports` as in Node.js).
-- **Allowed addresses (proposed):** only `app://`, i.e. the app folder (R-31); relative
-  addresses are resolved against the including script. No scripts from the network:
-  remote code must not be able to reach the native APIs (AGENTS.md §5.4).
-- **Where (proposed):** in the main script (JavaScriptCore, D-008) and in the windows.
-  In the main script a synchronous `include` is natural; in WebKit windows it has to be
-  checked how to do it without blocking the interface (a technical point of Phase 4).
+### D-050 — Graphics framework on EGL + OpenGL ES, drawn with Skia · `requirement` (R-38, EGL, 2026-11-13), details `proposed`
+- **What:** the framework that draws the components of `systemui` (R-34) in every
+  app, in the shell and in the system dialogs. Layers, from the bottom:
+  1. **Wayland + EGL + OpenGL ES 2.0/3.x**: Mesa on desktop, the Android drivers
+     through libhybris on mobile (D-014); the app draws into its own Wayland surface;
+  2. **Skia** (Ganesh GL backend, Rust bindings `skia-safe`) for shapes, images,
+     gradients, blur, text; **CPU raster fallback** in Skia when there is no usable
+     GPU (virtual machines, old PCs, R-25), the same drawing code;
+  3. **text:** Skia's paragraph module with HarfBuzz and ICU (shaping, bidirectional
+     text, line breaking), fonts through fontconfig;
+  4. **layout:** flexbox and grid with the `taffy` crate;
+  5. **our components**, input (mouse, touch, keyboard, gestures), focus, animations
+     (property animations with curves and springs, run on the frame clock of the
+     compositor) and accessibility (`accesskit` crate) — written by us, in Rust, with
+     the Lua API on top.
+- **Why Skia:** the same 2D engine of Android, Chrome and Flutter, so it runs on the
+  same GPUs and drivers we target on both devices; mature text; long fuzzing history
+  (R-14); a CPU path for hardware without GPU acceleration.
+- **Discarded alternatives:** own renderer directly on GLES (antialiasing, text and
+  blur are years of work); `femtovg` (light, but less complete text and effects);
+  `vello` and Skia Graphite (need Vulkan or compute shaders: they would exclude older
+  GPUs and many phone drivers, R-25).
+- **Costs and risks:** Skia is a large C++ build (gn and ninja, inside a Yocto recipe:
+  `skia-safe` must build from source, never download prebuilt binaries); on mobile the
+  EGL path through libhybris is the main technical risk (Phase 7 feasibility check,
+  for the framework and WPE together).
+- **Compositor (D-007):** the shell is a native app of the framework (D-054) that draws panels and decorations through *layer-shell*, and the
+  private compositor ↔ shell protocol stays.
 
-### D-031 — App folder and `app://` protocol · `confirmed` (principle), details `proposed`
-- **What (R-31):** each app has an isolated root folder; its resources are reached with
-  **`app://` followed by the path inside that folder**, for example `app://img/logo.png`
-  or `app://lib/utils.js`.
-- **Only the app accesses its own resources (the user's choice):** the same address in
-  two apps points to two different folders; an app has no way to refer to another one's
-  resources. Proposed implementation: each app has its own WebKit context (processes,
-  network session, storage, cookies kept separate) and its own `app://` protocol
-  handler, bound to its folder.
-- **Security rules (proposed):**
-  - normalized paths: no `..` or symbolic links that leave the folder;
-  - app folder read-only (it is the installed package); the data the app writes lives
-    elsewhere, through `system.storage` or `system.fs`;
-  - no access to `file://`; external files only through `system.fs`, within the
-    permission limits;
-  - `app://` registered in WebKit as a secure context, so the web APIs that require it
-    work.
+### D-051 — WPE WebKit for web views and the browser, on both targets · `confirmed` (the user's choice, 2026-11-13)
+- **What (R-41):** web content is shown with **WPE WebKit**, the WebKit port made for
+  embedding without GTK, instead of WebKitGTK. It hands its frames to the embedder as
+  EGL/DMA-BUF buffers, which the framework draws as a texture inside its own scene
+  (D-050): a `WebView` component like any other, with no GTK in the image.
+- **Same fork:** WPE and WebKitGTK are built from the same WebKit tree, from the same
+  `webkitglib/<version>` stable branches and with the same security advisories, so the
+  fork `aptecstudio/WebKit` and its `project-os/2.54` branch (D-019) stay valid; only
+  the build changes (`-DPORT=WPE`).
+- **Mobile:** the same WPE on the libhybris EGL path; fallback if that fails: Igalia's
+  WPE port for Android (to be evaluated in the Phase 7 feasibility check). Chromium/CEF
+  and Android's WebView were set aside: another engine to maintain, or one that needs
+  Android's Java runtime.
+- **Security rules:** web content never sees `system` or the Lua VM (AGENTS.md §5.4);
+  an app talks to its own web view only through a message channel it declares
+  (`webview` permission in `package.json`); each web view has its own WebKit context
+  (storage, cookies) bound to its app.
+- **Why:** one engine, one build and one set of fixes for the browser and the web views
+  on desktop and mobile; GTK 4 only to host a widget would be a large extra surface
+  (AGENTS.md §5.5).
+- **Discarded alternatives:** WebKitGTK on both targets (GTK 4 in the image only for
+  the web view, and a GTK widget does not fit into our EGL scene); WebKitGTK on desktop
+  and another library on mobile (two engines); Servo (embeddable and in Rust, but not
+  yet mature enough for a full browser; to be watched).
 
-### D-032 — Windows 11, macOS Big Sur, Xiaomi MIUI hybrid design · `confirmed` (requirement), details in Phase 5
-- **What (R-32):** the visual style combines the three references; it is defined in
-  Phase 5 and recorded in §3.
-- **Inspiration, not copying:** visual language and behaviors are taken up, not icons,
-  logos, wallpapers or other protected graphic elements of the three systems.
+### D-052 — App folders and `.pak` packages · `requirement` (R-39, 2026-11-13), details `proposed`
+- **What:** an app is either a folder or a `.pak` file; in both cases its resources
+  are reached with `app://` (R-31, D-031) and the manifest is `package.json` at the
+  root (R-11, data and not code: it is read without running any script).
+- **`.pak` format (proposed):** a zip archive read **in place**, never extracted: the
+  `app://` resolver opens entries directly (stored or deflate only). Rules checked at
+  installation and when the package is opened:
+  - entry names normalized: no `..`, no absolute paths, no backslashes, no symbolic
+    links, no duplicate names, no encrypted entries;
+  - central directory and local headers must agree (no two readings of the same
+    archive);
+  - limits on number of entries, size and compression ratio (no zip bombs);
+  - **signature over the whole file**, in a block placed before the central directory,
+    like Android's APK signature scheme v2, not per entry like JAR signing (per-entry
+    signing left room for flaws such as Android's "Janus"). Closes DA-05 if approved.
+- **Folders (proposed):** for development; an unsigned folder app runs only in
+  developer mode, after an explicit choice of the user; installed apps are signed
+  `.pak` files.
+- **Why:** R-39; reading in place keeps the app read-only (D-031) and avoids a second
+  copy on disk.
 
-### D-013 — Native components in Rust · `confirmed` (2026-11-11)
-- **What:** compositor (on Smithay), JavaScriptCore runtime host, broker, system daemons
-  and own build tools in Rust. External C libraries (WebKitGTK, GTK, Mesa) are used
-  through bindings.
-- **Why:** R-22; memory safety in the most exposed components (R-14).
-- **Discarded alternatives:** C with wlroots.
+### D-053 — Lua programming model: classes, events, coroutines, XML layouts · `requirement` (R-30, R-35, R-40), details `proposed` (2026-11-13)
+- **Classes:** a built-in `class()` function, since Lua has no classes:
+  `local Card = class("Card", system.ui.Component)` with an `init` constructor,
+  `super` calls, observable properties (for data binding) and `on`/`off`/`emit`
+  events (R-35); Luau types describe them for `luau-analyze`.
+- **Asynchronous calls:** every event handler runs in a coroutine, and the `system`
+  functions that wait (files, network, dialogs) suspend only that coroutine: the code
+  reads straight (`local text = system.fs.readText(path)`) without blocking the
+  interface or chaining callbacks.
+- **`include(url)` and `includeAsync(url)` (R-30, D-030):** unchanged rules (own scope,
+  cache, `IncludeCycleError` with the chain, only `app://`); in Lua the included chunk
+  returns its exports as a table (an `exports` table is also provided, for R-30).
+  `includeAsync` suspends the calling coroutine. Lua's `require` is not available.
+- **XML layouts (R-40):** a file per screen or component, e.g. `app://layout/main.xml`:
+  elements are components (`<Column>`, `<Button>`), attributes are their properties,
+  `id` names an element, `@string/…` and `@drawable/…` point to the app's resources
+  (translations, images), `on:click="onSave"` binds an event to a method of the
+  controller class. Parsed by the Rust host (`quick-xml`) and checked against the
+  framework's schema; no scripts inside XML. In Lua the same tree is built with
+  constructors, and `self:find("id")` reaches an element in both cases.
+- **Why:** the user's requirements; coroutines are Lua's natural way to wait, and XML
+  keeps the layout separate from the logic, as on Android.
 
-### D-014 — Single user space, per-platform hardware layer · `confirmed` (2026-11-11)
-- **What:** everything above the kernel (libc, compositor, runtime, shell, apps) is
-  identical on desktop and mobile. Only the **hardware layer** changes:
-  - **desktop (amd64):** mainline Linux kernel, Mesa for the GPU, linux-firmware
-    firmware;
-  - **mobile (arm64, Android base):** the phone vendor's kernel and firmware, Android
-    drivers (GPU, modem, sensors, camera) reached through Halium/libhybris; where a model
-    has good mainline support, that can be used.
-- **Why:** R-21. The differences stay confined in one folder per platform and device;
-  the rest is compiled twice (amd64, arm64) without changes.
-- **Constraints:** libhybris requires glibc (D-015); WebKitGTK must work with EGL
-  through libhybris (to be checked early, it is the main technical risk on the mobile
-  side); bootloader unlocking varies by model (see D-004).
-
-### D-015 — C library: glibc · `confirmed` (2026-11-11)
-- **Why:** needed for libhybris (Android drivers, D-014) and the best tested with
-  WebKitGTK and GTK.
-- **Discarded alternatives:** musl (incompatible with libhybris, less tested with WebKit).
-
-### D-016 — Init: systemd · `confirmed` (2026-11-11)
-- **What:** systemd as init, with udev, logind and journald.
-- **Why:** session and device management (logind/udev) is needed by the compositor;
-  built-in service sandboxing; existing Halium support.
-- **Alternatives:** lightweight inits (s6, dinit) or an own init in Rust: fewer
-  dependencies, but udev/sessions/seats to be rebuilt.
-
-### D-017 — Differentiated desktop / mobile setup · `confirmed` (2026-11-11)
-- **What:** a single HTML setup app with steps enabled according to the platform (R-24).
-  - **Desktop (from the USB image, D-010):** language → keyboard layout → time zone →
-    network (optional) → disk: partitioning/formatting, next to Windows too → disk
-    encryption → user and password → summary and installation (with GRUB and
-    detection of other systems) → reboot → first boot: preferences.
-  - **Mobile (first boot after the recovery):** language → Wi‑Fi/SIM network (PIN) →
-    automatic time zone → user and unlock code (PIN/password, fingerprint if any) →
-    system permissions (location, notifications) → preferences. No disk or physical
-    keyboard step.
-- **Why:** on mobile the system is already written by the recovery; on desktop the
-  setup is also the installation.
-
----
-
-### D-020 — GPL-3.0 license · `confirmed` (2026-11-11)
-- **What:** the project-os code is released under the GNU GPL v3 license (`LICENSE`
-  file). The WebKit fork keeps WebKit's original licenses (LGPL/BSD).
-- **Why:** the user's choice; whoever modifies and distributes the system must publish
-  its code, avoiding closed forks.
-
-### D-021 — Phases in sequence, not in parallel · `confirmed` (2026-11-11)
-- **What:** work happens on one phase at a time, in roadmap order.
-- **Why:** the user's request.
-
-### D-022 — Bottom-up development · `confirmed` (2026-11-11)
-- **What:** phase order: base system (Yocto, kernel, boot) → graphics stack → broker →
-  app runtime → shell → system apps → mobile → installation.
-- **Why:** the user's choice: each level is built and tested on the real system below
-  it.
-- **Accepted cost:** the application model (the newest part) is checked later; Yocto
-  builds take hours and a robust build host (DA-11).
-- **Discarded alternative:** starting from the runtime prototype on an existing
-  distribution.
-
-### D-023 — Placeholder logo and GRUB theme · `confirmed` (2026-11-11)
-- **What:**
-  - generic logo in `branding/logo/project-os-logo.svg`, **monochrome white** (ring and
-    central dot) on a dark background, in the style of the elementary OS boot screen,
-    as asked by the user; it stays a **placeholder**, the final brand is to be decided;
-  - GRUB theme in `branding/grub-theme/`: logo and name at the top, centered entries
-    520 px wide, selected entry highlighted by a light semi-transparent box, countdown
-    and key help at the bottom;
-  - all images are regenerated with `branding/tools/render.py` (SVG → PNG with
-    `rsvg-convert`, background and boxes with Pillow/NumPy); `branding/previews/`
-    holds an approximate preview, which does not go into the image.
-- **Font:** Inter (OFL‑1.1 license). The `.pf2` files for GRUB are not in the
-  repository: the Yocto recipe will download Inter from the official project and
-  generate them with `grub-mkfont` (Regular 14 and 18, Medium 18, SemiBold 28).
-- **Background:** ordered dithering instead of noise, to avoid color banding with a
-  light PNG (224 KB against 1.6 MB).
-- **Menu texts:** Italian for now; the localization of the boot menu is to be decided
-  later. *(Texts in English since D-037; localization still to be decided.)*
-- **Why:** R-18; the theme lives in `branding/` as the single source, and the recipe
-  will copy it into the image.
+### D-054 — Shell, system dialogs and setup in the native framework · `confirmed` (the user's choice, 2026-11-13)
+- **What:** the shell (Phase 5), the system dialogs (R-10, D-006: the portal backend
+  and polkit agent show native dialogs), the desktop installation
+  wizard (D-010) and the first-boot setup (D-017) are Lua apps of the framework, like
+  every other app. Web content lives only in web views and in the browser (D-051).
+- **Why:** a single framework for everything; the installation medium (D-010) needs
+  only the framework and no web engine, so it is smaller and starts faster.
 
 ---
 
@@ -1201,13 +1167,14 @@ project-os/
 ├── build/        # build output (not versioned)
 ├── sources/      # external repositories fetched by kas (not versioned)
 ├── branding/     # logo (placeholder), GRUB theme, generation script, previews
-├── runtime/      # app runtime: main script startup, WebKitGTK windows
+├── runtime/      # app host: Luau VM, `include`, `app://` resolver, `.pak` reader
+├── framework/    # graphics framework: EGL/GLES, Skia, layout, components, web view
 ├── broker/       # permission daemon and native APIs
-├── portal/       # xdg-desktop-portal backend and polkit agent (HTML dialogs)
+├── portal/       # xdg-desktop-portal backend and polkit agent (native dialogs)
 ├── shell/        # system shell: panels, launcher, notifications, dialogs
 ├── apps/         # system applications (settings, files, terminal,
 │                 # desktop installer, first-boot setup…)
-├── sdk/          # types and JS library of the system APIs (`system` object)
+├── sdk/          # Luau type definitions of the `system` object and of `systemui`
 └── docs/         # specifications (package.json format, APIs, permission model)
 ```
 
@@ -1219,8 +1186,6 @@ project-os/
 by `tools/lint.sh` before every commit. Already fixed (AGENTS.md §6,
 D-037): **everything in English** — identifiers, comments, script options and messages,
 documentation and commits; Italian only in translation files. Conventional Commits.
-*(Until 2026-11-12: documentation and commits in Italian, identifiers in English —
-superseded by D-037.)*
 
 **Testing in QEMU (convention approved by the user, 2026-11-12):** every change is
 tested in QEMU before its commit, with the QEMU window visible to the user. How much
@@ -1239,7 +1204,7 @@ this way: `/efi` not mounted in slot B, the bundle missing its `ext4` image,
 hardware go to the hardware test session (D-040).
 
 **Work branches (the user's preference, 2026-11-11):** work happens on **one branch at
-a time**, the one open for review (today `build/ab-partitions`). New steps and updates
+a time**, the one open for review (today `build/verified-boot`). New steps and updates
 to `MEMORY.md` and `ROADMAP.md` go there as subsequent commits; no parallel branches
 are opened. A new branch is opened only after the merge into `main`. Before starting,
 `git fetch` and start again from the updated remote branch: work happens from several

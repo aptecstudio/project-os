@@ -1,15 +1,10 @@
 # ROADMAP.md — Project status
 
 Steps done and steps to do, to give an overall and per-phase status.
-Update rules in `AGENTS.md` §3.
+Update rules in `AGENTS.md` §3: this file describes only the current state.
 
 **Phase states:** `proposed` → `approved` → `in progress` → `completed` (or `suspended`).
 Work happens only on `approved` or `in progress` phases.
-
-*Translated from Italian to English on 2026-11-12, at the user's request (D-037). The
-content is unchanged; state names are translated (`proposta` → `proposed`, `approvata`
-→ `approved`, `in corso` → `in progress`, `completata` → `completed`, `sospesa` →
-`suspended`).*
 
 ## Overall status
 
@@ -20,9 +15,9 @@ Phases are carried out **one at a time**, in order (D-021).
 |---|---|---|
 | 0 | Foundations and decisions | `in progress` |
 | 1 | Base system: Yocto, kernel, boot | `in progress` |
-| 2 | Graphics stack: WebKitGTK from the fork and compositor | `proposed` |
-| 3 | Broker, permissions and sandbox | `proposed` |
-| 4 | App runtime (JS scripts and windows) | `proposed` |
+| 2 | Graphics stack: EGL/GLES, Skia, compositor, WPE WebKit from the fork | `proposed` |
+| 3 | Broker, permissions, sandbox and `.pak` packages | `proposed` |
+| 4 | App runtime: Luau host, `systemui` framework, `app://` | `proposed` |
 | 5 | Shell, visual style and system dialogs | `proposed` |
 | 6 | System applications | `proposed` |
 | 7 | Android-based arm64 mobile (Pixel, then Oppo and Samsung) | `proposed` |
@@ -30,41 +25,33 @@ Phases are carried out **one at a time**, in order (D-021).
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
 **Next step:** step 4d (data unlocking with password and recovery key) on the
-`build/verified-boot` branch (step 4c.4 approved, D-048); then
-4e, 5b, and the real hardware test session (step 6) with all the hardware checks
-together. One step at a time, with the user's confirmation.
+`build/verified-boot` branch; then 4e, 5b, and the real hardware test session (step 6)
+with all the hardware checks together. One step at a time, with the user's
+confirmation. Awaiting approval: the `proposed` details of the new application model
+(D-049, D-050, D-052, D-053).
 
 ---
 
 ## Open decisions
 
 To be settled with the user before starting the phases indicated. Once decided, they
-move to `MEMORY.md` as a `confirmed` entry.
+move to `MEMORY.md` as a `confirmed` entry and leave this list.
 
-- [x] **DA-01 — Window management and Wayland compositor** → own compositor (D-007)
-- [x] **DA-02 — Runtime of the main JavaScript script** → JavaScriptCore (D-008)
 - [ ] **DA-03 — Reference mobile devices** *(blocks Phase 7)*
   First: the user's Google Pixel (exact model to be given). Then: the older Oppo and
   Samsung models the user owns (exact models to be given). For each one: unlockable
   bootloader? custom recovery available?
-- [x] **DA-04 — Root access model** → root mediated by the broker (D-005)
-- [ ] **DA-05 — App distribution format** *(blocks Phase 3)*
-  Own signed package (archive with `package.json` + signature). The `.deb` option
-  lapsed with R-20.
-- [x] **DA-06a — License** → GPL-3.0 (D-020)
+- [ ] **DA-05 — App package format** *(blocks Phase 3)*
+  `.pak` (R-39) with a signature over the whole file, read in place: details proposed
+  in D-052, to be approved.
 - [ ] **DA-06b — Final name of the system** *(not blocking; "project-os" for now)*
-- [x] **DA-07 — Language of the native components** → Rust (D-013)
-- [x] **DA-08 — Build system for the system built from source** → Yocto/OpenEmbedded (D-012)
-- [x] **DA-09 — System update model** → immutable A/B image (D-018)
-- [x] **DA-10 — Update `AGENTS.md`** → authorized by the user on 2026-11-11, §1 updated
-  (AGENTS.md v1.1)
 - [ ] **DA-11 — Build host** *(blocks the Phase 1 checks)*
   Yocto must run on a machine of the user's (VM or physical): at least 16 GB of RAM,
   250 GB of disk, many cores. Ubuntu Server 24.04/26.04 LTS recommended. Guide and
   scripts ready (`docs/development.md`, `tools/setup-host.sh`); the machine is missing.
-  *Temporary solution (D-034, confirmed):* the user's laptop, Debian 13 (4 cores, 7.4 GB
-  of RAM, 42 GB free), with `tools/build.sh --low-resources` (D-036); enough for Phase 1,
-  not for WebKitGTK (Phase 2).
+  *Temporary solution (D-034):* the user's laptop, Debian 13 (4 cores, 7.4 GB of RAM,
+  42 GB free), with `tools/build.sh --low-resources` (D-036); enough for Phase 1, not
+  for WPE WebKit and Skia (Phase 2).
 - [ ] **DA-12 — Ecosystem between devices** *(blocks Phase 9; affects Phases 3, 4, 6)*
   To decide: (a) local network and Bluetooth only, or also a relay service for distant
   devices, and in that case hosted by whom (the user themselves, the project);
@@ -77,21 +64,17 @@ move to `MEMORY.md` as a `confirmed` entry.
 
 ## Phase 0 — Foundations and decisions · `in progress`
 
-- [x] Create the `project-os` repository with main branch `main`
-- [x] Write `AGENTS.md` (rules for agents and people)
-- [x] Write `MEMORY.md` (requirements and decisions)
-- [x] Write `ROADMAP.md`
-- [x] Settle DA-01, DA-02, DA-04, DA-07
-- [x] Redesign the approach: from Debian to a system built from source (R-20…R-24)
-- [x] Settle DA-08, DA-09, DA-10
-- [x] Human approval of the `proposed` decisions in `MEMORY.md`
-- [x] GPL-3.0 license, `LICENSE` file
-- [x] Roadmap reordered from the bottom up (D-022)
-- [x] Start of Phase 1 approved: proceed one step at a time, with the user's
-      confirmation at each step
+- [x] Repository `project-os` with main branch `main`, GPL-3.0 license (D-020)
+- [x] Governance documents: `AGENTS.md`, `MEMORY.md`, `ROADMAP.md`
+- [x] Architecture decided and approved: system built from source with Yocto, Rust,
+      own compositor, mediated root, immutable A/B updates (D-005…D-022)
 - [x] Repository in English: code, documentation and commits (D-037)
 - [x] Code style rule in `AGENTS.md` §7, checks in `tools/lint.sh`, existing code
       reviewed (D-046)
+- [x] Native application model: Luau, own framework on EGL with Skia, WPE WebKit for
+      web views, folder and `.pak` apps, XML layouts; shell, dialogs and setup native
+      (R-37…R-41, D-049…D-054)
+- [ ] Approval of the `proposed` details of D-049, D-050, D-052, D-053
 - [ ] Build host ready (DA-11)
 
 ## Phase 1 — Base system: Yocto, kernel, boot · `in progress`
@@ -99,7 +82,7 @@ move to `MEMORY.md` as a `confirmed` entry.
 Goal: an amd64 image built from source that boots in QEMU/UEFI and on real hardware,
 with boot menu, A/B partitions and full hardware support.
 
-**First steps (to be approved):**
+**Steps:**
 - [x] 1. Configure Yocto 6.0 "Wrynose" (LTS) with kas and create the
       `meta-project-os` and `meta-project-os-desktop` layers (D-012, D-024); bitbake
       reads the configuration without errors. Confirmed by the first full build
@@ -200,93 +183,112 @@ with boot menu, A/B partitions and full hardware support.
 - [x] Regenerate `branding/previews/grub-menu.png` with the English menu texts
       (2026-11-12, Inter 4.1 from the official release, D-046)
 
-## Phase 2 — Graphics stack: WebKitGTK from the fork and compositor · `proposed`
+## Phase 2 — Graphics stack: EGL/GLES, Skia, compositor, WPE WebKit from the fork · `proposed`
 
 - [x] Fork `aptecstudio/WebKit` with work branch `project-os/2.54` from
       `webkitglib/2.54` (D-019)
+- [ ] Mesa (EGL, OpenGL ES 2/3) in the image, with a software renderer for machines
+      without a usable GPU
+- [ ] Minimal Rust/Smithay compositor (D-007, D-013)
+- [ ] Skia recipe built from source (gn, ninja) and `skia-safe` bindings built against
+      it, never prebuilt binaries (D-050)
+- [ ] A Rust test client that draws with Skia on EGL into a Wayland surface, GPU and CPU
+      paths, in QEMU and on real hardware
+- [ ] WPE WebKit recipe that builds from the fork (`-DPORT=WPE`, D-051)
 - [ ] Inventory of the known vulnerabilities of the starting version and check that
       they are all fixed in the fork
 - [ ] Documented procedure: integration of each official security release, re-applying
       our patches, new tag of the fork
 - [ ] Hardening: unneeded WebKit features disabled, restrictive build options
-- [ ] Mesa and GTK 4 in the image; WebKitGTK recipe that builds from the fork
-- [ ] Minimal Rust/Smithay compositor (D-007, D-013)
-- [ ] A WebKitGTK window on screen in the image, in QEMU and on real hardware
+- [ ] A WPE web view drawn as a texture inside the Skia scene of the test client
 
-## Phase 3 — Broker, permissions and sandbox · `proposed`
+## Phase 3 — Broker, permissions, sandbox and `.pak` packages · `proposed`
 
 - [ ] Specification of the permission model (`docs/permissions.md`)
 - [ ] Broker daemon in Rust with authenticated IPC
 - [ ] Per-process sandbox (namespaces + seccomp), deny by default
 - [ ] Basic APIs: filesystem, devices, windows, system services (R-12)
 - [ ] Mediated root requests with confirmation and audit log (R-13)
-- [ ] Signed app package format (DA-05)
+- [ ] `.pak` format (DA-05, D-052): reader in place, entry name and size checks,
+      signature over the whole file, developer mode for unsigned folders; tests with
+      malformed archives (path traversal, duplicates, zip bombs, mismatched headers)
 - [ ] Security tests with a Rust client: a process does not exceed the granted
       permissions
 - [ ] Plan the ecosystem APIs (`devices.*`, D-033) in the permission model
 
-## Phase 4 — App runtime · `proposed`
+## Phase 4 — App runtime: Luau host, `systemui` framework, `app://` · `proposed`
 
-Goal: the application model (R-07, R-09) on top of broker and compositor.
+Goal: the application model (R-09, R-37…R-40) on top of broker and compositor.
 
-- [ ] Cargo workspace with bindings to WebKitGTK 6.0 and JavaScriptCore
+- [ ] Cargo workspace with the Luau host (`mlua`), the framework (Skia, `taffy`,
+      `accesskit`) and the WPE bindings
+- [ ] Luau style tools (StyLua, selene, `luau-analyze`) installed by
+      `tools/setup-host.sh`; `tools/lint.sh` already runs them on `*.lua`/`*.luau` files
 - [ ] v0 specification of the `package.json` format (`docs/manifest.md`)
 - [ ] Specification of the `system` object APIs (`docs/api/`, D-029), with the class and
-      event model (R-35, D-045)
+      event model (R-35, D-045) and waiting calls on coroutines (D-053)
 - [ ] System API developer guide (R-36): `docs/api/` indexed by namespace, one page per
       namespace (classes, methods, events, permission in `package.json`, errors,
       examples), written together with each API
-- [ ] Specification of the `systemui` library (`docs/api/ui.md`, R-34, D-045): base
-      component class, built-in components, custom components, events, ownership of
-      the DOM tree and removal; `systemui` declaration in `package.json`
-- [ ] `app://` protocol bound to the app folder, separate WebKit context per app, path
-      checks (D-031)
-- [ ] `include()` and `includeAsync()`: own scope, `exports`, cache, cycle error with
-      the chain (D-030); tests of the edge cases (synchronous and asynchronous cycles,
+- [ ] Specification of `systemui` (`docs/api/ui.md`, R-34, D-045): base component class,
+      built-in components, custom components, events, component tree and removal, XML
+      layout schema (R-40, D-053); `systemui` declaration in `package.json`
+- [ ] Luau host: one sandboxed VM per app, only source code loaded, memory limit and
+      interrupt, `class()`, coroutine scheduler (D-049, D-053)
+- [ ] `app://` resolver bound to the app folder or `.pak`, path checks (D-031, D-052)
+- [ ] `include()` and `includeAsync()`: own scope, exports, cache, cycle error with the
+      chain (D-030); tests of the edge cases (synchronous and asynchronous cycles,
       errors halfway through loading)
 - [ ] `system` object exposed only with the declared and granted namespaces (D-029)
-- [ ] Native host that reads the manifest, creates an isolated JavaScriptCore context
-      and runs the main script
-- [ ] `window` API: opening, closing and communication with WebKitGTK windows bound to
-      the process; message channel main script ↔ windows (Electron style)
-- [ ] App subprocesses with cascading termination
+- [ ] Framework core: windows on Wayland surfaces, layout, text, input, focus,
+      animations, accessibility (D-050)
+- [ ] XML layouts parsed and validated against the schema, `self:find("id")`, event
+      binding to the controller class (D-053)
+- [ ] `WebView` component on WPE with a declared message channel, never access to
+      `system` (D-051)
+- [ ] App subprocesses with cascading termination; background workers in separate VMs
 - [ ] Connection of the system APIs to the broker, according to the manifest
       permissions
-- [ ] Sample "hello" app with two windows
+- [ ] Luau type definitions of `system` and `systemui` in `sdk/`, checked with
+      `luau-analyze`
+- [ ] Sample "hello" app with two windows, one layout in Lua and one in XML, as a folder
+      and as a `.pak`
 
 ## Phase 5 — Shell, visual style and system dialogs · `proposed`
 
 - [ ] Define the visual style, a Windows 11 / macOS Big Sur / MIUI hybrid (D-032), and
       record it in `MEMORY.md` §3
-- [ ] `systemui` library (R-34, D-045): wrapper that creates and owns the DOM elements,
-      their tree and their removal; built-in components (buttons, headers, footers,
-      text fields, lists…) with the system style; custom components; tests of the
-      component lifecycle (no leaks, no orphan elements)
+- [ ] `systemui` built-in components (buttons, headers, footers, text fields, lists…)
+      with the system style; custom components; tests of the component lifecycle (no
+      leaks, no orphan nodes) (R-34, D-045)
 - [ ] `systemui` developer guide (R-36, D-045): a `docs/systemui/` folder of Markdown
       pages, indexed and organized by component (one page per component: purpose,
-      constructor options, properties, methods, events, examples), plus getting
-      started, custom components and lifecycle pages; written together with each
-      component, not at the end
-- [ ] Shell: panel, launcher, window management, notifications
+      properties, XML attributes, methods, events, examples), plus getting started,
+      custom components and lifecycle pages; written together with each component, not
+      at the end
+- [ ] Shell as a native Lua app: panel, launcher, window management, notifications
+      (D-054)
 - [ ] Library of predefined system dialogs (R-10), built with `systemui`
-- [ ] `xdg-desktop-portal` backend and polkit agent with HTML dialogs
+- [ ] `xdg-desktop-portal` backend and polkit agent with native dialogs (D-006)
 - [ ] Adaptive desktop ↔ mobile layout, touch input
 
 ## Phase 6 — System applications · `proposed`
 
-All system apps are built with `systemui` (R-34), without HTML written by hand.
+All system apps are Lua apps built with `systemui` (R-34, R-37).
 
 - [ ] Settings (network, Bluetooth, audio, display, app permissions)
 - [ ] File manager
 - [ ] Terminal
-- [ ] App manager
+- [ ] App manager (`.pak` installation and removal)
+- [ ] Web browser on WPE WebKit (R-41, D-051)
 - [ ] "Devices" panel in Settings: pairing, list, revocation (D-033)
 
 ## Phase 7 — Android-based arm64 mobile · `proposed`
 
-- [ ] **Feasibility check (to be brought forward as soon as possible):** WebKitGTK with
-      EGL through libhybris on the user's Pixel; it is the main technical risk on the
-      mobile side (D-014)
+- [ ] **Feasibility check (to be brought forward as soon as possible):** the framework
+      (Skia on EGL) and WPE WebKit through libhybris on the user's Pixel; it is the main
+      technical risk on the mobile side (D-014). Fallback for web views: Igalia's WPE
+      port for Android (D-051)
 - [ ] Same user space compiled for arm64, without changes
 - [ ] `meta-project-os-mobile` layer: Halium/libhybris
 - [ ] Pixel: vendor kernel and firmware, GPU, touch, audio, Wi‑Fi, Bluetooth
@@ -297,9 +299,9 @@ All system apps are built with `systemui` (R-34), without HTML written by hand.
 
 ## Phase 8 — Installation, setup and updates · `proposed`
 
-- [ ] Desktop USB installation image: boots straight into the wizard, no live mode
-      (D-010, R-19)
-- [ ] Setup app with per-platform steps (D-017):
+- [ ] Desktop USB installation image: boots straight into the native wizard, no live
+      mode, no web engine (D-010, R-19)
+- [ ] Native setup app with per-platform steps (D-017, D-054):
   - [ ] desktop: language, keyboard, time zone, network, partitioning and formatting
         (next to Windows too), encryption, user, installation with GRUB
   - [ ] mobile (first boot after the recovery): language, Wi‑Fi/SIM, time zone, user
@@ -328,53 +330,3 @@ ecosystem (R-33, D-033). Requires DA-12.
 - [ ] Security tests: an unpaired or revoked device accesses nothing
 - [ ] Later: tablet as a second screen, shared keyboard and mouse
 
----
-
-## Progress log
-
-| Date | Phase | What |
-|---|---|---|
-| 2026-11-11 | 0 | Created `AGENTS.md`, `MEMORY.md`, `ROADMAP.md` |
-| 2026-11-11 | 0 | Decided own compositor, JavaScriptCore runtime, mediated root; ARM brands given |
-| 2026-11-11 | 0 | Added installation requirements (mobile recovery, desktop wizard), boot menu with dual boot, no live mode (R-16…R-19); proposed D-009…D-011 |
-| 2026-11-11 | 0 | Change of approach: from Debian to a system built from source, single desktop/mobile user space on an Android base, Rust, Pixel as first device, differentiated setup (R-20…R-24, D-012…D-017) |
-| 2026-11-11 | 0 | Decided Yocto and immutable A/B updates (D-012, D-018); `AGENTS.md` §1 updated with authorization |
-| 2026-11-11 | 0 | Decided the WebKitGTK fork maintained by the project (D-019) |
-| 2026-11-11 | 2 | Created the `aptecstudio/WebKit` fork and the `project-os/2.54` branch (current numbering: Phase 2) |
-| 2026-11-11 | 0 | Approved D-006, D-009…D-011, D-014…D-017; GPL-3.0 license; phases in sequence |
-| 2026-11-11 | 0 | Roadmap reordered from the bottom up: base system → graphics → broker → runtime → shell → apps → mobile → installation (D-022) |
-| 2026-11-11 | 1 | Placeholder logo and GRUB theme with preview (D-023); logo made monochrome white on request; theme approved and merged into `main` |
-| 2026-11-11 | 0 | New requirements: backward compatibility at every level, UEFI and BIOS boot, encryption without TPM, baseline x86-64 (R-25…R-28, D-027) |
-| 2026-11-11 | 1 | A/B partitions, slot selection in GRUB, RAUC, encrypted data partition on first boot, on the `build/ab-partitions` branch (D-026, steps 4a and 4b) |
-| 2026-11-11 | 1 | Work suspended at the user's request; prepared guide and scripts to build and test the image on their PC (D-028) |
-| 2026-11-11 | 0 | Added the presentation `README.md`, at the user's request; dark variant of the placeholder logo for light backgrounds |
-| 2026-11-11 | 0 | New specifications: APIs in the global `system` object, `include`/`includeAsync` with cycle error, `app://` protocol for the isolated app folder, Windows 11 / Big Sur / MIUI hybrid design (R-29…R-32, D-029…D-032) |
-| 2026-11-11 | 1 | User's laptop as temporary build host: `kas/low-resources.yml`, enabled by `tools/build.sh` below 16 GB of RAM (D-034) |
-| 2026-11-11 | 1 | **First full build succeeded** on the laptop (19:42 → 23:25, with three fixes: D-035, `features_check` in `project-os-storage`, `.wks.in` disk layout); `wic` image with 695 MB actually used; QEMU test missing |
-| 2026-11-11 | 1 | First build on the laptop stopped and restarted: kernel from the Yocto HTTP mirror (the git server runs at 17 KB/s), removed QEMU/Mesa/LLVM built by Yocto (D-035) |
-| 2026-11-11 | 9 | New requirement: interoperability between project-os devices as an ecosystem (R-33); proposed Phase 9 and D-033, opened DA-12 |
-| 2026-11-11 | 1 | Yocto layers, distribution, amd64 machine, base image and kas configuration (D-024); bitbake read check passed; kas and x86-64-v2 approved, merged into `main` |
-| 2026-11-11 | 1 | Kernel and firmware for desktop hardware (D-025): 147 options checked on 6.18, 27 firmware packages; approved and merged into `main` |
-| 2026-11-11 | 0 | `README.md` for those who want to know the project: what it will offer, devices, status, license; dark variant of the logo for light backgrounds |
-| 2026-11-12 | 1 | First test in QEMU: GRUB and kernel start; fixed missing `mkfs.ext4` for systemd-repart, ESP in fstab as `/dev/sda2` and missing `/efi` directory; `run-qemu.sh` opens the window from snap apps too. **Login reached**: encrypted data mounted and persistent, slot A confirmed by RAUC |
-| 2026-11-12 | 1 | A/B test in QEMU: bundle installed, automatic boot of slot B and rollback to A after an interrupted boot; fixed `ext4` image for the bundle, `1`/`0` values in `grubenv`, mounting of `/efi` with `efi.mount` |
-| 2026-11-12 | 1 | `tools/build.sh`: full-performance default mode, low resources on request; RAM and disk check with warnings; guide updated for those who reproduce the build without help (D-036) |
-| 2026-11-12 | 0 | Repository in English: comments, options and messages of the scripts (`--low-resources`, `--text`, `image`/`update`/`shell`), recipes, GRUB menu, documentation, `MEMORY.md` and `ROADMAP.md`; `docs/sviluppo.md` → `docs/development.md`; `AGENTS.md` §6 rewritten as a fixed rule and the whole file translated, with authorization (v1.3, D-037) |
-| 2026-11-12 | 1 | User's review: D-026, D-028, D-034, D-035, D-036 confirmed; `build/ab-partitions` merged into `main` |
-| 2026-11-12 | 1 | Phase 1 cleanup (D-038): package inventory with reasons, removed syslog, udhcpc, Pine64 keymaps, libssh/libgcrypt and the volatile tmpfs layout; EFI partition checked at every boot; kernel configcheck clean; full QEMU test including A/B update and rollback |
-| 2026-11-12 | 1 | D-038 approved by the user; `build/phase1-cleanup` merged into `main` |
-| 2026-11-12 | 1 | Step 3a: `sof-bin` recipe for the Intel SOF audio firmware, compressed with zstd, without debug files and ARM topologies (D-039) |
-| 2026-11-12 | 1 | Real hardware checks gathered in one test session, step 6, with the full list (D-040, at the user's request) |
-| 2026-11-12 | 1 | Video drivers review: VMware/Hyper‑V drivers and the laptop I2C/GPIO drivers had been silently dropped by the kernel; fixed, and the build now checks every fragment option against the final configuration (D-041) |
-| 2026-11-12 | 1 | D-039, D-040, D-041 approved, `build/sof-firmware` merged into `main`; plan of 3b + 4c approved with overlay `/etc` and UKI + separate kernel per slot (D-042) |
-| 2026-11-12 | 1 | Steps 4c.1 and 3b: systemd initramfs and early Intel/AMD microcode loaded by GRUB; boot, A/B update and rollback tested in QEMU (D-043) |
-| 2026-11-12 | 1 | Step 4c.2: data partition created, unlocked and mounted by the initramfs, persistent `/etc` overlay, update conflict report; tested in QEMU with reboot, A/B update, simulated conflict and rollback (D-044) |
-| 2026-11-12 | 0 | QEMU test convention recorded in `MEMORY.md` §5: full A/B test for changes to the boot chain, boot test for changes inside the system |
-| 2026-11-12 | 4–6 | New requirements: `systemui` library (`system.ui.*`, declared in `package.json`, classes and events, custom components, no HTML) and class/event model for all APIs (R-34, R-35, D-045); roadmap items in Phases 4, 5, 6 |
-| 2026-11-12 | 0 | Code style rule written into `AGENTS.md` §7 at the user's request; `tools/lint.sh` with ShellCheck, ruff, oelint-adv; all existing code reviewed, bbappends limited to our distribution/machine (D-046) |
-| 2026-11-12 | 5 | New requirement: `systemui` developer guide in `docs/systemui/`, indexed Markdown pages by component (R-36, D-045) |
-| 2026-11-12 | 4 | Developer guide extended to all system APIs, `docs/api/` by namespace (R-36, the user's choice) |
-| 2026-11-12 | 1 | Step 4c.3: erofs slots verified by dm-verity, root hash per slot on the EFI partition written by the bundle hook before activation; tested in QEMU with boot, A/B update, rollback and a corrupted block that stops the boot (D-047) |
-| 2026-11-12 | 1 | D-047 approved; automatic restart when PID 1 cannot go on (`systemd.crash_action=reboot`), so a corrupted slot rolls back without a manual reset; `grub.cfg` tracked by the disk image build; tested in QEMU |
-| 2026-11-12 | 1 | Step 4c.4: UKI with one profile per slot and separate files for BIOS on the EFI partition, no kernel in the slot, lz4hc erofs (the user's choice); tested in QEMU with UKI boot of both slots, A/B update, rollback, a corrupted block and the BIOS files (D-048) |
-| 2026-11-12 | 1 | D-048 approved by the user; work paused before step 4d |
