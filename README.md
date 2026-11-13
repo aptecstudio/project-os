@@ -8,8 +8,8 @@
 <h1 align="center">project-os</h1>
 
 <p align="center">
-  An operating system built from scratch on the Linux kernel, with an entirely web-based
-  interface. The same system for PCs and smartphones.
+  An operating system built from scratch on the Linux kernel, with a native interface
+  and apps written in Lua. The same system for PCs and smartphones.
 </p>
 
 <p align="center">
@@ -23,9 +23,11 @@
 
 project-os is an operating system for **Intel and AMD PCs** and for **smartphones and
 tablets**. Everything you see on screen (panels, windows, settings, dialogs, even the
-installer) is made with **HTML, CSS and JavaScript** and drawn by the **WebKit** web
-engine. Underneath there is an essential Linux system, built piece by piece from
-source, without starting from an existing distribution.
+installer) is a native app written in **Lua**, on project-os's own graphics framework
+drawn on the GPU through **EGL**; apps describe their screens in Lua or in XML. Web pages
+are shown by the **WebKit** engine, only in web views and in the browser. Underneath
+there is an essential Linux system, built piece by piece from source, without starting
+from an existing distribution.
 
 ## What you will get
 
@@ -78,7 +80,7 @@ graphics, then apps.
 |---|---|---|
 | 0 | Foundations and decisions | almost complete |
 | 1 | Base system: kernel, boot, partitions | in progress |
-| 2 | Graphics: WebKit and compositor | to do |
+| 2 | Graphics: framework, compositor, WebKit | to do |
 | 3 | App permissions and isolation | to do |
 | 4 | App runtime | to do |
 | 5 | Interface and visual style | to do |
@@ -114,7 +116,9 @@ Requirements, current limitations and troubleshooting:
 | Kernel | Linux 6.18 LTS; on phones, the vendor's kernel and drivers |
 | Boot | GRUB, with themed menu and dual boot |
 | Updates | Two copies of the system (A/B), signed bundles |
-| Web engine | WebKitGTK, from a [fork maintained by the project](https://github.com/aptecstudio/WebKit) |
+| App language | Lua (Luau) |
+| Graphics | own framework on EGL and OpenGL ES, drawn with Skia |
+| Web engine | WPE WebKit, from a [fork maintained by the project](https://github.com/aptecstudio/WebKit) |
 | Native components | Rust |
 | Graphics and input | Wayland |
 
