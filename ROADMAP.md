@@ -21,7 +21,7 @@ Phases are carried out **one at a time**, in order (D-021).
 | 5 | Shell, visual style and system dialogs | `proposed` |
 | 6 | System applications | `proposed` |
 | 7 | Android-based arm64 mobile (Pixel, then Oppo and Samsung) | `proposed` |
-| 8 | Installation, setup and updates | `proposed` |
+| 8 | Installation, setup, updates and release images | `proposed` |
 | 9 | Ecosystem: interoperability between devices | `proposed` |
 
 **Next step:** step 4d (data unlocking with password and recovery key) on the
@@ -301,14 +301,19 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
 - [ ] `meta-project-os-mobile` layer: Halium/libhybris
 - [ ] Pixel: vendor kernel and firmware, GPU, touch, audio, Wi‑Fi, Bluetooth
 - [ ] Pixel: modem (calls, text messages, data), sensors, camera
-- [ ] Recovery installation package for the Pixel (D-011)
+- [ ] Pixel release files (D-011, D-056): fastboot package with flashing script and
+      `vbmeta`, project key as custom verified-boot key so the bootloader can be locked
+      again; recovery zip where a custom recovery exists
 - [ ] Oppo and Samsung: model assessment (bootloader, recovery), then porting
 - [ ] Touch gestures, on-screen keyboard, rotation, power management
 
-## Phase 8 — Installation, setup and updates · `proposed`
+## Phase 8 — Installation, setup, updates and release images · `proposed`
 
-- [ ] Desktop USB installation image: boots straight into the native wizard, no live
-      mode, no web engine (D-010, R-19)
+- [ ] Desktop installation image: hybrid `.iso` (USB and DVD, UEFI and BIOS) made with
+      `xorriso`, boots straight into the native wizard, no live mode, no web engine
+      (D-010, D-056, R-19); tested in QEMU (UEFI and BIOS) and in the hardware session
+- [ ] The wizard writes slot A from the same signed system image as the update bundle,
+      after checking its signature (D-056)
 - [ ] Native setup app with per-platform steps (D-017, D-054):
   - [ ] desktop: language, keyboard, time zone, network, partitioning and formatting
         (next to Windows too), encryption, user, installation with GRUB
@@ -318,6 +323,9 @@ All system apps are Lua apps built with `systemui` (R-34, R-37).
 - [ ] Signing of packages and images; keys outside the repository
 - [ ] Signed A/B updates with automatic rollback to the previous version (D-018), on
       desktop and mobile
+- [ ] Release process (R-42, D-056): build of the `.iso` and of the phone packages,
+      `SHA256SUMS` signed with the release key, publication on GitHub Releases;
+      installation guide for desktop and for each phone
 
 ## Phase 9 — Ecosystem: interoperability between devices · `proposed`
 

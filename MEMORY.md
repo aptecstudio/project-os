@@ -26,7 +26,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 | R-13 | An application can request root access from its `package.json` and/or through dedicated APIs. |
 | R-14 | The system must be **secure**. |
 | R-15 | Main branch of the repository: `main`. |
-| R-16 | **Mobile:** installation through the device recovery; the setup continues on first boot with a graphical interface. |
+| R-16 | **Mobile:** installation by flashing a published image (fastboot package, or zip from the device recovery where one exists); the setup continues on first boot with a graphical interface. |
 | R-17 | **Desktop:** installation with a wizard application in Windows/Debian style, built like all the other apps. |
 | R-18 | **Desktop:** boot menu with centered entries and the system logo (a generic logo at first), allowing dual boot with Windows or other systems. |
 | R-19 | No live mode for now. |
@@ -51,6 +51,7 @@ Set by the user (2026-11-11 to 2026-11-13).
 | R-38 | **Own graphics framework on EGL**, the same on desktop and mobile, that draws the components of `systemui`. |
 | R-39 | **App formats:** an app is a **folder** whose resources are reached with `app://` (R-31), or a **`.pak` package** (a zip archive with the `.pak` extension). |
 | R-40 | **Component descriptions** either in a Lua script or in **XML**, Android-layout style. |
+| R-42 | **Release images:** besides being buildable, the project publishes ready-to-use files: an installation image for desktops and a flashable image for each supported mobile device (D-056). |
 | R-41 | **WebKit** is the base for web views and for a future web browser; on mobile another library may be used if needed, but the goal is a single system on both kinds of device (WPE WebKit chosen, D-051). |
 
 ---
@@ -103,7 +104,7 @@ Set by the user (2026-11-11 to 2026-11-13).
   re-evaluated if GRUB turns out awkward to integrate).
 
 ### D-010 — Desktop installation medium · `confirmed` (2026-11-11)
-- **What:** a USB installation image that starts only the bare minimum (kernel,
+- **What:** a hybrid `.iso` installation image (D-056), for USB sticks and DVDs, that starts only the bare minimum (kernel,
   compositor, Lua runtime and framework, broker) and opens the installation wizard
   directly (a native app, D-054); no user session or apps. No web engine on the
   medium.
@@ -113,12 +114,17 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **The wizard handles:** language, keyboard, disk and partitions (next to an existing
   Windows too, without touching its boot), disk encryption, user, GRUB installation.
 
-### D-011 — Mobile installation from recovery · `confirmed` (2026-11-11)
-- **What:** for each supported model, a package installable from the recovery (e.g. a
-  zip flashable from a custom recovery), plus the fastboot images where needed. On
-  first boot the setup app starts (see D-017 for the steps).
-- **Why:** R-16. It is the standard method on Android phones with an unlocked
-  bootloader.
+### D-011 — Mobile installation: fastboot package and recovery zip · `confirmed` (the user's choice, 2026-11-13)
+- **What:** for each supported model, a **fastboot package** (images plus a flashing
+  script, like Google's factory images) that works with an unlocked bootloader alone,
+  and, where the model has a custom recovery, a **zip** to install from it. Both come
+  from the same build and carry the same signed system image (D-056). On first boot
+  the setup app starts (see D-017 for the steps).
+- **Why:** R-16. Fastboot works on every model with an unlockable bootloader, recent
+  Pixels included, which often have no custom recovery; the recovery zip is the usual
+  method where one exists.
+- **Discarded alternatives:** recovery zip only (it needs a custom recovery for each
+  model); fastboot only (less comfortable where a recovery is already installed).
 
 ### D-012 — System built from source with Yocto/OpenEmbedded · `confirmed` (2026-11-11)
 - **What:** every component (toolchain, libc, libraries, WebKit, Skia, kernel) is compiled
@@ -1174,6 +1180,36 @@ Set by the user (2026-11-11 to 2026-11-13).
 - **Discarded alternatives:** WebKit's built-in Wayland platform (it creates its own
   toplevel windows on the compositor); leaving signals to their defaults (behaviour
   that changes between WebKit versions, and outside our style and permission model).
+
+### D-056 — Published release images · `requirement` (R-42, 2026-11-13), formats `confirmed` (the user's choice), details `proposed`
+- **What gets published at every release:**
+  | Target | File | Use |
+  |---|---|---|
+  | Desktop amd64 | `project-os-<version>-amd64.iso` | installer (D-010): **hybrid ISO**, boots from USB stick and DVD, UEFI and BIOS (R-26); written with Rufus, Etcher, Ventoy or `dd` |
+  | Each phone model | `project-os-<version>-<device>-fastboot.zip` | images plus flashing script (D-011) |
+  | Each phone model with a custom recovery | `project-os-<version>-<device>-recovery.zip` | install from the recovery (D-011) |
+  | All | `SHA256SUMS` and its signature | integrity of every file, signed with the project's release key |
+  No ready-made virtual machine images (the user's choice): in a VM the system is
+  installed from the `.iso`, like on a PC. The `.wic` image stays a development output
+  for QEMU (D-028), not a release file.
+- **One signed system, every path (proposed):** the installer and the phone packages
+  carry the same signed system image as the RAUC update bundle (D-026, D-047), and the
+  installer checks its signature before writing slot A. Installing and updating write
+  the same verified file, so the installation is tested by the same checks as the
+  updates.
+- **Desktop ISO (proposed):** GRUB for both UEFI (an EFI system partition image inside
+  the ISO) and BIOS (El Torito), MBR and GPT for USB booting, made with `xorriso`; the
+  medium starts only what the wizard needs (D-010) and no live session (R-19). Secure
+  Boot with project-os keys in Phase 8 (D-009).
+- **Phones (proposed):** the fastboot package flashes the boot images with the vendor
+  kernel (D-014), the system image and the verified-boot metadata (`vbmeta`); on models
+  that allow a custom verified-boot key (Pixels: `avb_custom_key`), the package installs
+  the project's key, so the bootloader can be locked again with project-os on it. The
+  flashing script is POSIX `sh` (Linux and macOS); for Windows, the plain `fastboot`
+  commands in the guide, or a script if a language for it is added to AGENTS.md §7.
+- **Where:** GitHub Releases of `aptecstudio/project-os` (proposed); the release key
+  stays outside the repository (AGENTS.md §4).
+- **Why:** R-42: users must be able to install project-os without building it.
 
 ---
 
