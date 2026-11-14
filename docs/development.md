@@ -34,9 +34,16 @@ cd project-os
 tools/setup-host.sh
 ```
 
-`setup-host.sh` installs the programs for Yocto, kas, QEMU and the UEFI firmware, and
-creates the **development keys** to sign updates in `~/.config/project-os/keys`
-(outside the repository). It asks for confirmation before changing system settings.
+`setup-host.sh` installs the programs for Yocto, kas, QEMU and the UEFI firmware, the
+code style tools and the branding tools, and creates the **development keys** to sign
+updates in `~/.config/project-os/keys` (outside the repository). It asks for
+confirmation before changing system settings (`--yes` answers for you). At the end it
+checks every tool and lists what is missing; the full list of packages is in
+[`README.md`](../README.md#1-install-the-dependencies).
+
+Clone the project into a **Linux file system** (ext4, btrfs, xfs), for example your home
+directory: on NTFS, FAT or exFAT disks shared with Windows, or on network shares, the
+build fails. The script warns if the repository is in such a place.
 
 When it finishes, log out and back in (or open a new terminal).
 
@@ -125,6 +132,11 @@ other copy, and goes back to the previous one by itself if the boot does not com
 - **Build stopped with an error:** copy the last lines of the terminal and, if given,
   the log file named in the error (in `build/tmp/work/...`). The build host's system
   and the output of `git log -1` are useful too.
+- **`setup-host.sh` ends with "Setup incomplete":** the list shows what is missing; run
+  it again after fixing the cause (network, `sudo` rights), it keeps what is done.
+- **Errors about permissions, links or "dubious ownership" from git:** the repository is
+  probably on an NTFS/FAT disk or owned by another user. Clone it again into your home
+  directory.
 - **Error about namespaces or "unshare":** run `tools/setup-host.sh` again and accept
   the AppArmor change (see the explanation in the script).
 - **Error about the keys:** check that `~/.config/project-os/keys/ca.cert.pem` exists,

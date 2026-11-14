@@ -1211,6 +1211,36 @@ Set by the user (2026-11-11 to 2026-11-13).
   stays outside the repository (AGENTS.md §4).
 - **Why:** R-42: users must be able to install project-os without building it.
 
+### D-057 — One-command setup of a build host · `proposed` (the user's request, 2026-11-14)
+- **What:** `tools/setup-host.sh` (D-028) is the only command a developer runs on a new
+  Debian 13 or Ubuntu 24.04/26.04 machine to install everything the repository needs:
+  - apt: the Yocto 6.0 host packages (Reference Manual list, `lz4` for
+    `liblz4-tool`), QEMU and OVMF, `pipx`/`python3-venv`, `openssl`,
+    `ca-certificates`, `curl`, and for `branding/tools/render.py` `librsvg2-bin`,
+    `python3-pil`, `python3-numpy`, `fonts-inter`;
+  - pipx: kas and the style tools of `tools/lint.sh` (D-046);
+  - development keys, `en_US.UTF-8`, `kvm` group, AppArmor user namespaces (as before).
+- **Checks added:**
+  - **file system of the repository**, from `findmnt` (`stat` reports NTFS through
+    ntfs-3g only as `fuse`): NTFS, FAT, exFAT, FUSE and network shares are reported
+    with the command to clone into a Linux file system. The setup goes on, because the
+    packages are needed anyway. Found on the user's second PC, where the repository is
+    on an NTFS disk shared with Windows;
+  - **git "dubious ownership"** (repository owned by another user, as on that NTFS
+    disk): the script offers `safe.directory` for that path only, after asking;
+  - **final verification** of every command, Python module, locale, OVMF, font and
+    key, with the list of what is missing and a non-zero exit; RAM and free space
+    compared with the two build modes (D-036), suggesting `--low-resources`.
+- **`--yes`:** answers every question, for unattended setups; it includes the AppArmor
+  change, so it is documented in the help and in the README.
+- **Discarded:** a second script next to `setup-host.sh` (two entry points for the same
+  job); `sudo VAR=value` (refused by the default sudo policy, `sudo env` is used);
+  stopping on an unsuitable file system (the packages would still be missing after
+  cloning elsewhere).
+- **Why:** other developers must be able to prepare a machine without help; the
+  dependencies were partly implicit (branding tools, `python3-venv`) and an NTFS
+  checkout failed only hours into the build.
+
 ---
 
 ## 3. Visual style

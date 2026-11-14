@@ -151,6 +151,13 @@ with boot menu, A/B partitions and full hardware support.
 **Next steps:**
 - [x] Guide and scripts for the build host and the emulator (`docs/development.md`,
       `tools/setup-host.sh`, `tools/build.sh`, `tools/run-qemu.sh`, D-028)
+- [ ] One-command setup of a new build host (the user's request, 2026-11-14, D-057):
+      `tools/setup-host.sh` installs every dependency (Yocto, emulator, kas, style
+      tools, branding), checks the result and the file system; dependencies and build
+      steps in `README.md`
+  - [x] Script and documentation written; checked with ShellCheck and a run with
+        stubbed `sudo`/`pipx`
+  - [ ] Real run on the user's second PC (Debian 13), then full build there
 - [x] First full build and boot in QEMU on the user's machine
   - [x] First full build on the laptop (2026-11-11)
   - [x] Boot in QEMU with `tools/run-qemu.sh` (2026-11-12): login, encrypted data

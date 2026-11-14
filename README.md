@@ -94,18 +94,87 @@ The details of each step are in [`ROADMAP.md`](ROADMAP.md).
 ## Building it yourself
 
 Today you can only build the base system from source and boot it in the QEMU emulator,
-up to a text terminal, signed A/B updates included. You need a Linux machine (Ubuntu
-24.04/26.04 or Debian 13); the first build takes several hours.
+up to a text terminal, signed A/B updates included. The first build takes several
+hours.
+
+### What you need
+
+| | Minimum | Recommended |
+|---|---|---|
+| System | Debian 13 or Ubuntu 24.04 LTS | Ubuntu 26.04 LTS |
+| RAM | 8 GB (with `--low-resources`) | 16 GB or more |
+| Free disk | 45 GB (with `--low-resources`) | 250 GB on SSD |
+| Processor | 4 cores, 64-bit | 8 cores or more, with virtualization (KVM) enabled |
+
+A user account with `sudo` rights is needed to install the packages. A virtual machine
+works too: enable nested virtualization for the emulator.
+
+**The project must be on a Linux file system** (ext4, btrfs, xfs), for example in your
+home directory. A disk shared with Windows (NTFS, FAT, exFAT) or a network share does
+not work: the build needs Linux owners, permissions and links.
+
+### 1. Install the dependencies
+
+One script installs everything, as a normal user (it asks for the `sudo` password):
 
 ```sh
-git clone https://github.com/aptecstudio/project-os.git
-cd project-os
-tools/setup-host.sh   # prepares the machine
-tools/build.sh        # builds the image (PC with few resources: --low-resources)
-tools/run-qemu.sh     # boots it in the emulator
+git clone https://github.com/aptecstudio/project-os.git ~/project-os
+cd ~/project-os
+tools/setup-host.sh          # add --yes to answer "yes" to every question
 ```
 
-Requirements, current limitations and troubleshooting:
+It can be run again at any time. What it installs and sets up:
+
+| What | Packages | Why |
+|---|---|---|
+| Yocto build tools | `build-essential chrpath cpio debianutils diffstat file gawk gcc git iputils-ping libacl1 locales lz4 python3 python3-git python3-jinja2 python3-pexpect python3-pip python3-subunit socat texinfo unzip wget xz-utils zstd` | compile the whole system from source |
+| Emulator | `qemu-system-x86 qemu-utils ovmf` | boot the image with UEFI firmware |
+| Helpers | `pipx python3-venv openssl ca-certificates curl` | install kas, create the signing keys, download sources |
+| Branding | `librsvg2-bin python3-pil python3-numpy fonts-inter` | regenerate the logo and boot menu images |
+| kas, style checks | `kas`, `ruff`, `shellcheck-py`, `oelint-adv` (through pipx, in `~/.local/bin`) | start the build; `tools/lint.sh` |
+| Settings | `en_US.UTF-8` locale, `kvm` group, user namespaces on Ubuntu (asks first) | required by bitbake and the emulator |
+| Development keys | `~/.config/project-os/keys`, outside the repository | sign the test updates |
+
+At the end the script checks every tool and lists what is missing, if anything. Then
+**open a new terminal** (log out and back in if it added you to the `kvm` group).
+
+<details>
+<summary>Installing by hand, without the script</summary>
+
+```sh
+sudo apt-get update
+sudo apt-get install -y build-essential chrpath cpio debianutils diffstat file gawk \
+    gcc git iputils-ping libacl1 locales lz4 python3 python3-git python3-jinja2 \
+    python3-pexpect python3-pip python3-subunit socat texinfo unzip wget xz-utils zstd \
+    pipx python3-venv openssl ca-certificates curl qemu-system-x86 qemu-utils ovmf \
+    librsvg2-bin python3-pil python3-numpy fonts-inter
+sudo sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen && sudo locale-gen
+pipx ensurepath
+pipx install kas && pipx install ruff && pipx install shellcheck-py \
+    && pipx install oelint-adv
+tools/gen-dev-keys.sh
+sudo usermod -aG kvm "$USER"
+```
+
+On Ubuntu 24.04 and later, also allow user namespaces for bitbake (see the comments in
+`tools/setup-host.sh`).
+
+</details>
+
+### 2. Build and run
+
+```sh
+tools/build.sh                  # builds the disk image (hours the first time)
+tools/build.sh --low-resources  # the same, on a PC with less than 16 GB of RAM
+tools/run-qemu.sh               # boots it in the emulator (--text: in the terminal)
+tools/build.sh update           # signed A/B update bundle
+tools/lint.sh                   # code style checks, before every commit
+```
+
+Downloads go into `sources/` and the build into `build/`; later builds reuse them and
+take minutes. Log in as `root`, without password (development image only).
+
+Modes, update tests, current limitations and troubleshooting:
 [`docs/development.md`](docs/development.md).
 
 ## How it is made
